@@ -1,0 +1,380 @@
+zabbix_export:
+  version: '7.0'
+  template_groups:
+  - uuid: e8f2a8480d674fb2a53bea65079ae6e3
+    name: Templates/Printers
+  templates:
+  - uuid: ffadeba898fe47a9b0249087d0ca72eb
+    template: Brother HL-L8570CDW by SNMP
+    name: Brother HL-L8570CDW by SNMP
+    description: 'Zabbix 7.0.x SNMP template for Brother HL-L8570CDW.
+
+
+      Verified source database date: 2026-09-27.
+
+      Family/series: HL-L8500.
+
+      Category: Laser printer; Colour.
+
+      Network: Ethernet + Wi-Fi.
+
+      Verified SNMP support: SNMPv3.
+
+      Evidence level: A - model-specific.
+
+      Canada status: Canada product page / current or supported.
+
+
+      Monitoring is intentionally based on standard SNMPv2-MIB, HOST-RESOURCES-MIB and Printer-MIB objects. Supply, tray and marker rows are discovered dynamically.
+      Manufacturer-specific private OIDs are not guessed.
+
+
+      Product/catalog source: https://www.brother.ca/en/p/HLL8570CDW
+
+      SNMP evidence source: https://www.brother.ca/en/p/HLL8570CDW
+
+      Verification notes: Brother Canada specifications explicitly list network interfaces and SNMP security/management.
+
+      '
+    groups:
+    - name: Templates/Printers
+    tags:
+    - tag: class
+      value: printer
+    - tag: manufacturer
+      value: Brother
+    - tag: model
+      value: HL-L8570CDW
+    - tag: family
+      value: HL-L8500
+    - tag: category
+      value: Laser printer
+    - tag: snmp_support
+      value: SNMPv3
+    - tag: evidence_level
+      value: A - model-specific
+    macros:
+    - macro: '{$SNMP.TIMEOUT}'
+      value: 10m
+      description: Time without successful SNMP polling before the availability trigger fires.
+    - macro: '{$PRINTER.SUPPLY.LOW}'
+      value: '10'
+      description: Low supply threshold in percent, used only when both current and maximum capacity are positive.
+    - macro: '{$PRINTER.PAPER.LOW}'
+      value: '10'
+      description: Low paper threshold in percent, used only when both current and maximum tray capacity are positive.
+    items:
+    - uuid: 68a7f69b56a74e5ab5a0e0f708d3c2b5
+      name: SNMP availability
+      type: INTERNAL
+      key: zabbix[host,snmp,available]
+      delay: 1m
+      history: 7d
+      valuemap:
+        name: Zabbix SNMP availability
+      tags:
+      - tag: component
+        value: availability
+      triggers:
+      - uuid: 09afff73bc2f49d2a36dc1f8d892feeb
+        expression: max(/Brother HL-L8570CDW by SNMP/zabbix[host,snmp,available],{$SNMP.TIMEOUT})=0
+        name: 'Brother HL-L8570CDW: No SNMP data collection'
+        priority: HIGH
+        description: Zabbix has been unable to poll this printer over SNMP for the configured timeout period.
+    - uuid: ba34615ca70e40aaa0945d7e8cd9a170
+      name: System description
+      type: SNMP_AGENT
+      snmp_oid: 1.3.6.1.2.1.1.1.0
+      key: printer.sysdescr
+      delay: 1h
+      history: 7d
+      trends: '0'
+      value_type: TEXT
+      tags:
+      - tag: component
+        value: inventory
+    - uuid: 0f46b68f45164509820d087b7583b802
+      name: System name
+      type: SNMP_AGENT
+      snmp_oid: 1.3.6.1.2.1.1.5.0
+      key: printer.sysname
+      delay: 10m
+      history: 7d
+      trends: '0'
+      value_type: CHAR
+      tags:
+      - tag: component
+        value: inventory
+    - uuid: 80299c32bc5946a6915dc3974ead0b68
+      name: System object ID
+      type: SNMP_AGENT
+      snmp_oid: 1.3.6.1.2.1.1.2.0
+      key: printer.sysobjectid
+      delay: 12h
+      history: 30d
+      trends: '0'
+      value_type: CHAR
+      tags:
+      - tag: component
+        value: inventory
+    - uuid: 7673685bacef4575b57563d8a88753bb
+      name: System location
+      type: SNMP_AGENT
+      snmp_oid: 1.3.6.1.2.1.1.6.0
+      key: printer.syslocation
+      delay: 1h
+      history: 7d
+      trends: '0'
+      value_type: CHAR
+      tags:
+      - tag: component
+        value: inventory
+    - uuid: 107f04230af74c6fb2a298857bda68c0
+      name: System contact
+      type: SNMP_AGENT
+      snmp_oid: 1.3.6.1.2.1.1.4.0
+      key: printer.syscontact
+      delay: 1h
+      history: 7d
+      trends: '0'
+      value_type: CHAR
+      tags:
+      - tag: component
+        value: inventory
+    - uuid: e9cb569a777b40ea888513f9ffbe1fab
+      name: System uptime
+      type: SNMP_AGENT
+      snmp_oid: 1.3.6.1.2.1.1.3.0
+      key: printer.uptime
+      delay: 5m
+      history: 30d
+      value_type: FLOAT
+      units: uptime
+      preprocessing:
+      - type: MULTIPLIER
+        parameters:
+        - '0.01'
+      tags:
+      - tag: component
+        value: system
+    - uuid: bb8b3c50a80c4bd9a93e91a82581f68f
+      name: Printer status
+      type: SNMP_AGENT
+      snmp_oid: 1.3.6.1.2.1.25.3.5.1.1.1
+      key: printer.status
+      delay: 1m
+      history: 30d
+      value_type: UNSIGNED
+      description: 'HOST-RESOURCES-MIB hrPrinterStatus: 1=other, 2=unknown, 3=idle, 4=printing, 5=warmup.'
+      valuemap:
+        name: HOST-RESOURCES-MIB::hrPrinterStatus
+      tags:
+      - tag: component
+        value: status
+      triggers:
+      - uuid: 0f7b627e24f44692bf8aa03bd8c70f99
+        expression: last(/Brother HL-L8570CDW by SNMP/printer.status)=1 or last(/Brother HL-L8570CDW by SNMP/printer.status)=2
+        name: 'Brother HL-L8570CDW: Printer status is other or unknown'
+        priority: WARNING
+        opdata: 'Printer status: {ITEM.LASTVALUE1}'
+    - uuid: e1325b5738ff4007870314aede3b064b
+      name: Printer name
+      type: SNMP_AGENT
+      snmp_oid: 1.3.6.1.2.1.43.5.1.1.16.1
+      key: printer.name
+      delay: 1h
+      history: 7d
+      trends: '0'
+      value_type: CHAR
+      tags:
+      - tag: component
+        value: inventory
+    - uuid: e3bd9f14d8c24ccb9ef7eb3ba2f8fb73
+      name: Printer serial number
+      type: SNMP_AGENT
+      snmp_oid: 1.3.6.1.2.1.43.5.1.1.17.1
+      key: printer.serial
+      delay: 12h
+      history: 30d
+      trends: '0'
+      value_type: CHAR
+      tags:
+      - tag: component
+        value: inventory
+    - uuid: e5efa239c7f44adfb97f6a8fe7779668
+      name: Lifetime page count
+      type: SNMP_AGENT
+      snmp_oid: 1.3.6.1.2.1.43.10.2.1.4.1.1
+      key: printer.page.count
+      delay: 5m
+      history: 90d
+      trends: 365d
+      value_type: UNSIGNED
+      units: pages
+      description: Standard Printer-MIB prtMarkerLifeCount for the common .1.1 marker instance. Some devices expose different marker indexes; the generic marker discovery
+        rule in this template can still discover alternate indexes.
+      tags:
+      - tag: component
+        value: usage
+    discovery_rules:
+    - uuid: 75f30c53cf65422399b2a8bacb4916e5
+      name: Printer supply discovery
+      type: SNMP_AGENT
+      snmp_oid: discovery[{#SUPPLYDESC},1.3.6.1.2.1.43.11.1.1.6,{#SUPPLYTYPE},1.3.6.1.2.1.43.11.1.1.5,{#SUPPLYUNIT},1.3.6.1.2.1.43.11.1.1.7]
+      key: printer.supply.discovery
+      delay: 1h
+      lifetime: 7d
+      description: Discovers supplies from the standard Printer-MIB. Dynamic indexes prevent assumptions about toner/drum/waste-container positions.
+      item_prototypes:
+      - uuid: bbd7397fe39f4525a4fe84f12918007b
+        name: 'Supply {#SUPPLYDESC}: current level'
+        type: SNMP_AGENT
+        snmp_oid: 1.3.6.1.2.1.43.11.1.1.9.{#SNMPINDEX}
+        key: printer.supply.level[{#SNMPINDEX}]
+        delay: 5m
+        history: 30d
+        trends: 365d
+        value_type: FLOAT
+        description: Raw current supply level. Printer-MIB special values can include -1=other, -2=unknown, -3=some remains but exact amount is unknown.
+      - uuid: 82947bc3daff41b68ca8b07028182149
+        name: 'Supply {#SUPPLYDESC}: maximum capacity'
+        type: SNMP_AGENT
+        snmp_oid: 1.3.6.1.2.1.43.11.1.1.8.{#SNMPINDEX}
+        key: printer.supply.max[{#SNMPINDEX}]
+        delay: 1h
+        history: 30d
+        trends: 365d
+        value_type: FLOAT
+        description: Raw maximum supply capacity. Printer-MIB can return negative special values when capacity is unknown.
+      trigger_prototypes:
+      - uuid: bd6376b84a9242c198ae415d45ff071b
+        expression: last(/Brother HL-L8570CDW by SNMP/printer.supply.level[{#SNMPINDEX}])=0
+        name: 'Brother HL-L8570CDW: {#SUPPLYDESC} is empty'
+        priority: HIGH
+      - uuid: 4a85abf815954d99af8d28cf5020cb30
+        expression: last(/Brother HL-L8570CDW by SNMP/printer.supply.level[{#SNMPINDEX}])>0 and last(/Brother HL-L8570CDW by SNMP/printer.supply.max[{#SNMPINDEX}])>0
+          and (100*last(/Brother HL-L8570CDW by SNMP/printer.supply.level[{#SNMPINDEX}])/last(/Brother HL-L8570CDW by SNMP/printer.supply.max[{#SNMPINDEX}]))<{$PRINTER.SUPPLY.LOW}
+        name: 'Brother HL-L8570CDW: {#SUPPLYDESC} is low'
+        priority: WARNING
+      graph_prototypes:
+      - uuid: b77dab96f64743bfb766e345cad22734
+        name: Supply {#SUPPLYDESC}
+        graph_items:
+        - color: 199C0D
+          item:
+            host: Brother HL-L8570CDW by SNMP
+            key: printer.supply.level[{#SNMPINDEX}]
+        - sortorder: '1'
+          color: F63100
+          item:
+            host: Brother HL-L8570CDW by SNMP
+            key: printer.supply.max[{#SNMPINDEX}]
+    - uuid: 67e91f8b911c4dc084bd764e385596dc
+      name: Paper tray discovery
+      type: SNMP_AGENT
+      snmp_oid: discovery[{#TRAYNAME},1.3.6.1.2.1.43.8.2.1.13]
+      key: printer.tray.discovery
+      delay: 1h
+      lifetime: 7d
+      description: Discovers input trays using standard Printer-MIB prtInputName.
+      item_prototypes:
+      - uuid: 2bb32e33a7994a9c8efe783bab15c133
+        name: 'Paper tray {#TRAYNAME}: current level'
+        type: SNMP_AGENT
+        snmp_oid: 1.3.6.1.2.1.43.8.2.1.10.{#SNMPINDEX}
+        key: printer.tray.level[{#SNMPINDEX}]
+        delay: 5m
+        history: 30d
+        trends: 365d
+        value_type: FLOAT
+        units: sheets
+      - uuid: d62cf094c61448a0954312629adc1b22
+        name: 'Paper tray {#TRAYNAME}: maximum capacity'
+        type: SNMP_AGENT
+        snmp_oid: 1.3.6.1.2.1.43.8.2.1.9.{#SNMPINDEX}
+        key: printer.tray.max[{#SNMPINDEX}]
+        delay: 1h
+        history: 30d
+        trends: 365d
+        value_type: FLOAT
+        units: sheets
+      trigger_prototypes:
+      - uuid: 58ccc0b2eef7433aa468da9057ec0314
+        expression: last(/Brother HL-L8570CDW by SNMP/printer.tray.level[{#SNMPINDEX}])=0
+        name: 'Brother HL-L8570CDW: Paper tray {#TRAYNAME} is empty'
+        priority: AVERAGE
+      - uuid: c00de9f5d8904ebda48df9d51cfc986b
+        expression: last(/Brother HL-L8570CDW by SNMP/printer.tray.level[{#SNMPINDEX}])>0 and last(/Brother HL-L8570CDW by SNMP/printer.tray.max[{#SNMPINDEX}])>0
+          and (100*last(/Brother HL-L8570CDW by SNMP/printer.tray.level[{#SNMPINDEX}])/last(/Brother HL-L8570CDW by SNMP/printer.tray.max[{#SNMPINDEX}]))<{$PRINTER.PAPER.LOW}
+        name: 'Brother HL-L8570CDW: Paper tray {#TRAYNAME} is low'
+        priority: WARNING
+      graph_prototypes:
+      - uuid: c3fa4ffa759b44cbb9aa0d2472030cb7
+        name: Paper tray {#TRAYNAME}
+        graph_items:
+        - color: 199C0D
+          item:
+            host: Brother HL-L8570CDW by SNMP
+            key: printer.tray.level[{#SNMPINDEX}]
+        - sortorder: '1'
+          color: F63100
+          item:
+            host: Brother HL-L8570CDW by SNMP
+            key: printer.tray.max[{#SNMPINDEX}]
+    - uuid: 1bbf925a06f9468c8cabf9dc6ebb6568
+      name: Marker life counter discovery
+      type: SNMP_AGENT
+      snmp_oid: discovery[{#MARKERCOUNT},1.3.6.1.2.1.43.10.2.1.4]
+      key: printer.marker.discovery
+      delay: 1h
+      lifetime: 7d
+      description: Discovers Printer-MIB prtMarkerLifeCount entries so devices with non-.1.1 marker indexes still expose usage counters.
+      item_prototypes:
+      - uuid: 2d91db0b1a0d494587f4d84986d83b07
+        name: 'Marker {#SNMPINDEX}: lifetime count'
+        type: SNMP_AGENT
+        snmp_oid: 1.3.6.1.2.1.43.10.2.1.4.{#SNMPINDEX}
+        key: printer.marker.life[{#SNMPINDEX}]
+        delay: 5m
+        history: 90d
+        trends: 365d
+        value_type: UNSIGNED
+      graph_prototypes:
+      - uuid: fccd59acc7114d479d6a4e9cceadddeb
+        name: 'Marker {#SNMPINDEX}: lifetime count'
+        graph_items:
+        - color: 2774A4
+          item:
+            host: Brother HL-L8570CDW by SNMP
+            key: printer.marker.life[{#SNMPINDEX}]
+    valuemaps:
+    - uuid: bb96532b0209433297960d24f0819828
+      name: Zabbix SNMP availability
+      mappings:
+      - value: '0'
+        newvalue: Not available
+      - value: '1'
+        newvalue: Available
+      - value: '2'
+        newvalue: Unknown
+    - uuid: 2b88006f0ba545b29bfae79a449b5c00
+      name: HOST-RESOURCES-MIB::hrPrinterStatus
+      mappings:
+      - value: '1'
+        newvalue: Other
+      - value: '2'
+        newvalue: Unknown
+      - value: '3'
+        newvalue: Idle
+      - value: '4'
+        newvalue: Printing
+      - value: '5'
+        newvalue: Warmup
+  graphs:
+  - uuid: 047589c2a8b1444ab869dfe1181a9b4d
+    name: 'Brother HL-L8570CDW: Lifetime page count'
+    graph_items:
+    - color: 2774A4
+      item:
+        host: Brother HL-L8570CDW by SNMP
+        key: printer.page.count

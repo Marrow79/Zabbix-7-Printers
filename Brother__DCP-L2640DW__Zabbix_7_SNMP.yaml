@@ -1,0 +1,380 @@
+zabbix_export:
+  version: '7.0'
+  template_groups:
+  - uuid: e8f2a8480d674fb2a53bea65079ae6e3
+    name: Templates/Printers
+  templates:
+  - uuid: 39cbc32b27644ffb808daf6c845d5e36
+    template: Brother DCP-L2640DW by SNMP
+    name: Brother DCP-L2640DW by SNMP
+    description: 'Zabbix 7.0.x SNMP template for Brother DCP-L2640DW.
+
+
+      Verified source database date: 2026-09-27.
+
+      Family/series: DCP-L2600.
+
+      Category: Mono MFP; B&W.
+
+      Network: Ethernet + Wi-Fi.
+
+      Verified SNMP support: SNMPv3.
+
+      Evidence level: A - model-specific.
+
+      Canada status: Canada product page / current or supported.
+
+
+      Monitoring is intentionally based on standard SNMPv2-MIB, HOST-RESOURCES-MIB and Printer-MIB objects. Supply, tray and marker rows are discovered dynamically.
+      Manufacturer-specific private OIDs are not guessed.
+
+
+      Product/catalog source: https://www.brother.ca/en/p/DCPL2640DW
+
+      SNMP evidence source: https://www.brother.ca/en/p/DCPL2640DW
+
+      Verification notes: Brother Canada specifications explicitly list network interfaces and SNMP security/management.
+
+      '
+    groups:
+    - name: Templates/Printers
+    tags:
+    - tag: class
+      value: printer
+    - tag: manufacturer
+      value: Brother
+    - tag: model
+      value: DCP-L2640DW
+    - tag: family
+      value: DCP-L2600
+    - tag: category
+      value: Mono MFP
+    - tag: snmp_support
+      value: SNMPv3
+    - tag: evidence_level
+      value: A - model-specific
+    macros:
+    - macro: '{$SNMP.TIMEOUT}'
+      value: 10m
+      description: Time without successful SNMP polling before the availability trigger fires.
+    - macro: '{$PRINTER.SUPPLY.LOW}'
+      value: '10'
+      description: Low supply threshold in percent, used only when both current and maximum capacity are positive.
+    - macro: '{$PRINTER.PAPER.LOW}'
+      value: '10'
+      description: Low paper threshold in percent, used only when both current and maximum tray capacity are positive.
+    items:
+    - uuid: 311989728f09474ea67dabd39977a7db
+      name: SNMP availability
+      type: INTERNAL
+      key: zabbix[host,snmp,available]
+      delay: 1m
+      history: 7d
+      valuemap:
+        name: Zabbix SNMP availability
+      tags:
+      - tag: component
+        value: availability
+      triggers:
+      - uuid: 561c28d878db4c0d8b28ecf7338004e7
+        expression: max(/Brother DCP-L2640DW by SNMP/zabbix[host,snmp,available],{$SNMP.TIMEOUT})=0
+        name: 'Brother DCP-L2640DW: No SNMP data collection'
+        priority: HIGH
+        description: Zabbix has been unable to poll this printer over SNMP for the configured timeout period.
+    - uuid: 172ee2c0497b415fafb0c3907fa999c6
+      name: System description
+      type: SNMP_AGENT
+      snmp_oid: 1.3.6.1.2.1.1.1.0
+      key: printer.sysdescr
+      delay: 1h
+      history: 7d
+      trends: '0'
+      value_type: TEXT
+      tags:
+      - tag: component
+        value: inventory
+    - uuid: 00805106d8684180b0d3102daa45ac98
+      name: System name
+      type: SNMP_AGENT
+      snmp_oid: 1.3.6.1.2.1.1.5.0
+      key: printer.sysname
+      delay: 10m
+      history: 7d
+      trends: '0'
+      value_type: CHAR
+      tags:
+      - tag: component
+        value: inventory
+    - uuid: 84afabba09074a0b9bdf5b20b69de0b1
+      name: System object ID
+      type: SNMP_AGENT
+      snmp_oid: 1.3.6.1.2.1.1.2.0
+      key: printer.sysobjectid
+      delay: 12h
+      history: 30d
+      trends: '0'
+      value_type: CHAR
+      tags:
+      - tag: component
+        value: inventory
+    - uuid: 1f1daa298a4b418eb0086aabfdb9fe29
+      name: System location
+      type: SNMP_AGENT
+      snmp_oid: 1.3.6.1.2.1.1.6.0
+      key: printer.syslocation
+      delay: 1h
+      history: 7d
+      trends: '0'
+      value_type: CHAR
+      tags:
+      - tag: component
+        value: inventory
+    - uuid: 4d393b94ecb34af2af4daf76f52b9744
+      name: System contact
+      type: SNMP_AGENT
+      snmp_oid: 1.3.6.1.2.1.1.4.0
+      key: printer.syscontact
+      delay: 1h
+      history: 7d
+      trends: '0'
+      value_type: CHAR
+      tags:
+      - tag: component
+        value: inventory
+    - uuid: e77842ad34304a4c898c43da0366d7d7
+      name: System uptime
+      type: SNMP_AGENT
+      snmp_oid: 1.3.6.1.2.1.1.3.0
+      key: printer.uptime
+      delay: 5m
+      history: 30d
+      value_type: FLOAT
+      units: uptime
+      preprocessing:
+      - type: MULTIPLIER
+        parameters:
+        - '0.01'
+      tags:
+      - tag: component
+        value: system
+    - uuid: 751812470d5c48e792e247de28161680
+      name: Printer status
+      type: SNMP_AGENT
+      snmp_oid: 1.3.6.1.2.1.25.3.5.1.1.1
+      key: printer.status
+      delay: 1m
+      history: 30d
+      value_type: UNSIGNED
+      description: 'HOST-RESOURCES-MIB hrPrinterStatus: 1=other, 2=unknown, 3=idle, 4=printing, 5=warmup.'
+      valuemap:
+        name: HOST-RESOURCES-MIB::hrPrinterStatus
+      tags:
+      - tag: component
+        value: status
+      triggers:
+      - uuid: 577c52ca9cdc4fe192095ca6068f1016
+        expression: last(/Brother DCP-L2640DW by SNMP/printer.status)=1 or last(/Brother DCP-L2640DW by SNMP/printer.status)=2
+        name: 'Brother DCP-L2640DW: Printer status is other or unknown'
+        priority: WARNING
+        opdata: 'Printer status: {ITEM.LASTVALUE1}'
+    - uuid: 1dbb5bfb13ad4c0cb803c488661d70e2
+      name: Printer name
+      type: SNMP_AGENT
+      snmp_oid: 1.3.6.1.2.1.43.5.1.1.16.1
+      key: printer.name
+      delay: 1h
+      history: 7d
+      trends: '0'
+      value_type: CHAR
+      tags:
+      - tag: component
+        value: inventory
+    - uuid: 4c1294093fbd4572a281e2f3d6e3b168
+      name: Printer serial number
+      type: SNMP_AGENT
+      snmp_oid: 1.3.6.1.2.1.43.5.1.1.17.1
+      key: printer.serial
+      delay: 12h
+      history: 30d
+      trends: '0'
+      value_type: CHAR
+      tags:
+      - tag: component
+        value: inventory
+    - uuid: 7f28de2382ea4ad4ae52a22ea2062e89
+      name: Lifetime page count
+      type: SNMP_AGENT
+      snmp_oid: 1.3.6.1.2.1.43.10.2.1.4.1.1
+      key: printer.page.count
+      delay: 5m
+      history: 90d
+      trends: 365d
+      value_type: UNSIGNED
+      units: pages
+      description: Standard Printer-MIB prtMarkerLifeCount for the common .1.1 marker instance. Some devices expose different marker indexes; the generic marker discovery
+        rule in this template can still discover alternate indexes.
+      tags:
+      - tag: component
+        value: usage
+    discovery_rules:
+    - uuid: 4544a0fe5a574ecf8d39fadff7fad21c
+      name: Printer supply discovery
+      type: SNMP_AGENT
+      snmp_oid: discovery[{#SUPPLYDESC},1.3.6.1.2.1.43.11.1.1.6,{#SUPPLYTYPE},1.3.6.1.2.1.43.11.1.1.5,{#SUPPLYUNIT},1.3.6.1.2.1.43.11.1.1.7]
+      key: printer.supply.discovery
+      delay: 1h
+      lifetime: 7d
+      description: Discovers supplies from the standard Printer-MIB. Dynamic indexes prevent assumptions about toner/drum/waste-container positions.
+      item_prototypes:
+      - uuid: cabb4217431e40a29189bbb168dcccd3
+        name: 'Supply {#SUPPLYDESC}: current level'
+        type: SNMP_AGENT
+        snmp_oid: 1.3.6.1.2.1.43.11.1.1.9.{#SNMPINDEX}
+        key: printer.supply.level[{#SNMPINDEX}]
+        delay: 5m
+        history: 30d
+        trends: 365d
+        value_type: FLOAT
+        description: Raw current supply level. Printer-MIB special values can include -1=other, -2=unknown, -3=some remains but exact amount is unknown.
+      - uuid: c325763f362545a1ba6610e2acfb5de3
+        name: 'Supply {#SUPPLYDESC}: maximum capacity'
+        type: SNMP_AGENT
+        snmp_oid: 1.3.6.1.2.1.43.11.1.1.8.{#SNMPINDEX}
+        key: printer.supply.max[{#SNMPINDEX}]
+        delay: 1h
+        history: 30d
+        trends: 365d
+        value_type: FLOAT
+        description: Raw maximum supply capacity. Printer-MIB can return negative special values when capacity is unknown.
+      trigger_prototypes:
+      - uuid: e218013057d6423a83449a3156c4b78d
+        expression: last(/Brother DCP-L2640DW by SNMP/printer.supply.level[{#SNMPINDEX}])=0
+        name: 'Brother DCP-L2640DW: {#SUPPLYDESC} is empty'
+        priority: HIGH
+      - uuid: e2275dddccc144049967ec06c84ffcaf
+        expression: last(/Brother DCP-L2640DW by SNMP/printer.supply.level[{#SNMPINDEX}])>0 and last(/Brother DCP-L2640DW by SNMP/printer.supply.max[{#SNMPINDEX}])>0
+          and (100*last(/Brother DCP-L2640DW by SNMP/printer.supply.level[{#SNMPINDEX}])/last(/Brother DCP-L2640DW by SNMP/printer.supply.max[{#SNMPINDEX}]))<{$PRINTER.SUPPLY.LOW}
+        name: 'Brother DCP-L2640DW: {#SUPPLYDESC} is low'
+        priority: WARNING
+      graph_prototypes:
+      - uuid: 67869c14d8fb47468e6de45360a9fd66
+        name: Supply {#SUPPLYDESC}
+        graph_items:
+        - color: 199C0D
+          item:
+            host: Brother DCP-L2640DW by SNMP
+            key: printer.supply.level[{#SNMPINDEX}]
+        - sortorder: '1'
+          color: F63100
+          item:
+            host: Brother DCP-L2640DW by SNMP
+            key: printer.supply.max[{#SNMPINDEX}]
+    - uuid: 7dda6c866cb0410dbc19e6edd4271bb2
+      name: Paper tray discovery
+      type: SNMP_AGENT
+      snmp_oid: discovery[{#TRAYNAME},1.3.6.1.2.1.43.8.2.1.13]
+      key: printer.tray.discovery
+      delay: 1h
+      lifetime: 7d
+      description: Discovers input trays using standard Printer-MIB prtInputName.
+      item_prototypes:
+      - uuid: 6e9178f64c5e46fe8accc014ad53acdc
+        name: 'Paper tray {#TRAYNAME}: current level'
+        type: SNMP_AGENT
+        snmp_oid: 1.3.6.1.2.1.43.8.2.1.10.{#SNMPINDEX}
+        key: printer.tray.level[{#SNMPINDEX}]
+        delay: 5m
+        history: 30d
+        trends: 365d
+        value_type: FLOAT
+        units: sheets
+      - uuid: cdda069b6cc648fd969ab9341644f289
+        name: 'Paper tray {#TRAYNAME}: maximum capacity'
+        type: SNMP_AGENT
+        snmp_oid: 1.3.6.1.2.1.43.8.2.1.9.{#SNMPINDEX}
+        key: printer.tray.max[{#SNMPINDEX}]
+        delay: 1h
+        history: 30d
+        trends: 365d
+        value_type: FLOAT
+        units: sheets
+      trigger_prototypes:
+      - uuid: 58220c0a0b0d45e6bedb2ba7c119af89
+        expression: last(/Brother DCP-L2640DW by SNMP/printer.tray.level[{#SNMPINDEX}])=0
+        name: 'Brother DCP-L2640DW: Paper tray {#TRAYNAME} is empty'
+        priority: AVERAGE
+      - uuid: f08a05c3c8c841a2a2eff8a849c122af
+        expression: last(/Brother DCP-L2640DW by SNMP/printer.tray.level[{#SNMPINDEX}])>0 and last(/Brother DCP-L2640DW by SNMP/printer.tray.max[{#SNMPINDEX}])>0
+          and (100*last(/Brother DCP-L2640DW by SNMP/printer.tray.level[{#SNMPINDEX}])/last(/Brother DCP-L2640DW by SNMP/printer.tray.max[{#SNMPINDEX}]))<{$PRINTER.PAPER.LOW}
+        name: 'Brother DCP-L2640DW: Paper tray {#TRAYNAME} is low'
+        priority: WARNING
+      graph_prototypes:
+      - uuid: 4b1f8daeac6b479abbfc44efad0b10ff
+        name: Paper tray {#TRAYNAME}
+        graph_items:
+        - color: 199C0D
+          item:
+            host: Brother DCP-L2640DW by SNMP
+            key: printer.tray.level[{#SNMPINDEX}]
+        - sortorder: '1'
+          color: F63100
+          item:
+            host: Brother DCP-L2640DW by SNMP
+            key: printer.tray.max[{#SNMPINDEX}]
+    - uuid: ebedec9d4d114cc2adcf5df24a22cf86
+      name: Marker life counter discovery
+      type: SNMP_AGENT
+      snmp_oid: discovery[{#MARKERCOUNT},1.3.6.1.2.1.43.10.2.1.4]
+      key: printer.marker.discovery
+      delay: 1h
+      lifetime: 7d
+      description: Discovers Printer-MIB prtMarkerLifeCount entries so devices with non-.1.1 marker indexes still expose usage counters.
+      item_prototypes:
+      - uuid: a4f5793eb61d4fabbe0f7ae50dca7602
+        name: 'Marker {#SNMPINDEX}: lifetime count'
+        type: SNMP_AGENT
+        snmp_oid: 1.3.6.1.2.1.43.10.2.1.4.{#SNMPINDEX}
+        key: printer.marker.life[{#SNMPINDEX}]
+        delay: 5m
+        history: 90d
+        trends: 365d
+        value_type: UNSIGNED
+      graph_prototypes:
+      - uuid: c0751e7843ce4b58bfd56413f505d205
+        name: 'Marker {#SNMPINDEX}: lifetime count'
+        graph_items:
+        - color: 2774A4
+          item:
+            host: Brother DCP-L2640DW by SNMP
+            key: printer.marker.life[{#SNMPINDEX}]
+    valuemaps:
+    - uuid: 4dbc3342ba39470c9ca1a86a69c729f2
+      name: Zabbix SNMP availability
+      mappings:
+      - value: '0'
+        newvalue: Not available
+      - value: '1'
+        newvalue: Available
+      - value: '2'
+        newvalue: Unknown
+    - uuid: 26b695b92e064898b6bd909b14b54091
+      name: HOST-RESOURCES-MIB::hrPrinterStatus
+      mappings:
+      - value: '1'
+        newvalue: Other
+      - value: '2'
+        newvalue: Unknown
+      - value: '3'
+        newvalue: Idle
+      - value: '4'
+        newvalue: Printing
+      - value: '5'
+        newvalue: Warmup
+  graphs:
+  - uuid: 170a54d530904c8aa16ee02acd049dd2
+    name: 'Brother DCP-L2640DW: Lifetime page count'
+    graph_items:
+    - color: 2774A4
+      item:
+        host: Brother DCP-L2640DW by SNMP
+        key: printer.page.count
