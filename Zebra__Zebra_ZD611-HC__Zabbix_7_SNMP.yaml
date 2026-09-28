@@ -1,0 +1,380 @@
+zabbix_export:
+  version: '7.0'
+  template_groups:
+  - uuid: e8f2a8480d674fb2a53bea65079ae6e3
+    name: Templates/Printers
+  templates:
+  - uuid: 9cecc5e9469a4dcb9e5934cf69d6eafe
+    template: Zebra Zebra ZD611-HC by SNMP
+    name: Zebra Zebra ZD611-HC by SNMP
+    description: 'Zabbix 7.0.x SNMP template for Zebra Zebra ZD611-HC.
+
+
+      Verified source database date: 2026-09-27.
+
+      Family/series: ZD600.
+
+      Category: Healthcare label printer; B&W/label.
+
+      Network: Ethernet standard/optional and/or Wi-Fi depending on model.
+
+      Verified SNMP support: SNMPv3 on Link-OS 7.0+.
+
+      Evidence level: B - current model + platform/firmware.
+
+      Canada status: Current Zebra family/product page.
+
+
+      Monitoring is intentionally based on standard SNMPv2-MIB, HOST-RESOURCES-MIB and Printer-MIB objects. Supply, tray and marker rows are discovered dynamically.
+      Manufacturer-specific private OIDs are not guessed.
+
+
+      Product/catalog source: https://www.zebra.com/us/en/products/printers/desktop/zd600-series.html
+
+      SNMP evidence source: https://support.zebra.com/article/000031511
+
+      Verification notes: Zebra states SNMPv3 is available on printers running Link-OS 7.0 and above. Confirm installed firmware before deployment.
+
+      '
+    groups:
+    - name: Templates/Printers
+    tags:
+    - tag: class
+      value: printer
+    - tag: manufacturer
+      value: Zebra
+    - tag: model
+      value: Zebra ZD611-HC
+    - tag: family
+      value: ZD600
+    - tag: category
+      value: Healthcare label printer
+    - tag: snmp_support
+      value: SNMPv3 on Link-OS 7.0+
+    - tag: evidence_level
+      value: B - current model + platform/firmware
+    macros:
+    - macro: '{$SNMP.TIMEOUT}'
+      value: 10m
+      description: Time without successful SNMP polling before the availability trigger fires.
+    - macro: '{$PRINTER.SUPPLY.LOW}'
+      value: '10'
+      description: Low supply threshold in percent, used only when both current and maximum capacity are positive.
+    - macro: '{$PRINTER.PAPER.LOW}'
+      value: '10'
+      description: Low paper threshold in percent, used only when both current and maximum tray capacity are positive.
+    items:
+    - uuid: b68aaa7221124e78bbc2aedaabb3f844
+      name: SNMP availability
+      type: INTERNAL
+      key: zabbix[host,snmp,available]
+      delay: 1m
+      history: 7d
+      valuemap:
+        name: Zabbix SNMP availability
+      tags:
+      - tag: component
+        value: availability
+      triggers:
+      - uuid: b1d124441a5340ec8a90cb8bd787ad7c
+        expression: max(/Zebra Zebra ZD611-HC by SNMP/zabbix[host,snmp,available],{$SNMP.TIMEOUT})=0
+        name: 'Zebra Zebra ZD611-HC: No SNMP data collection'
+        priority: HIGH
+        description: Zabbix has been unable to poll this printer over SNMP for the configured timeout period.
+    - uuid: bf861b4462f4438daaa27c175cd9d691
+      name: System description
+      type: SNMP_AGENT
+      snmp_oid: 1.3.6.1.2.1.1.1.0
+      key: printer.sysdescr
+      delay: 1h
+      history: 7d
+      trends: '0'
+      value_type: TEXT
+      tags:
+      - tag: component
+        value: inventory
+    - uuid: fb08a4a93e54479a99c994f2dbdc4a89
+      name: System name
+      type: SNMP_AGENT
+      snmp_oid: 1.3.6.1.2.1.1.5.0
+      key: printer.sysname
+      delay: 10m
+      history: 7d
+      trends: '0'
+      value_type: CHAR
+      tags:
+      - tag: component
+        value: inventory
+    - uuid: 75eacce17eba4efdadcac097bb2e37ac
+      name: System object ID
+      type: SNMP_AGENT
+      snmp_oid: 1.3.6.1.2.1.1.2.0
+      key: printer.sysobjectid
+      delay: 12h
+      history: 30d
+      trends: '0'
+      value_type: CHAR
+      tags:
+      - tag: component
+        value: inventory
+    - uuid: 157449d561b2491d86652b86e3be98df
+      name: System location
+      type: SNMP_AGENT
+      snmp_oid: 1.3.6.1.2.1.1.6.0
+      key: printer.syslocation
+      delay: 1h
+      history: 7d
+      trends: '0'
+      value_type: CHAR
+      tags:
+      - tag: component
+        value: inventory
+    - uuid: 0f8e7a7bb5194838bda13e9f4db919df
+      name: System contact
+      type: SNMP_AGENT
+      snmp_oid: 1.3.6.1.2.1.1.4.0
+      key: printer.syscontact
+      delay: 1h
+      history: 7d
+      trends: '0'
+      value_type: CHAR
+      tags:
+      - tag: component
+        value: inventory
+    - uuid: b07388039cf34d1ca2a1496237b07e8b
+      name: System uptime
+      type: SNMP_AGENT
+      snmp_oid: 1.3.6.1.2.1.1.3.0
+      key: printer.uptime
+      delay: 5m
+      history: 30d
+      value_type: FLOAT
+      units: uptime
+      preprocessing:
+      - type: MULTIPLIER
+        parameters:
+        - '0.01'
+      tags:
+      - tag: component
+        value: system
+    - uuid: b8893b15601140f69a0cfb280934f4ab
+      name: Printer status
+      type: SNMP_AGENT
+      snmp_oid: 1.3.6.1.2.1.25.3.5.1.1.1
+      key: printer.status
+      delay: 1m
+      history: 30d
+      value_type: UNSIGNED
+      description: 'HOST-RESOURCES-MIB hrPrinterStatus: 1=other, 2=unknown, 3=idle, 4=printing, 5=warmup.'
+      valuemap:
+        name: HOST-RESOURCES-MIB::hrPrinterStatus
+      tags:
+      - tag: component
+        value: status
+      triggers:
+      - uuid: a534eea778f047348313c7511ef88189
+        expression: last(/Zebra Zebra ZD611-HC by SNMP/printer.status)=1 or last(/Zebra Zebra ZD611-HC by SNMP/printer.status)=2
+        name: 'Zebra Zebra ZD611-HC: Printer status is other or unknown'
+        priority: WARNING
+        opdata: 'Printer status: {ITEM.LASTVALUE1}'
+    - uuid: 41b5a170eec14164b8aa75333ff610c0
+      name: Printer name
+      type: SNMP_AGENT
+      snmp_oid: 1.3.6.1.2.1.43.5.1.1.16.1
+      key: printer.name
+      delay: 1h
+      history: 7d
+      trends: '0'
+      value_type: CHAR
+      tags:
+      - tag: component
+        value: inventory
+    - uuid: b4c97592bc324485833697baaeda9d4a
+      name: Printer serial number
+      type: SNMP_AGENT
+      snmp_oid: 1.3.6.1.2.1.43.5.1.1.17.1
+      key: printer.serial
+      delay: 12h
+      history: 30d
+      trends: '0'
+      value_type: CHAR
+      tags:
+      - tag: component
+        value: inventory
+    - uuid: d22982cada8c4bd09d1bac3a480b43ec
+      name: Lifetime page count
+      type: SNMP_AGENT
+      snmp_oid: 1.3.6.1.2.1.43.10.2.1.4.1.1
+      key: printer.page.count
+      delay: 5m
+      history: 90d
+      trends: 365d
+      value_type: UNSIGNED
+      units: pages
+      description: Standard Printer-MIB prtMarkerLifeCount for the common .1.1 marker instance. Some devices expose different marker indexes; the generic marker discovery
+        rule in this template can still discover alternate indexes.
+      tags:
+      - tag: component
+        value: usage
+    discovery_rules:
+    - uuid: a8e070c73d6340ddaefbd13da5d19ac1
+      name: Printer supply discovery
+      type: SNMP_AGENT
+      snmp_oid: discovery[{#SUPPLYDESC},1.3.6.1.2.1.43.11.1.1.6,{#SUPPLYTYPE},1.3.6.1.2.1.43.11.1.1.5,{#SUPPLYUNIT},1.3.6.1.2.1.43.11.1.1.7]
+      key: printer.supply.discovery
+      delay: 1h
+      lifetime: 7d
+      description: Discovers supplies from the standard Printer-MIB. Dynamic indexes prevent assumptions about toner/drum/waste-container positions.
+      item_prototypes:
+      - uuid: 9558718d8b96471687ac8612028a4563
+        name: 'Supply {#SUPPLYDESC}: current level'
+        type: SNMP_AGENT
+        snmp_oid: 1.3.6.1.2.1.43.11.1.1.9.{#SNMPINDEX}
+        key: printer.supply.level[{#SNMPINDEX}]
+        delay: 5m
+        history: 30d
+        trends: 365d
+        value_type: FLOAT
+        description: Raw current supply level. Printer-MIB special values can include -1=other, -2=unknown, -3=some remains but exact amount is unknown.
+      - uuid: adb7b3e0698c4761a4cb5c2e9b709251
+        name: 'Supply {#SUPPLYDESC}: maximum capacity'
+        type: SNMP_AGENT
+        snmp_oid: 1.3.6.1.2.1.43.11.1.1.8.{#SNMPINDEX}
+        key: printer.supply.max[{#SNMPINDEX}]
+        delay: 1h
+        history: 30d
+        trends: 365d
+        value_type: FLOAT
+        description: Raw maximum supply capacity. Printer-MIB can return negative special values when capacity is unknown.
+      trigger_prototypes:
+      - uuid: da1485c248274f7ca797640e708aab97
+        expression: last(/Zebra Zebra ZD611-HC by SNMP/printer.supply.level[{#SNMPINDEX}])=0
+        name: 'Zebra Zebra ZD611-HC: {#SUPPLYDESC} is empty'
+        priority: HIGH
+      - uuid: 7997c983561246c39a47ee26a2cb1458
+        expression: last(/Zebra Zebra ZD611-HC by SNMP/printer.supply.level[{#SNMPINDEX}])>0 and last(/Zebra Zebra ZD611-HC by SNMP/printer.supply.max[{#SNMPINDEX}])>0
+          and (100*last(/Zebra Zebra ZD611-HC by SNMP/printer.supply.level[{#SNMPINDEX}])/last(/Zebra Zebra ZD611-HC by SNMP/printer.supply.max[{#SNMPINDEX}]))<{$PRINTER.SUPPLY.LOW}
+        name: 'Zebra Zebra ZD611-HC: {#SUPPLYDESC} is low'
+        priority: WARNING
+      graph_prototypes:
+      - uuid: c3b921445e06421eb86f0963e7d0c4d8
+        name: Supply {#SUPPLYDESC}
+        graph_items:
+        - color: 199C0D
+          item:
+            host: Zebra Zebra ZD611-HC by SNMP
+            key: printer.supply.level[{#SNMPINDEX}]
+        - sortorder: '1'
+          color: F63100
+          item:
+            host: Zebra Zebra ZD611-HC by SNMP
+            key: printer.supply.max[{#SNMPINDEX}]
+    - uuid: fde73f242cb74e3e9064f3367f488dbc
+      name: Paper tray discovery
+      type: SNMP_AGENT
+      snmp_oid: discovery[{#TRAYNAME},1.3.6.1.2.1.43.8.2.1.13]
+      key: printer.tray.discovery
+      delay: 1h
+      lifetime: 7d
+      description: Discovers input trays using standard Printer-MIB prtInputName.
+      item_prototypes:
+      - uuid: c6851e5ea7c94de7b4a0941270161cd1
+        name: 'Paper tray {#TRAYNAME}: current level'
+        type: SNMP_AGENT
+        snmp_oid: 1.3.6.1.2.1.43.8.2.1.10.{#SNMPINDEX}
+        key: printer.tray.level[{#SNMPINDEX}]
+        delay: 5m
+        history: 30d
+        trends: 365d
+        value_type: FLOAT
+        units: sheets
+      - uuid: 560af526dd04406798f619274eddcc90
+        name: 'Paper tray {#TRAYNAME}: maximum capacity'
+        type: SNMP_AGENT
+        snmp_oid: 1.3.6.1.2.1.43.8.2.1.9.{#SNMPINDEX}
+        key: printer.tray.max[{#SNMPINDEX}]
+        delay: 1h
+        history: 30d
+        trends: 365d
+        value_type: FLOAT
+        units: sheets
+      trigger_prototypes:
+      - uuid: 496fc5bcfb0d4221b8c63831e36f3d08
+        expression: last(/Zebra Zebra ZD611-HC by SNMP/printer.tray.level[{#SNMPINDEX}])=0
+        name: 'Zebra Zebra ZD611-HC: Paper tray {#TRAYNAME} is empty'
+        priority: AVERAGE
+      - uuid: cfa776774e3a4728bcb6aa52ce98a306
+        expression: last(/Zebra Zebra ZD611-HC by SNMP/printer.tray.level[{#SNMPINDEX}])>0 and last(/Zebra Zebra ZD611-HC by SNMP/printer.tray.max[{#SNMPINDEX}])>0
+          and (100*last(/Zebra Zebra ZD611-HC by SNMP/printer.tray.level[{#SNMPINDEX}])/last(/Zebra Zebra ZD611-HC by SNMP/printer.tray.max[{#SNMPINDEX}]))<{$PRINTER.PAPER.LOW}
+        name: 'Zebra Zebra ZD611-HC: Paper tray {#TRAYNAME} is low'
+        priority: WARNING
+      graph_prototypes:
+      - uuid: bafba9c71caf499c8cecba613afdf23b
+        name: Paper tray {#TRAYNAME}
+        graph_items:
+        - color: 199C0D
+          item:
+            host: Zebra Zebra ZD611-HC by SNMP
+            key: printer.tray.level[{#SNMPINDEX}]
+        - sortorder: '1'
+          color: F63100
+          item:
+            host: Zebra Zebra ZD611-HC by SNMP
+            key: printer.tray.max[{#SNMPINDEX}]
+    - uuid: 6f39cf8ef4764bd099cb12ad23a820cf
+      name: Marker life counter discovery
+      type: SNMP_AGENT
+      snmp_oid: discovery[{#MARKERCOUNT},1.3.6.1.2.1.43.10.2.1.4]
+      key: printer.marker.discovery
+      delay: 1h
+      lifetime: 7d
+      description: Discovers Printer-MIB prtMarkerLifeCount entries so devices with non-.1.1 marker indexes still expose usage counters.
+      item_prototypes:
+      - uuid: 1308eebbbaf04fa8b17127ecaf78496b
+        name: 'Marker {#SNMPINDEX}: lifetime count'
+        type: SNMP_AGENT
+        snmp_oid: 1.3.6.1.2.1.43.10.2.1.4.{#SNMPINDEX}
+        key: printer.marker.life[{#SNMPINDEX}]
+        delay: 5m
+        history: 90d
+        trends: 365d
+        value_type: UNSIGNED
+      graph_prototypes:
+      - uuid: e222dd4ee99341bfbeb16cf4e17e8f16
+        name: 'Marker {#SNMPINDEX}: lifetime count'
+        graph_items:
+        - color: 2774A4
+          item:
+            host: Zebra Zebra ZD611-HC by SNMP
+            key: printer.marker.life[{#SNMPINDEX}]
+    valuemaps:
+    - uuid: 99559c7ca82044928953bee064e4765e
+      name: Zabbix SNMP availability
+      mappings:
+      - value: '0'
+        newvalue: Not available
+      - value: '1'
+        newvalue: Available
+      - value: '2'
+        newvalue: Unknown
+    - uuid: b8817750c92046a3ade37f5348775449
+      name: HOST-RESOURCES-MIB::hrPrinterStatus
+      mappings:
+      - value: '1'
+        newvalue: Other
+      - value: '2'
+        newvalue: Unknown
+      - value: '3'
+        newvalue: Idle
+      - value: '4'
+        newvalue: Printing
+      - value: '5'
+        newvalue: Warmup
+  graphs:
+  - uuid: e9ed2ce677fa4afeb0b88dd9441382bb
+    name: 'Zebra Zebra ZD611-HC: Lifetime page count'
+    graph_items:
+    - color: 2774A4
+      item:
+        host: Zebra Zebra ZD611-HC by SNMP
+        key: printer.page.count

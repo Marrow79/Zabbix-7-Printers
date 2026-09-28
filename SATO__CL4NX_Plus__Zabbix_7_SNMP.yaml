@@ -1,0 +1,380 @@
+zabbix_export:
+  version: '7.0'
+  template_groups:
+  - uuid: e8f2a8480d674fb2a53bea65079ae6e3
+    name: Templates/Printers
+  templates:
+  - uuid: 7e42cc68c60f41a5a7f6ffd32985f8de
+    template: SATO CL4NX Plus by SNMP
+    name: SATO CL4NX Plus by SNMP
+    description: 'Zabbix 7.0.x SNMP template for SATO CL4NX Plus.
+
+
+      Verified source database date: 2026-09-27.
+
+      Family/series: CL4NX Plus.
+
+      Category: Industrial label printer; B&W/label.
+
+      Network: Ethernet standard; Wi-Fi optional.
+
+      Verified SNMP support: SNMPv3.
+
+      Evidence level: A - model-specific.
+
+      Canada status: North American product page; Canada sales/support via SATO Americas.
+
+
+      Monitoring is intentionally based on standard SNMPv2-MIB, HOST-RESOURCES-MIB and Printer-MIB objects. Supply, tray and marker rows are discovered dynamically.
+      Manufacturer-specific private OIDs are not guessed.
+
+
+      Product/catalog source: https://www.satoamerica.com/products/printers/industrial/cl4nx-plus/specifications/
+
+      SNMP evidence source: https://www.satoamerica.com/products/printers/industrial/cl4nx-plus/specifications/
+
+      Verification notes: Official specifications explicitly list Ethernet and SNMP Ver. 3.
+
+      '
+    groups:
+    - name: Templates/Printers
+    tags:
+    - tag: class
+      value: printer
+    - tag: manufacturer
+      value: SATO
+    - tag: model
+      value: CL4NX Plus
+    - tag: family
+      value: CL4NX Plus
+    - tag: category
+      value: Industrial label printer
+    - tag: snmp_support
+      value: SNMPv3
+    - tag: evidence_level
+      value: A - model-specific
+    macros:
+    - macro: '{$SNMP.TIMEOUT}'
+      value: 10m
+      description: Time without successful SNMP polling before the availability trigger fires.
+    - macro: '{$PRINTER.SUPPLY.LOW}'
+      value: '10'
+      description: Low supply threshold in percent, used only when both current and maximum capacity are positive.
+    - macro: '{$PRINTER.PAPER.LOW}'
+      value: '10'
+      description: Low paper threshold in percent, used only when both current and maximum tray capacity are positive.
+    items:
+    - uuid: 4c838b6224bc45d5ad7644be7decf73b
+      name: SNMP availability
+      type: INTERNAL
+      key: zabbix[host,snmp,available]
+      delay: 1m
+      history: 7d
+      valuemap:
+        name: Zabbix SNMP availability
+      tags:
+      - tag: component
+        value: availability
+      triggers:
+      - uuid: b19a96b346df4cd19dbae25cc5be0db8
+        expression: max(/SATO CL4NX Plus by SNMP/zabbix[host,snmp,available],{$SNMP.TIMEOUT})=0
+        name: 'SATO CL4NX Plus: No SNMP data collection'
+        priority: HIGH
+        description: Zabbix has been unable to poll this printer over SNMP for the configured timeout period.
+    - uuid: 518bb32b508e40828a1a355db39da03e
+      name: System description
+      type: SNMP_AGENT
+      snmp_oid: 1.3.6.1.2.1.1.1.0
+      key: printer.sysdescr
+      delay: 1h
+      history: 7d
+      trends: '0'
+      value_type: TEXT
+      tags:
+      - tag: component
+        value: inventory
+    - uuid: d8c6d9aff6f3405eac789da527139207
+      name: System name
+      type: SNMP_AGENT
+      snmp_oid: 1.3.6.1.2.1.1.5.0
+      key: printer.sysname
+      delay: 10m
+      history: 7d
+      trends: '0'
+      value_type: CHAR
+      tags:
+      - tag: component
+        value: inventory
+    - uuid: 59d39d3adf5346b296ec989439cf150c
+      name: System object ID
+      type: SNMP_AGENT
+      snmp_oid: 1.3.6.1.2.1.1.2.0
+      key: printer.sysobjectid
+      delay: 12h
+      history: 30d
+      trends: '0'
+      value_type: CHAR
+      tags:
+      - tag: component
+        value: inventory
+    - uuid: f0fb2817fa04478fb9881d1b95e580f8
+      name: System location
+      type: SNMP_AGENT
+      snmp_oid: 1.3.6.1.2.1.1.6.0
+      key: printer.syslocation
+      delay: 1h
+      history: 7d
+      trends: '0'
+      value_type: CHAR
+      tags:
+      - tag: component
+        value: inventory
+    - uuid: 003e92ef30ae4e6fb46a2bb0d836c12b
+      name: System contact
+      type: SNMP_AGENT
+      snmp_oid: 1.3.6.1.2.1.1.4.0
+      key: printer.syscontact
+      delay: 1h
+      history: 7d
+      trends: '0'
+      value_type: CHAR
+      tags:
+      - tag: component
+        value: inventory
+    - uuid: c9eca32c3de24eaea0ab2b820c36a5b8
+      name: System uptime
+      type: SNMP_AGENT
+      snmp_oid: 1.3.6.1.2.1.1.3.0
+      key: printer.uptime
+      delay: 5m
+      history: 30d
+      value_type: FLOAT
+      units: uptime
+      preprocessing:
+      - type: MULTIPLIER
+        parameters:
+        - '0.01'
+      tags:
+      - tag: component
+        value: system
+    - uuid: 95baf79e6adb479ea61e3b09cd364f69
+      name: Printer status
+      type: SNMP_AGENT
+      snmp_oid: 1.3.6.1.2.1.25.3.5.1.1.1
+      key: printer.status
+      delay: 1m
+      history: 30d
+      value_type: UNSIGNED
+      description: 'HOST-RESOURCES-MIB hrPrinterStatus: 1=other, 2=unknown, 3=idle, 4=printing, 5=warmup.'
+      valuemap:
+        name: HOST-RESOURCES-MIB::hrPrinterStatus
+      tags:
+      - tag: component
+        value: status
+      triggers:
+      - uuid: 69ce9f65925f4969a2c64f6bc2dbb926
+        expression: last(/SATO CL4NX Plus by SNMP/printer.status)=1 or last(/SATO CL4NX Plus by SNMP/printer.status)=2
+        name: 'SATO CL4NX Plus: Printer status is other or unknown'
+        priority: WARNING
+        opdata: 'Printer status: {ITEM.LASTVALUE1}'
+    - uuid: 03aec188ed3a45faa5fd9bf8fb57e938
+      name: Printer name
+      type: SNMP_AGENT
+      snmp_oid: 1.3.6.1.2.1.43.5.1.1.16.1
+      key: printer.name
+      delay: 1h
+      history: 7d
+      trends: '0'
+      value_type: CHAR
+      tags:
+      - tag: component
+        value: inventory
+    - uuid: 51c76b17dc7642e68af98cef0238ba3e
+      name: Printer serial number
+      type: SNMP_AGENT
+      snmp_oid: 1.3.6.1.2.1.43.5.1.1.17.1
+      key: printer.serial
+      delay: 12h
+      history: 30d
+      trends: '0'
+      value_type: CHAR
+      tags:
+      - tag: component
+        value: inventory
+    - uuid: e60ab7e9121843d49cc7b6f484da0657
+      name: Lifetime page count
+      type: SNMP_AGENT
+      snmp_oid: 1.3.6.1.2.1.43.10.2.1.4.1.1
+      key: printer.page.count
+      delay: 5m
+      history: 90d
+      trends: 365d
+      value_type: UNSIGNED
+      units: pages
+      description: Standard Printer-MIB prtMarkerLifeCount for the common .1.1 marker instance. Some devices expose different marker indexes; the generic marker discovery
+        rule in this template can still discover alternate indexes.
+      tags:
+      - tag: component
+        value: usage
+    discovery_rules:
+    - uuid: c2511683e0c14e43b13565e84aae2e80
+      name: Printer supply discovery
+      type: SNMP_AGENT
+      snmp_oid: discovery[{#SUPPLYDESC},1.3.6.1.2.1.43.11.1.1.6,{#SUPPLYTYPE},1.3.6.1.2.1.43.11.1.1.5,{#SUPPLYUNIT},1.3.6.1.2.1.43.11.1.1.7]
+      key: printer.supply.discovery
+      delay: 1h
+      lifetime: 7d
+      description: Discovers supplies from the standard Printer-MIB. Dynamic indexes prevent assumptions about toner/drum/waste-container positions.
+      item_prototypes:
+      - uuid: d4f15e8da76a4fe0a733fbb338abe345
+        name: 'Supply {#SUPPLYDESC}: current level'
+        type: SNMP_AGENT
+        snmp_oid: 1.3.6.1.2.1.43.11.1.1.9.{#SNMPINDEX}
+        key: printer.supply.level[{#SNMPINDEX}]
+        delay: 5m
+        history: 30d
+        trends: 365d
+        value_type: FLOAT
+        description: Raw current supply level. Printer-MIB special values can include -1=other, -2=unknown, -3=some remains but exact amount is unknown.
+      - uuid: 5b2191c005414c14a01c8a82677a4c8a
+        name: 'Supply {#SUPPLYDESC}: maximum capacity'
+        type: SNMP_AGENT
+        snmp_oid: 1.3.6.1.2.1.43.11.1.1.8.{#SNMPINDEX}
+        key: printer.supply.max[{#SNMPINDEX}]
+        delay: 1h
+        history: 30d
+        trends: 365d
+        value_type: FLOAT
+        description: Raw maximum supply capacity. Printer-MIB can return negative special values when capacity is unknown.
+      trigger_prototypes:
+      - uuid: 706a10d2e4614bf5ba52e7e8dd16b397
+        expression: last(/SATO CL4NX Plus by SNMP/printer.supply.level[{#SNMPINDEX}])=0
+        name: 'SATO CL4NX Plus: {#SUPPLYDESC} is empty'
+        priority: HIGH
+      - uuid: d2d572ba15e54ad78a420536b7df5a57
+        expression: last(/SATO CL4NX Plus by SNMP/printer.supply.level[{#SNMPINDEX}])>0 and last(/SATO CL4NX Plus by SNMP/printer.supply.max[{#SNMPINDEX}])>0 and
+          (100*last(/SATO CL4NX Plus by SNMP/printer.supply.level[{#SNMPINDEX}])/last(/SATO CL4NX Plus by SNMP/printer.supply.max[{#SNMPINDEX}]))<{$PRINTER.SUPPLY.LOW}
+        name: 'SATO CL4NX Plus: {#SUPPLYDESC} is low'
+        priority: WARNING
+      graph_prototypes:
+      - uuid: a8cecb84f932467fa81cdc3ca1abc558
+        name: Supply {#SUPPLYDESC}
+        graph_items:
+        - color: 199C0D
+          item:
+            host: SATO CL4NX Plus by SNMP
+            key: printer.supply.level[{#SNMPINDEX}]
+        - sortorder: '1'
+          color: F63100
+          item:
+            host: SATO CL4NX Plus by SNMP
+            key: printer.supply.max[{#SNMPINDEX}]
+    - uuid: 9e894c9ba6e7428ea254f1433fddc56b
+      name: Paper tray discovery
+      type: SNMP_AGENT
+      snmp_oid: discovery[{#TRAYNAME},1.3.6.1.2.1.43.8.2.1.13]
+      key: printer.tray.discovery
+      delay: 1h
+      lifetime: 7d
+      description: Discovers input trays using standard Printer-MIB prtInputName.
+      item_prototypes:
+      - uuid: 720b1452315d4f12af58df9171b17f1a
+        name: 'Paper tray {#TRAYNAME}: current level'
+        type: SNMP_AGENT
+        snmp_oid: 1.3.6.1.2.1.43.8.2.1.10.{#SNMPINDEX}
+        key: printer.tray.level[{#SNMPINDEX}]
+        delay: 5m
+        history: 30d
+        trends: 365d
+        value_type: FLOAT
+        units: sheets
+      - uuid: d7575c5ef44f4db99777d4b63b1d0ba8
+        name: 'Paper tray {#TRAYNAME}: maximum capacity'
+        type: SNMP_AGENT
+        snmp_oid: 1.3.6.1.2.1.43.8.2.1.9.{#SNMPINDEX}
+        key: printer.tray.max[{#SNMPINDEX}]
+        delay: 1h
+        history: 30d
+        trends: 365d
+        value_type: FLOAT
+        units: sheets
+      trigger_prototypes:
+      - uuid: 13f8ee3579384e1581cb7bc384c5c85d
+        expression: last(/SATO CL4NX Plus by SNMP/printer.tray.level[{#SNMPINDEX}])=0
+        name: 'SATO CL4NX Plus: Paper tray {#TRAYNAME} is empty'
+        priority: AVERAGE
+      - uuid: e3774ff399934953a6d7cb9fad7dba76
+        expression: last(/SATO CL4NX Plus by SNMP/printer.tray.level[{#SNMPINDEX}])>0 and last(/SATO CL4NX Plus by SNMP/printer.tray.max[{#SNMPINDEX}])>0 and (100*last(/SATO
+          CL4NX Plus by SNMP/printer.tray.level[{#SNMPINDEX}])/last(/SATO CL4NX Plus by SNMP/printer.tray.max[{#SNMPINDEX}]))<{$PRINTER.PAPER.LOW}
+        name: 'SATO CL4NX Plus: Paper tray {#TRAYNAME} is low'
+        priority: WARNING
+      graph_prototypes:
+      - uuid: c070f97a17e24930b3688522216754c5
+        name: Paper tray {#TRAYNAME}
+        graph_items:
+        - color: 199C0D
+          item:
+            host: SATO CL4NX Plus by SNMP
+            key: printer.tray.level[{#SNMPINDEX}]
+        - sortorder: '1'
+          color: F63100
+          item:
+            host: SATO CL4NX Plus by SNMP
+            key: printer.tray.max[{#SNMPINDEX}]
+    - uuid: 4dadaad529594062b1d744b997fef7b2
+      name: Marker life counter discovery
+      type: SNMP_AGENT
+      snmp_oid: discovery[{#MARKERCOUNT},1.3.6.1.2.1.43.10.2.1.4]
+      key: printer.marker.discovery
+      delay: 1h
+      lifetime: 7d
+      description: Discovers Printer-MIB prtMarkerLifeCount entries so devices with non-.1.1 marker indexes still expose usage counters.
+      item_prototypes:
+      - uuid: b04c23b441024678a0a7070b62df3de6
+        name: 'Marker {#SNMPINDEX}: lifetime count'
+        type: SNMP_AGENT
+        snmp_oid: 1.3.6.1.2.1.43.10.2.1.4.{#SNMPINDEX}
+        key: printer.marker.life[{#SNMPINDEX}]
+        delay: 5m
+        history: 90d
+        trends: 365d
+        value_type: UNSIGNED
+      graph_prototypes:
+      - uuid: 365ff582709c4a0eaaffe3ce8119b331
+        name: 'Marker {#SNMPINDEX}: lifetime count'
+        graph_items:
+        - color: 2774A4
+          item:
+            host: SATO CL4NX Plus by SNMP
+            key: printer.marker.life[{#SNMPINDEX}]
+    valuemaps:
+    - uuid: ca2af27fa084447cbd37aa4570c47f93
+      name: Zabbix SNMP availability
+      mappings:
+      - value: '0'
+        newvalue: Not available
+      - value: '1'
+        newvalue: Available
+      - value: '2'
+        newvalue: Unknown
+    - uuid: 3c2a25c7fa8846f18243f8e103f997fb
+      name: HOST-RESOURCES-MIB::hrPrinterStatus
+      mappings:
+      - value: '1'
+        newvalue: Other
+      - value: '2'
+        newvalue: Unknown
+      - value: '3'
+        newvalue: Idle
+      - value: '4'
+        newvalue: Printing
+      - value: '5'
+        newvalue: Warmup
+  graphs:
+  - uuid: dba3e9bee19a4cd1a86e4f38c5bf3682
+    name: 'SATO CL4NX Plus: Lifetime page count'
+    graph_items:
+    - color: 2774A4
+      item:
+        host: SATO CL4NX Plus by SNMP
+        key: printer.page.count

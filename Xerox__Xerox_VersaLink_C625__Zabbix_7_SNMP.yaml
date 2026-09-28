@@ -1,0 +1,380 @@
+zabbix_export:
+  version: '7.0'
+  template_groups:
+  - uuid: e8f2a8480d674fb2a53bea65079ae6e3
+    name: Templates/Printers
+  templates:
+  - uuid: e1a03e899f3f4693961e99baf0020a10
+    template: Xerox Xerox VersaLink C625 by SNMP
+    name: Xerox Xerox VersaLink C625 by SNMP
+    description: 'Zabbix 7.0.x SNMP template for Xerox Xerox VersaLink C625.
+
+
+      Verified source database date: 2026-09-27.
+
+      Family/series: C600 Series.
+
+      Category: Colour MFP; Colour.
+
+      Network: Ethernet.
+
+      Verified SNMP support: SNMPv3.
+
+      Evidence level: A - model-specific.
+
+      Canada status: Current Xerox Canada shop.
+
+
+      Monitoring is intentionally based on standard SNMPv2-MIB, HOST-RESOURCES-MIB and Printer-MIB objects. Supply, tray and marker rows are discovered dynamically.
+      Manufacturer-specific private OIDs are not guessed.
+
+
+      Product/catalog source: https://www.shop.xerox.ca/en/versalink-c625
+
+      SNMP evidence source: https://securitydocs.business.xerox.com/wp-content/uploads/2025/02/Secure-Installation-and-Operation-VersaLink-C415_C625_B415_B625-v2_4.pdf
+
+      Verification notes: Current Xerox Canada product/security documentation explicitly lists SNMPv3.
+
+      '
+    groups:
+    - name: Templates/Printers
+    tags:
+    - tag: class
+      value: printer
+    - tag: manufacturer
+      value: Xerox
+    - tag: model
+      value: Xerox VersaLink C625
+    - tag: family
+      value: C600 Series
+    - tag: category
+      value: Colour MFP
+    - tag: snmp_support
+      value: SNMPv3
+    - tag: evidence_level
+      value: A - model-specific
+    macros:
+    - macro: '{$SNMP.TIMEOUT}'
+      value: 10m
+      description: Time without successful SNMP polling before the availability trigger fires.
+    - macro: '{$PRINTER.SUPPLY.LOW}'
+      value: '10'
+      description: Low supply threshold in percent, used only when both current and maximum capacity are positive.
+    - macro: '{$PRINTER.PAPER.LOW}'
+      value: '10'
+      description: Low paper threshold in percent, used only when both current and maximum tray capacity are positive.
+    items:
+    - uuid: 1aa572c6c513458d91484fef085cc71a
+      name: SNMP availability
+      type: INTERNAL
+      key: zabbix[host,snmp,available]
+      delay: 1m
+      history: 7d
+      valuemap:
+        name: Zabbix SNMP availability
+      tags:
+      - tag: component
+        value: availability
+      triggers:
+      - uuid: 85e2e81a12b848d6b86641f0c2446217
+        expression: max(/Xerox Xerox VersaLink C625 by SNMP/zabbix[host,snmp,available],{$SNMP.TIMEOUT})=0
+        name: 'Xerox Xerox VersaLink C625: No SNMP data collection'
+        priority: HIGH
+        description: Zabbix has been unable to poll this printer over SNMP for the configured timeout period.
+    - uuid: 3b44b25e25e84ee9aa1b069ddce7cd26
+      name: System description
+      type: SNMP_AGENT
+      snmp_oid: 1.3.6.1.2.1.1.1.0
+      key: printer.sysdescr
+      delay: 1h
+      history: 7d
+      trends: '0'
+      value_type: TEXT
+      tags:
+      - tag: component
+        value: inventory
+    - uuid: 4d666052d1794e60ba0d72b3853e2126
+      name: System name
+      type: SNMP_AGENT
+      snmp_oid: 1.3.6.1.2.1.1.5.0
+      key: printer.sysname
+      delay: 10m
+      history: 7d
+      trends: '0'
+      value_type: CHAR
+      tags:
+      - tag: component
+        value: inventory
+    - uuid: 2c3431846d3f46c689e8c8a6aebb64dd
+      name: System object ID
+      type: SNMP_AGENT
+      snmp_oid: 1.3.6.1.2.1.1.2.0
+      key: printer.sysobjectid
+      delay: 12h
+      history: 30d
+      trends: '0'
+      value_type: CHAR
+      tags:
+      - tag: component
+        value: inventory
+    - uuid: b110b14124924828bd8609cee9a7beb8
+      name: System location
+      type: SNMP_AGENT
+      snmp_oid: 1.3.6.1.2.1.1.6.0
+      key: printer.syslocation
+      delay: 1h
+      history: 7d
+      trends: '0'
+      value_type: CHAR
+      tags:
+      - tag: component
+        value: inventory
+    - uuid: 61e301c1d5164320805b2f78ac056307
+      name: System contact
+      type: SNMP_AGENT
+      snmp_oid: 1.3.6.1.2.1.1.4.0
+      key: printer.syscontact
+      delay: 1h
+      history: 7d
+      trends: '0'
+      value_type: CHAR
+      tags:
+      - tag: component
+        value: inventory
+    - uuid: 76a97a858051495a97945ef582ed46cc
+      name: System uptime
+      type: SNMP_AGENT
+      snmp_oid: 1.3.6.1.2.1.1.3.0
+      key: printer.uptime
+      delay: 5m
+      history: 30d
+      value_type: FLOAT
+      units: uptime
+      preprocessing:
+      - type: MULTIPLIER
+        parameters:
+        - '0.01'
+      tags:
+      - tag: component
+        value: system
+    - uuid: 949c29a28ac44406bcb1ba16fe49fb5f
+      name: Printer status
+      type: SNMP_AGENT
+      snmp_oid: 1.3.6.1.2.1.25.3.5.1.1.1
+      key: printer.status
+      delay: 1m
+      history: 30d
+      value_type: UNSIGNED
+      description: 'HOST-RESOURCES-MIB hrPrinterStatus: 1=other, 2=unknown, 3=idle, 4=printing, 5=warmup.'
+      valuemap:
+        name: HOST-RESOURCES-MIB::hrPrinterStatus
+      tags:
+      - tag: component
+        value: status
+      triggers:
+      - uuid: d02f982926d14f5e94a777830dbaf2f5
+        expression: last(/Xerox Xerox VersaLink C625 by SNMP/printer.status)=1 or last(/Xerox Xerox VersaLink C625 by SNMP/printer.status)=2
+        name: 'Xerox Xerox VersaLink C625: Printer status is other or unknown'
+        priority: WARNING
+        opdata: 'Printer status: {ITEM.LASTVALUE1}'
+    - uuid: 300f9ca922124aeb9b18f2f4257264e3
+      name: Printer name
+      type: SNMP_AGENT
+      snmp_oid: 1.3.6.1.2.1.43.5.1.1.16.1
+      key: printer.name
+      delay: 1h
+      history: 7d
+      trends: '0'
+      value_type: CHAR
+      tags:
+      - tag: component
+        value: inventory
+    - uuid: 76e9662bed5d4e14b6c101ea678871ae
+      name: Printer serial number
+      type: SNMP_AGENT
+      snmp_oid: 1.3.6.1.2.1.43.5.1.1.17.1
+      key: printer.serial
+      delay: 12h
+      history: 30d
+      trends: '0'
+      value_type: CHAR
+      tags:
+      - tag: component
+        value: inventory
+    - uuid: 6912ba7f93804623a14f5f4e37f0f76d
+      name: Lifetime page count
+      type: SNMP_AGENT
+      snmp_oid: 1.3.6.1.2.1.43.10.2.1.4.1.1
+      key: printer.page.count
+      delay: 5m
+      history: 90d
+      trends: 365d
+      value_type: UNSIGNED
+      units: pages
+      description: Standard Printer-MIB prtMarkerLifeCount for the common .1.1 marker instance. Some devices expose different marker indexes; the generic marker discovery
+        rule in this template can still discover alternate indexes.
+      tags:
+      - tag: component
+        value: usage
+    discovery_rules:
+    - uuid: afd5ff9730c84cbd9a9d402e99ed3758
+      name: Printer supply discovery
+      type: SNMP_AGENT
+      snmp_oid: discovery[{#SUPPLYDESC},1.3.6.1.2.1.43.11.1.1.6,{#SUPPLYTYPE},1.3.6.1.2.1.43.11.1.1.5,{#SUPPLYUNIT},1.3.6.1.2.1.43.11.1.1.7]
+      key: printer.supply.discovery
+      delay: 1h
+      lifetime: 7d
+      description: Discovers supplies from the standard Printer-MIB. Dynamic indexes prevent assumptions about toner/drum/waste-container positions.
+      item_prototypes:
+      - uuid: b4cf6bb0478c4b6e9fce01b38fe22b2c
+        name: 'Supply {#SUPPLYDESC}: current level'
+        type: SNMP_AGENT
+        snmp_oid: 1.3.6.1.2.1.43.11.1.1.9.{#SNMPINDEX}
+        key: printer.supply.level[{#SNMPINDEX}]
+        delay: 5m
+        history: 30d
+        trends: 365d
+        value_type: FLOAT
+        description: Raw current supply level. Printer-MIB special values can include -1=other, -2=unknown, -3=some remains but exact amount is unknown.
+      - uuid: 24835897755d47c4bc97edbbb4406f49
+        name: 'Supply {#SUPPLYDESC}: maximum capacity'
+        type: SNMP_AGENT
+        snmp_oid: 1.3.6.1.2.1.43.11.1.1.8.{#SNMPINDEX}
+        key: printer.supply.max[{#SNMPINDEX}]
+        delay: 1h
+        history: 30d
+        trends: 365d
+        value_type: FLOAT
+        description: Raw maximum supply capacity. Printer-MIB can return negative special values when capacity is unknown.
+      trigger_prototypes:
+      - uuid: 1cd150b9026149aab77ebaa2cda62ed1
+        expression: last(/Xerox Xerox VersaLink C625 by SNMP/printer.supply.level[{#SNMPINDEX}])=0
+        name: 'Xerox Xerox VersaLink C625: {#SUPPLYDESC} is empty'
+        priority: HIGH
+      - uuid: f86d93e36aaa4444bd0eeed7b57e663e
+        expression: last(/Xerox Xerox VersaLink C625 by SNMP/printer.supply.level[{#SNMPINDEX}])>0 and last(/Xerox Xerox VersaLink C625 by SNMP/printer.supply.max[{#SNMPINDEX}])>0
+          and (100*last(/Xerox Xerox VersaLink C625 by SNMP/printer.supply.level[{#SNMPINDEX}])/last(/Xerox Xerox VersaLink C625 by SNMP/printer.supply.max[{#SNMPINDEX}]))<{$PRINTER.SUPPLY.LOW}
+        name: 'Xerox Xerox VersaLink C625: {#SUPPLYDESC} is low'
+        priority: WARNING
+      graph_prototypes:
+      - uuid: 3214bd63abde4964a44dac2ff314dae7
+        name: Supply {#SUPPLYDESC}
+        graph_items:
+        - color: 199C0D
+          item:
+            host: Xerox Xerox VersaLink C625 by SNMP
+            key: printer.supply.level[{#SNMPINDEX}]
+        - sortorder: '1'
+          color: F63100
+          item:
+            host: Xerox Xerox VersaLink C625 by SNMP
+            key: printer.supply.max[{#SNMPINDEX}]
+    - uuid: 193a5abc96504943b6c5b56bc424b3f4
+      name: Paper tray discovery
+      type: SNMP_AGENT
+      snmp_oid: discovery[{#TRAYNAME},1.3.6.1.2.1.43.8.2.1.13]
+      key: printer.tray.discovery
+      delay: 1h
+      lifetime: 7d
+      description: Discovers input trays using standard Printer-MIB prtInputName.
+      item_prototypes:
+      - uuid: 709dc490c23e427994a41067560532e1
+        name: 'Paper tray {#TRAYNAME}: current level'
+        type: SNMP_AGENT
+        snmp_oid: 1.3.6.1.2.1.43.8.2.1.10.{#SNMPINDEX}
+        key: printer.tray.level[{#SNMPINDEX}]
+        delay: 5m
+        history: 30d
+        trends: 365d
+        value_type: FLOAT
+        units: sheets
+      - uuid: c4ef0e28d02c448bbf3cb8cd32c99fc8
+        name: 'Paper tray {#TRAYNAME}: maximum capacity'
+        type: SNMP_AGENT
+        snmp_oid: 1.3.6.1.2.1.43.8.2.1.9.{#SNMPINDEX}
+        key: printer.tray.max[{#SNMPINDEX}]
+        delay: 1h
+        history: 30d
+        trends: 365d
+        value_type: FLOAT
+        units: sheets
+      trigger_prototypes:
+      - uuid: 87f2c5a5d7384aabb7fe409a0ddd6298
+        expression: last(/Xerox Xerox VersaLink C625 by SNMP/printer.tray.level[{#SNMPINDEX}])=0
+        name: 'Xerox Xerox VersaLink C625: Paper tray {#TRAYNAME} is empty'
+        priority: AVERAGE
+      - uuid: 96719115583a4b4594fee65d409d2110
+        expression: last(/Xerox Xerox VersaLink C625 by SNMP/printer.tray.level[{#SNMPINDEX}])>0 and last(/Xerox Xerox VersaLink C625 by SNMP/printer.tray.max[{#SNMPINDEX}])>0
+          and (100*last(/Xerox Xerox VersaLink C625 by SNMP/printer.tray.level[{#SNMPINDEX}])/last(/Xerox Xerox VersaLink C625 by SNMP/printer.tray.max[{#SNMPINDEX}]))<{$PRINTER.PAPER.LOW}
+        name: 'Xerox Xerox VersaLink C625: Paper tray {#TRAYNAME} is low'
+        priority: WARNING
+      graph_prototypes:
+      - uuid: 30aa69bcf5704064a068d2e84a162890
+        name: Paper tray {#TRAYNAME}
+        graph_items:
+        - color: 199C0D
+          item:
+            host: Xerox Xerox VersaLink C625 by SNMP
+            key: printer.tray.level[{#SNMPINDEX}]
+        - sortorder: '1'
+          color: F63100
+          item:
+            host: Xerox Xerox VersaLink C625 by SNMP
+            key: printer.tray.max[{#SNMPINDEX}]
+    - uuid: 662f885143d147b987ee5f20d15188f8
+      name: Marker life counter discovery
+      type: SNMP_AGENT
+      snmp_oid: discovery[{#MARKERCOUNT},1.3.6.1.2.1.43.10.2.1.4]
+      key: printer.marker.discovery
+      delay: 1h
+      lifetime: 7d
+      description: Discovers Printer-MIB prtMarkerLifeCount entries so devices with non-.1.1 marker indexes still expose usage counters.
+      item_prototypes:
+      - uuid: 81934498ab2f40e0b8f3d135ace952c3
+        name: 'Marker {#SNMPINDEX}: lifetime count'
+        type: SNMP_AGENT
+        snmp_oid: 1.3.6.1.2.1.43.10.2.1.4.{#SNMPINDEX}
+        key: printer.marker.life[{#SNMPINDEX}]
+        delay: 5m
+        history: 90d
+        trends: 365d
+        value_type: UNSIGNED
+      graph_prototypes:
+      - uuid: b3ee2f6dcbbc4a14847fbec7df6ac21c
+        name: 'Marker {#SNMPINDEX}: lifetime count'
+        graph_items:
+        - color: 2774A4
+          item:
+            host: Xerox Xerox VersaLink C625 by SNMP
+            key: printer.marker.life[{#SNMPINDEX}]
+    valuemaps:
+    - uuid: dfc15e2ad5734d82a1a6026c3a0fcbc5
+      name: Zabbix SNMP availability
+      mappings:
+      - value: '0'
+        newvalue: Not available
+      - value: '1'
+        newvalue: Available
+      - value: '2'
+        newvalue: Unknown
+    - uuid: 4ecd9001bd4f46a08f3ea8ebaf18c2b5
+      name: HOST-RESOURCES-MIB::hrPrinterStatus
+      mappings:
+      - value: '1'
+        newvalue: Other
+      - value: '2'
+        newvalue: Unknown
+      - value: '3'
+        newvalue: Idle
+      - value: '4'
+        newvalue: Printing
+      - value: '5'
+        newvalue: Warmup
+  graphs:
+  - uuid: ec08b73a994e4832a57dcaee71d1d33e
+    name: 'Xerox Xerox VersaLink C625: Lifetime page count'
+    graph_items:
+    - color: 2774A4
+      item:
+        host: Xerox Xerox VersaLink C625 by SNMP
+        key: printer.page.count

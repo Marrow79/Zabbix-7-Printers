@@ -1,0 +1,381 @@
+zabbix_export:
+  version: '7.0'
+  template_groups:
+  - uuid: e8f2a8480d674fb2a53bea65079ae6e3
+    name: Templates/Printers
+  templates:
+  - uuid: 7dd0f4d667994ae0adfe7ebb7248eaa9
+    template: Xerox Xerox VersaLink C7000 by SNMP
+    name: Xerox Xerox VersaLink C7000 by SNMP
+    description: 'Zabbix 7.0.x SNMP template for Xerox Xerox VersaLink C7000.
+
+
+      Verified source database date: 2026-09-27.
+
+      Family/series: C7000 Series.
+
+      Category: Colour printer; Colour.
+
+      Network: Ethernet.
+
+      Verified SNMP support: SNMP (series management platform).
+
+      Evidence level: B - current model + family/platform.
+
+      Canada status: Current Xerox Canada VersaLink catalog.
+
+
+      Monitoring is intentionally based on standard SNMPv2-MIB, HOST-RESOURCES-MIB and Printer-MIB objects. Supply, tray and marker rows are discovered dynamically.
+      Manufacturer-specific private OIDs are not guessed.
+
+
+      Product/catalog source: https://www.shop.xerox.ca/en/products/versalink
+
+      SNMP evidence source: https://www.shop.xerox.ca/en/products/versalink
+
+      Verification notes: Included as a current VersaLink network model; SNMP management is a platform feature. Exact supported SNMP version should be confirmed in
+      the model security guide.
+
+      '
+    groups:
+    - name: Templates/Printers
+    tags:
+    - tag: class
+      value: printer
+    - tag: manufacturer
+      value: Xerox
+    - tag: model
+      value: Xerox VersaLink C7000
+    - tag: family
+      value: C7000 Series
+    - tag: category
+      value: Colour printer
+    - tag: snmp_support
+      value: SNMP (series management platform)
+    - tag: evidence_level
+      value: B - current model + family/platform
+    macros:
+    - macro: '{$SNMP.TIMEOUT}'
+      value: 10m
+      description: Time without successful SNMP polling before the availability trigger fires.
+    - macro: '{$PRINTER.SUPPLY.LOW}'
+      value: '10'
+      description: Low supply threshold in percent, used only when both current and maximum capacity are positive.
+    - macro: '{$PRINTER.PAPER.LOW}'
+      value: '10'
+      description: Low paper threshold in percent, used only when both current and maximum tray capacity are positive.
+    items:
+    - uuid: f309e445029242e797c5657adfd27003
+      name: SNMP availability
+      type: INTERNAL
+      key: zabbix[host,snmp,available]
+      delay: 1m
+      history: 7d
+      valuemap:
+        name: Zabbix SNMP availability
+      tags:
+      - tag: component
+        value: availability
+      triggers:
+      - uuid: d76ae478407f40a2ba4c4b46f48cb6cf
+        expression: max(/Xerox Xerox VersaLink C7000 by SNMP/zabbix[host,snmp,available],{$SNMP.TIMEOUT})=0
+        name: 'Xerox Xerox VersaLink C7000: No SNMP data collection'
+        priority: HIGH
+        description: Zabbix has been unable to poll this printer over SNMP for the configured timeout period.
+    - uuid: 7787d58a81e6408995f20b372ac4e093
+      name: System description
+      type: SNMP_AGENT
+      snmp_oid: 1.3.6.1.2.1.1.1.0
+      key: printer.sysdescr
+      delay: 1h
+      history: 7d
+      trends: '0'
+      value_type: TEXT
+      tags:
+      - tag: component
+        value: inventory
+    - uuid: b710b62422b2459688d77bf6e63d5453
+      name: System name
+      type: SNMP_AGENT
+      snmp_oid: 1.3.6.1.2.1.1.5.0
+      key: printer.sysname
+      delay: 10m
+      history: 7d
+      trends: '0'
+      value_type: CHAR
+      tags:
+      - tag: component
+        value: inventory
+    - uuid: b50db333a6804aafa2a1c5f0f54b51d6
+      name: System object ID
+      type: SNMP_AGENT
+      snmp_oid: 1.3.6.1.2.1.1.2.0
+      key: printer.sysobjectid
+      delay: 12h
+      history: 30d
+      trends: '0'
+      value_type: CHAR
+      tags:
+      - tag: component
+        value: inventory
+    - uuid: 9964ea162327434f9446c9011671ef96
+      name: System location
+      type: SNMP_AGENT
+      snmp_oid: 1.3.6.1.2.1.1.6.0
+      key: printer.syslocation
+      delay: 1h
+      history: 7d
+      trends: '0'
+      value_type: CHAR
+      tags:
+      - tag: component
+        value: inventory
+    - uuid: d008b1e215074bbb8119bd6a33eb1bc8
+      name: System contact
+      type: SNMP_AGENT
+      snmp_oid: 1.3.6.1.2.1.1.4.0
+      key: printer.syscontact
+      delay: 1h
+      history: 7d
+      trends: '0'
+      value_type: CHAR
+      tags:
+      - tag: component
+        value: inventory
+    - uuid: 5551780293a0440891ab3f81d9077351
+      name: System uptime
+      type: SNMP_AGENT
+      snmp_oid: 1.3.6.1.2.1.1.3.0
+      key: printer.uptime
+      delay: 5m
+      history: 30d
+      value_type: FLOAT
+      units: uptime
+      preprocessing:
+      - type: MULTIPLIER
+        parameters:
+        - '0.01'
+      tags:
+      - tag: component
+        value: system
+    - uuid: 9ba3b8646a4d428095bebf97e8e87a14
+      name: Printer status
+      type: SNMP_AGENT
+      snmp_oid: 1.3.6.1.2.1.25.3.5.1.1.1
+      key: printer.status
+      delay: 1m
+      history: 30d
+      value_type: UNSIGNED
+      description: 'HOST-RESOURCES-MIB hrPrinterStatus: 1=other, 2=unknown, 3=idle, 4=printing, 5=warmup.'
+      valuemap:
+        name: HOST-RESOURCES-MIB::hrPrinterStatus
+      tags:
+      - tag: component
+        value: status
+      triggers:
+      - uuid: e490d8988d274459b92d13f500c05c61
+        expression: last(/Xerox Xerox VersaLink C7000 by SNMP/printer.status)=1 or last(/Xerox Xerox VersaLink C7000 by SNMP/printer.status)=2
+        name: 'Xerox Xerox VersaLink C7000: Printer status is other or unknown'
+        priority: WARNING
+        opdata: 'Printer status: {ITEM.LASTVALUE1}'
+    - uuid: d2ce0dde7eec4ad88aa4e41234278fb0
+      name: Printer name
+      type: SNMP_AGENT
+      snmp_oid: 1.3.6.1.2.1.43.5.1.1.16.1
+      key: printer.name
+      delay: 1h
+      history: 7d
+      trends: '0'
+      value_type: CHAR
+      tags:
+      - tag: component
+        value: inventory
+    - uuid: a04f486de19d4eabb46c0dddf49fafa8
+      name: Printer serial number
+      type: SNMP_AGENT
+      snmp_oid: 1.3.6.1.2.1.43.5.1.1.17.1
+      key: printer.serial
+      delay: 12h
+      history: 30d
+      trends: '0'
+      value_type: CHAR
+      tags:
+      - tag: component
+        value: inventory
+    - uuid: 356132a212b2464c9989aa7aa5f31df2
+      name: Lifetime page count
+      type: SNMP_AGENT
+      snmp_oid: 1.3.6.1.2.1.43.10.2.1.4.1.1
+      key: printer.page.count
+      delay: 5m
+      history: 90d
+      trends: 365d
+      value_type: UNSIGNED
+      units: pages
+      description: Standard Printer-MIB prtMarkerLifeCount for the common .1.1 marker instance. Some devices expose different marker indexes; the generic marker discovery
+        rule in this template can still discover alternate indexes.
+      tags:
+      - tag: component
+        value: usage
+    discovery_rules:
+    - uuid: 39e6a4e6410745ed85902db2a670bbdc
+      name: Printer supply discovery
+      type: SNMP_AGENT
+      snmp_oid: discovery[{#SUPPLYDESC},1.3.6.1.2.1.43.11.1.1.6,{#SUPPLYTYPE},1.3.6.1.2.1.43.11.1.1.5,{#SUPPLYUNIT},1.3.6.1.2.1.43.11.1.1.7]
+      key: printer.supply.discovery
+      delay: 1h
+      lifetime: 7d
+      description: Discovers supplies from the standard Printer-MIB. Dynamic indexes prevent assumptions about toner/drum/waste-container positions.
+      item_prototypes:
+      - uuid: 7e55697d108d4b2a814f4b0078237602
+        name: 'Supply {#SUPPLYDESC}: current level'
+        type: SNMP_AGENT
+        snmp_oid: 1.3.6.1.2.1.43.11.1.1.9.{#SNMPINDEX}
+        key: printer.supply.level[{#SNMPINDEX}]
+        delay: 5m
+        history: 30d
+        trends: 365d
+        value_type: FLOAT
+        description: Raw current supply level. Printer-MIB special values can include -1=other, -2=unknown, -3=some remains but exact amount is unknown.
+      - uuid: 3c9675db8641497abc173109da77890c
+        name: 'Supply {#SUPPLYDESC}: maximum capacity'
+        type: SNMP_AGENT
+        snmp_oid: 1.3.6.1.2.1.43.11.1.1.8.{#SNMPINDEX}
+        key: printer.supply.max[{#SNMPINDEX}]
+        delay: 1h
+        history: 30d
+        trends: 365d
+        value_type: FLOAT
+        description: Raw maximum supply capacity. Printer-MIB can return negative special values when capacity is unknown.
+      trigger_prototypes:
+      - uuid: 4ade300e7df341c08e174f038ae56ba3
+        expression: last(/Xerox Xerox VersaLink C7000 by SNMP/printer.supply.level[{#SNMPINDEX}])=0
+        name: 'Xerox Xerox VersaLink C7000: {#SUPPLYDESC} is empty'
+        priority: HIGH
+      - uuid: ef52f934d68040fbbee599ccb1d02034
+        expression: last(/Xerox Xerox VersaLink C7000 by SNMP/printer.supply.level[{#SNMPINDEX}])>0 and last(/Xerox Xerox VersaLink C7000 by SNMP/printer.supply.max[{#SNMPINDEX}])>0
+          and (100*last(/Xerox Xerox VersaLink C7000 by SNMP/printer.supply.level[{#SNMPINDEX}])/last(/Xerox Xerox VersaLink C7000 by SNMP/printer.supply.max[{#SNMPINDEX}]))<{$PRINTER.SUPPLY.LOW}
+        name: 'Xerox Xerox VersaLink C7000: {#SUPPLYDESC} is low'
+        priority: WARNING
+      graph_prototypes:
+      - uuid: f5069d8578ab498795fb00fa1b7020e7
+        name: Supply {#SUPPLYDESC}
+        graph_items:
+        - color: 199C0D
+          item:
+            host: Xerox Xerox VersaLink C7000 by SNMP
+            key: printer.supply.level[{#SNMPINDEX}]
+        - sortorder: '1'
+          color: F63100
+          item:
+            host: Xerox Xerox VersaLink C7000 by SNMP
+            key: printer.supply.max[{#SNMPINDEX}]
+    - uuid: dddeba589704442787847edff8135c11
+      name: Paper tray discovery
+      type: SNMP_AGENT
+      snmp_oid: discovery[{#TRAYNAME},1.3.6.1.2.1.43.8.2.1.13]
+      key: printer.tray.discovery
+      delay: 1h
+      lifetime: 7d
+      description: Discovers input trays using standard Printer-MIB prtInputName.
+      item_prototypes:
+      - uuid: 6db0d6a58ff24d09be9d428d2d38dd80
+        name: 'Paper tray {#TRAYNAME}: current level'
+        type: SNMP_AGENT
+        snmp_oid: 1.3.6.1.2.1.43.8.2.1.10.{#SNMPINDEX}
+        key: printer.tray.level[{#SNMPINDEX}]
+        delay: 5m
+        history: 30d
+        trends: 365d
+        value_type: FLOAT
+        units: sheets
+      - uuid: 72b93d94ec364eb8b0b191baf13680d4
+        name: 'Paper tray {#TRAYNAME}: maximum capacity'
+        type: SNMP_AGENT
+        snmp_oid: 1.3.6.1.2.1.43.8.2.1.9.{#SNMPINDEX}
+        key: printer.tray.max[{#SNMPINDEX}]
+        delay: 1h
+        history: 30d
+        trends: 365d
+        value_type: FLOAT
+        units: sheets
+      trigger_prototypes:
+      - uuid: e1f6daf7290244dba501e757cac2b34a
+        expression: last(/Xerox Xerox VersaLink C7000 by SNMP/printer.tray.level[{#SNMPINDEX}])=0
+        name: 'Xerox Xerox VersaLink C7000: Paper tray {#TRAYNAME} is empty'
+        priority: AVERAGE
+      - uuid: 279e183cf368401a9a3517ec5c45f83d
+        expression: last(/Xerox Xerox VersaLink C7000 by SNMP/printer.tray.level[{#SNMPINDEX}])>0 and last(/Xerox Xerox VersaLink C7000 by SNMP/printer.tray.max[{#SNMPINDEX}])>0
+          and (100*last(/Xerox Xerox VersaLink C7000 by SNMP/printer.tray.level[{#SNMPINDEX}])/last(/Xerox Xerox VersaLink C7000 by SNMP/printer.tray.max[{#SNMPINDEX}]))<{$PRINTER.PAPER.LOW}
+        name: 'Xerox Xerox VersaLink C7000: Paper tray {#TRAYNAME} is low'
+        priority: WARNING
+      graph_prototypes:
+      - uuid: ecc520194eda44ac803c1a30d07ad57b
+        name: Paper tray {#TRAYNAME}
+        graph_items:
+        - color: 199C0D
+          item:
+            host: Xerox Xerox VersaLink C7000 by SNMP
+            key: printer.tray.level[{#SNMPINDEX}]
+        - sortorder: '1'
+          color: F63100
+          item:
+            host: Xerox Xerox VersaLink C7000 by SNMP
+            key: printer.tray.max[{#SNMPINDEX}]
+    - uuid: a6753eeb8b4942fb8a33e7500b361187
+      name: Marker life counter discovery
+      type: SNMP_AGENT
+      snmp_oid: discovery[{#MARKERCOUNT},1.3.6.1.2.1.43.10.2.1.4]
+      key: printer.marker.discovery
+      delay: 1h
+      lifetime: 7d
+      description: Discovers Printer-MIB prtMarkerLifeCount entries so devices with non-.1.1 marker indexes still expose usage counters.
+      item_prototypes:
+      - uuid: 92fc861fe07748f4bc61e5fcc587ee97
+        name: 'Marker {#SNMPINDEX}: lifetime count'
+        type: SNMP_AGENT
+        snmp_oid: 1.3.6.1.2.1.43.10.2.1.4.{#SNMPINDEX}
+        key: printer.marker.life[{#SNMPINDEX}]
+        delay: 5m
+        history: 90d
+        trends: 365d
+        value_type: UNSIGNED
+      graph_prototypes:
+      - uuid: 2947307f5f5a4186920b8c87d95901d9
+        name: 'Marker {#SNMPINDEX}: lifetime count'
+        graph_items:
+        - color: 2774A4
+          item:
+            host: Xerox Xerox VersaLink C7000 by SNMP
+            key: printer.marker.life[{#SNMPINDEX}]
+    valuemaps:
+    - uuid: ce6b18b7448a4ec99997eb408763fc06
+      name: Zabbix SNMP availability
+      mappings:
+      - value: '0'
+        newvalue: Not available
+      - value: '1'
+        newvalue: Available
+      - value: '2'
+        newvalue: Unknown
+    - uuid: 5a45e764fca3439c8d980db60ccbceab
+      name: HOST-RESOURCES-MIB::hrPrinterStatus
+      mappings:
+      - value: '1'
+        newvalue: Other
+      - value: '2'
+        newvalue: Unknown
+      - value: '3'
+        newvalue: Idle
+      - value: '4'
+        newvalue: Printing
+      - value: '5'
+        newvalue: Warmup
+  graphs:
+  - uuid: 7b846962806249fbb17088c6e84a65a9
+    name: 'Xerox Xerox VersaLink C7000: Lifetime page count'
+    graph_items:
+    - color: 2774A4
+      item:
+        host: Xerox Xerox VersaLink C7000 by SNMP
+        key: printer.page.count

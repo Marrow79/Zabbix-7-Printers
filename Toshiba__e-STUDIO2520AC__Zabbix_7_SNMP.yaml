@@ -1,0 +1,380 @@
+zabbix_export:
+  version: '7.0'
+  template_groups:
+  - uuid: e8f2a8480d674fb2a53bea65079ae6e3
+    name: Templates/Printers
+  templates:
+  - uuid: 51fa4252d7294c899e4ab7834e9437d2
+    template: Toshiba e-STUDIO2520AC by SNMP
+    name: Toshiba e-STUDIO2520AC by SNMP
+    description: 'Zabbix 7.0.x SNMP template for Toshiba e-STUDIO2520AC.
+
+
+      Verified source database date: 2026-09-27.
+
+      Family/series: e-STUDIO.
+
+      Category: Office MFP; Colour.
+
+      Network: Ethernet; Wi-Fi available on selected/configured models.
+
+      Verified SNMP support: SNMPv1/v2/v3.
+
+      Evidence level: B - Canada support model + e-BRIDGE platform.
+
+      Canada status: Toshiba Business Canada/North America support family.
+
+
+      Monitoring is intentionally based on standard SNMPv2-MIB, HOST-RESOURCES-MIB and Printer-MIB objects. Supply, tray and marker rows are discovered dynamically.
+      Manufacturer-specific private OIDs are not guessed.
+
+
+      Product/catalog source: https://business.toshiba.com/tbs/support/
+
+      SNMP evidence source: https://business.toshiba.com/downloads/KB/f1Ulds/14147/TopAccess_EN_%28EBN%29_Ver01F1.pdf
+
+      Verification notes: Toshiba TopAccess/e-BRIDGE documentation supports SNMPv1/v2/v3 monitoring; model list comes from official support/manual families.
+
+      '
+    groups:
+    - name: Templates/Printers
+    tags:
+    - tag: class
+      value: printer
+    - tag: manufacturer
+      value: Toshiba
+    - tag: model
+      value: e-STUDIO2520AC
+    - tag: family
+      value: e-STUDIO
+    - tag: category
+      value: Office MFP
+    - tag: snmp_support
+      value: SNMPv1/v2/v3
+    - tag: evidence_level
+      value: B - Canada support model + e-BRIDGE platform
+    macros:
+    - macro: '{$SNMP.TIMEOUT}'
+      value: 10m
+      description: Time without successful SNMP polling before the availability trigger fires.
+    - macro: '{$PRINTER.SUPPLY.LOW}'
+      value: '10'
+      description: Low supply threshold in percent, used only when both current and maximum capacity are positive.
+    - macro: '{$PRINTER.PAPER.LOW}'
+      value: '10'
+      description: Low paper threshold in percent, used only when both current and maximum tray capacity are positive.
+    items:
+    - uuid: b1a160b61f0d497d8f38ab7eeb39ba71
+      name: SNMP availability
+      type: INTERNAL
+      key: zabbix[host,snmp,available]
+      delay: 1m
+      history: 7d
+      valuemap:
+        name: Zabbix SNMP availability
+      tags:
+      - tag: component
+        value: availability
+      triggers:
+      - uuid: 5f72eea72eda42c5bc9e09cdeec52daa
+        expression: max(/Toshiba e-STUDIO2520AC by SNMP/zabbix[host,snmp,available],{$SNMP.TIMEOUT})=0
+        name: 'Toshiba e-STUDIO2520AC: No SNMP data collection'
+        priority: HIGH
+        description: Zabbix has been unable to poll this printer over SNMP for the configured timeout period.
+    - uuid: 01df6bf6d444497b8d4583b4701ea688
+      name: System description
+      type: SNMP_AGENT
+      snmp_oid: 1.3.6.1.2.1.1.1.0
+      key: printer.sysdescr
+      delay: 1h
+      history: 7d
+      trends: '0'
+      value_type: TEXT
+      tags:
+      - tag: component
+        value: inventory
+    - uuid: 8980a7a289da459db1e9285e0fc448c6
+      name: System name
+      type: SNMP_AGENT
+      snmp_oid: 1.3.6.1.2.1.1.5.0
+      key: printer.sysname
+      delay: 10m
+      history: 7d
+      trends: '0'
+      value_type: CHAR
+      tags:
+      - tag: component
+        value: inventory
+    - uuid: ed81b166e594431c9a72705376647eb7
+      name: System object ID
+      type: SNMP_AGENT
+      snmp_oid: 1.3.6.1.2.1.1.2.0
+      key: printer.sysobjectid
+      delay: 12h
+      history: 30d
+      trends: '0'
+      value_type: CHAR
+      tags:
+      - tag: component
+        value: inventory
+    - uuid: e496e44d70a24f56b6674edd90999c18
+      name: System location
+      type: SNMP_AGENT
+      snmp_oid: 1.3.6.1.2.1.1.6.0
+      key: printer.syslocation
+      delay: 1h
+      history: 7d
+      trends: '0'
+      value_type: CHAR
+      tags:
+      - tag: component
+        value: inventory
+    - uuid: c241422724854882ae96264714c67496
+      name: System contact
+      type: SNMP_AGENT
+      snmp_oid: 1.3.6.1.2.1.1.4.0
+      key: printer.syscontact
+      delay: 1h
+      history: 7d
+      trends: '0'
+      value_type: CHAR
+      tags:
+      - tag: component
+        value: inventory
+    - uuid: 6b1f5a2e406e40e5a292a9fb26b19dbe
+      name: System uptime
+      type: SNMP_AGENT
+      snmp_oid: 1.3.6.1.2.1.1.3.0
+      key: printer.uptime
+      delay: 5m
+      history: 30d
+      value_type: FLOAT
+      units: uptime
+      preprocessing:
+      - type: MULTIPLIER
+        parameters:
+        - '0.01'
+      tags:
+      - tag: component
+        value: system
+    - uuid: b2a5067d23d34cac9e6cab0ab1e9f4e8
+      name: Printer status
+      type: SNMP_AGENT
+      snmp_oid: 1.3.6.1.2.1.25.3.5.1.1.1
+      key: printer.status
+      delay: 1m
+      history: 30d
+      value_type: UNSIGNED
+      description: 'HOST-RESOURCES-MIB hrPrinterStatus: 1=other, 2=unknown, 3=idle, 4=printing, 5=warmup.'
+      valuemap:
+        name: HOST-RESOURCES-MIB::hrPrinterStatus
+      tags:
+      - tag: component
+        value: status
+      triggers:
+      - uuid: 58a85f5371bb44d9904690e1c46a5b0c
+        expression: last(/Toshiba e-STUDIO2520AC by SNMP/printer.status)=1 or last(/Toshiba e-STUDIO2520AC by SNMP/printer.status)=2
+        name: 'Toshiba e-STUDIO2520AC: Printer status is other or unknown'
+        priority: WARNING
+        opdata: 'Printer status: {ITEM.LASTVALUE1}'
+    - uuid: dc044798a08d498e98dd544909b16a41
+      name: Printer name
+      type: SNMP_AGENT
+      snmp_oid: 1.3.6.1.2.1.43.5.1.1.16.1
+      key: printer.name
+      delay: 1h
+      history: 7d
+      trends: '0'
+      value_type: CHAR
+      tags:
+      - tag: component
+        value: inventory
+    - uuid: 15e7b1a0cdfd46bc937fd618da0507c2
+      name: Printer serial number
+      type: SNMP_AGENT
+      snmp_oid: 1.3.6.1.2.1.43.5.1.1.17.1
+      key: printer.serial
+      delay: 12h
+      history: 30d
+      trends: '0'
+      value_type: CHAR
+      tags:
+      - tag: component
+        value: inventory
+    - uuid: 934ee8b1d8a04a6d9aa9a4b89d84220b
+      name: Lifetime page count
+      type: SNMP_AGENT
+      snmp_oid: 1.3.6.1.2.1.43.10.2.1.4.1.1
+      key: printer.page.count
+      delay: 5m
+      history: 90d
+      trends: 365d
+      value_type: UNSIGNED
+      units: pages
+      description: Standard Printer-MIB prtMarkerLifeCount for the common .1.1 marker instance. Some devices expose different marker indexes; the generic marker discovery
+        rule in this template can still discover alternate indexes.
+      tags:
+      - tag: component
+        value: usage
+    discovery_rules:
+    - uuid: 60349943e9c74434ba034f2e427b2d4f
+      name: Printer supply discovery
+      type: SNMP_AGENT
+      snmp_oid: discovery[{#SUPPLYDESC},1.3.6.1.2.1.43.11.1.1.6,{#SUPPLYTYPE},1.3.6.1.2.1.43.11.1.1.5,{#SUPPLYUNIT},1.3.6.1.2.1.43.11.1.1.7]
+      key: printer.supply.discovery
+      delay: 1h
+      lifetime: 7d
+      description: Discovers supplies from the standard Printer-MIB. Dynamic indexes prevent assumptions about toner/drum/waste-container positions.
+      item_prototypes:
+      - uuid: 8012c0ddcce743ebba2f23f710b160cd
+        name: 'Supply {#SUPPLYDESC}: current level'
+        type: SNMP_AGENT
+        snmp_oid: 1.3.6.1.2.1.43.11.1.1.9.{#SNMPINDEX}
+        key: printer.supply.level[{#SNMPINDEX}]
+        delay: 5m
+        history: 30d
+        trends: 365d
+        value_type: FLOAT
+        description: Raw current supply level. Printer-MIB special values can include -1=other, -2=unknown, -3=some remains but exact amount is unknown.
+      - uuid: 1f3b3fdc5393416799af1cd7d267f778
+        name: 'Supply {#SUPPLYDESC}: maximum capacity'
+        type: SNMP_AGENT
+        snmp_oid: 1.3.6.1.2.1.43.11.1.1.8.{#SNMPINDEX}
+        key: printer.supply.max[{#SNMPINDEX}]
+        delay: 1h
+        history: 30d
+        trends: 365d
+        value_type: FLOAT
+        description: Raw maximum supply capacity. Printer-MIB can return negative special values when capacity is unknown.
+      trigger_prototypes:
+      - uuid: b6085ce59e154ce78fcdc0a5f51ece39
+        expression: last(/Toshiba e-STUDIO2520AC by SNMP/printer.supply.level[{#SNMPINDEX}])=0
+        name: 'Toshiba e-STUDIO2520AC: {#SUPPLYDESC} is empty'
+        priority: HIGH
+      - uuid: d4f0c6be5cb34d8f8c2e19501be9e4ad
+        expression: last(/Toshiba e-STUDIO2520AC by SNMP/printer.supply.level[{#SNMPINDEX}])>0 and last(/Toshiba e-STUDIO2520AC by SNMP/printer.supply.max[{#SNMPINDEX}])>0
+          and (100*last(/Toshiba e-STUDIO2520AC by SNMP/printer.supply.level[{#SNMPINDEX}])/last(/Toshiba e-STUDIO2520AC by SNMP/printer.supply.max[{#SNMPINDEX}]))<{$PRINTER.SUPPLY.LOW}
+        name: 'Toshiba e-STUDIO2520AC: {#SUPPLYDESC} is low'
+        priority: WARNING
+      graph_prototypes:
+      - uuid: 9412c5e4dce94eb98b4dc68b6d4fce33
+        name: Supply {#SUPPLYDESC}
+        graph_items:
+        - color: 199C0D
+          item:
+            host: Toshiba e-STUDIO2520AC by SNMP
+            key: printer.supply.level[{#SNMPINDEX}]
+        - sortorder: '1'
+          color: F63100
+          item:
+            host: Toshiba e-STUDIO2520AC by SNMP
+            key: printer.supply.max[{#SNMPINDEX}]
+    - uuid: 02d8069a152e4a209adc593c57a985e9
+      name: Paper tray discovery
+      type: SNMP_AGENT
+      snmp_oid: discovery[{#TRAYNAME},1.3.6.1.2.1.43.8.2.1.13]
+      key: printer.tray.discovery
+      delay: 1h
+      lifetime: 7d
+      description: Discovers input trays using standard Printer-MIB prtInputName.
+      item_prototypes:
+      - uuid: b21303a20a074ed198329c35850ff10b
+        name: 'Paper tray {#TRAYNAME}: current level'
+        type: SNMP_AGENT
+        snmp_oid: 1.3.6.1.2.1.43.8.2.1.10.{#SNMPINDEX}
+        key: printer.tray.level[{#SNMPINDEX}]
+        delay: 5m
+        history: 30d
+        trends: 365d
+        value_type: FLOAT
+        units: sheets
+      - uuid: 9237a70f357e44189c9da911632f80e3
+        name: 'Paper tray {#TRAYNAME}: maximum capacity'
+        type: SNMP_AGENT
+        snmp_oid: 1.3.6.1.2.1.43.8.2.1.9.{#SNMPINDEX}
+        key: printer.tray.max[{#SNMPINDEX}]
+        delay: 1h
+        history: 30d
+        trends: 365d
+        value_type: FLOAT
+        units: sheets
+      trigger_prototypes:
+      - uuid: e4f938f21c0141f38f3b3b5df307b771
+        expression: last(/Toshiba e-STUDIO2520AC by SNMP/printer.tray.level[{#SNMPINDEX}])=0
+        name: 'Toshiba e-STUDIO2520AC: Paper tray {#TRAYNAME} is empty'
+        priority: AVERAGE
+      - uuid: 55b2141a83dd4bf4bde6f1c8b63cd952
+        expression: last(/Toshiba e-STUDIO2520AC by SNMP/printer.tray.level[{#SNMPINDEX}])>0 and last(/Toshiba e-STUDIO2520AC by SNMP/printer.tray.max[{#SNMPINDEX}])>0
+          and (100*last(/Toshiba e-STUDIO2520AC by SNMP/printer.tray.level[{#SNMPINDEX}])/last(/Toshiba e-STUDIO2520AC by SNMP/printer.tray.max[{#SNMPINDEX}]))<{$PRINTER.PAPER.LOW}
+        name: 'Toshiba e-STUDIO2520AC: Paper tray {#TRAYNAME} is low'
+        priority: WARNING
+      graph_prototypes:
+      - uuid: 324b6486d6ed4c608e1a2f31b89842e1
+        name: Paper tray {#TRAYNAME}
+        graph_items:
+        - color: 199C0D
+          item:
+            host: Toshiba e-STUDIO2520AC by SNMP
+            key: printer.tray.level[{#SNMPINDEX}]
+        - sortorder: '1'
+          color: F63100
+          item:
+            host: Toshiba e-STUDIO2520AC by SNMP
+            key: printer.tray.max[{#SNMPINDEX}]
+    - uuid: 9b75d842989a448d88cb100cd7733270
+      name: Marker life counter discovery
+      type: SNMP_AGENT
+      snmp_oid: discovery[{#MARKERCOUNT},1.3.6.1.2.1.43.10.2.1.4]
+      key: printer.marker.discovery
+      delay: 1h
+      lifetime: 7d
+      description: Discovers Printer-MIB prtMarkerLifeCount entries so devices with non-.1.1 marker indexes still expose usage counters.
+      item_prototypes:
+      - uuid: 2d427444e58f4d39a01f0966b90d1982
+        name: 'Marker {#SNMPINDEX}: lifetime count'
+        type: SNMP_AGENT
+        snmp_oid: 1.3.6.1.2.1.43.10.2.1.4.{#SNMPINDEX}
+        key: printer.marker.life[{#SNMPINDEX}]
+        delay: 5m
+        history: 90d
+        trends: 365d
+        value_type: UNSIGNED
+      graph_prototypes:
+      - uuid: 86d04269d43448739c37fd41595bad39
+        name: 'Marker {#SNMPINDEX}: lifetime count'
+        graph_items:
+        - color: 2774A4
+          item:
+            host: Toshiba e-STUDIO2520AC by SNMP
+            key: printer.marker.life[{#SNMPINDEX}]
+    valuemaps:
+    - uuid: f1e8aa52077d4deca5e2ce94dfdb7e16
+      name: Zabbix SNMP availability
+      mappings:
+      - value: '0'
+        newvalue: Not available
+      - value: '1'
+        newvalue: Available
+      - value: '2'
+        newvalue: Unknown
+    - uuid: 04759a17bc624ec69b37a5152a349ed1
+      name: HOST-RESOURCES-MIB::hrPrinterStatus
+      mappings:
+      - value: '1'
+        newvalue: Other
+      - value: '2'
+        newvalue: Unknown
+      - value: '3'
+        newvalue: Idle
+      - value: '4'
+        newvalue: Printing
+      - value: '5'
+        newvalue: Warmup
+  graphs:
+  - uuid: 8d7e8ce62ddc4f72951abc3db74512ba
+    name: 'Toshiba e-STUDIO2520AC: Lifetime page count'
+    graph_items:
+    - color: 2774A4
+      item:
+        host: Toshiba e-STUDIO2520AC by SNMP
+        key: printer.page.count

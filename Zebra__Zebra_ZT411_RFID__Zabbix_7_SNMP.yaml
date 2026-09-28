@@ -1,0 +1,380 @@
+zabbix_export:
+  version: '7.0'
+  template_groups:
+  - uuid: e8f2a8480d674fb2a53bea65079ae6e3
+    name: Templates/Printers
+  templates:
+  - uuid: a2038c328bb140cf8e02bb5f0469fff4
+    template: Zebra Zebra ZT411 RFID by SNMP
+    name: Zebra Zebra ZT411 RFID by SNMP
+    description: 'Zabbix 7.0.x SNMP template for Zebra Zebra ZT411 RFID.
+
+
+      Verified source database date: 2026-09-27.
+
+      Family/series: ZT400.
+
+      Category: RFID industrial printer; B&W/label.
+
+      Network: Ethernet standard/optional and/or Wi-Fi depending on model.
+
+      Verified SNMP support: SNMPv3 on Link-OS 7.0+.
+
+      Evidence level: B - current model + platform/firmware.
+
+      Canada status: Current Zebra family/product page.
+
+
+      Monitoring is intentionally based on standard SNMPv2-MIB, HOST-RESOURCES-MIB and Printer-MIB objects. Supply, tray and marker rows are discovered dynamically.
+      Manufacturer-specific private OIDs are not guessed.
+
+
+      Product/catalog source: https://www.zebra.com/us/en/products/rfid/rfid-enabled-products.html
+
+      SNMP evidence source: https://support.zebra.com/article/000031511
+
+      Verification notes: Zebra states SNMPv3 is available on printers running Link-OS 7.0 and above. Confirm installed firmware before deployment.
+
+      '
+    groups:
+    - name: Templates/Printers
+    tags:
+    - tag: class
+      value: printer
+    - tag: manufacturer
+      value: Zebra
+    - tag: model
+      value: Zebra ZT411 RFID
+    - tag: family
+      value: ZT400
+    - tag: category
+      value: RFID industrial printer
+    - tag: snmp_support
+      value: SNMPv3 on Link-OS 7.0+
+    - tag: evidence_level
+      value: B - current model + platform/firmware
+    macros:
+    - macro: '{$SNMP.TIMEOUT}'
+      value: 10m
+      description: Time without successful SNMP polling before the availability trigger fires.
+    - macro: '{$PRINTER.SUPPLY.LOW}'
+      value: '10'
+      description: Low supply threshold in percent, used only when both current and maximum capacity are positive.
+    - macro: '{$PRINTER.PAPER.LOW}'
+      value: '10'
+      description: Low paper threshold in percent, used only when both current and maximum tray capacity are positive.
+    items:
+    - uuid: 8092d86d3b9f486aa2d08f26d10a877c
+      name: SNMP availability
+      type: INTERNAL
+      key: zabbix[host,snmp,available]
+      delay: 1m
+      history: 7d
+      valuemap:
+        name: Zabbix SNMP availability
+      tags:
+      - tag: component
+        value: availability
+      triggers:
+      - uuid: 65e576f158134acbb84e229f0b63ef2a
+        expression: max(/Zebra Zebra ZT411 RFID by SNMP/zabbix[host,snmp,available],{$SNMP.TIMEOUT})=0
+        name: 'Zebra Zebra ZT411 RFID: No SNMP data collection'
+        priority: HIGH
+        description: Zabbix has been unable to poll this printer over SNMP for the configured timeout period.
+    - uuid: a647cba5a90341d2be6e99c5e44cf803
+      name: System description
+      type: SNMP_AGENT
+      snmp_oid: 1.3.6.1.2.1.1.1.0
+      key: printer.sysdescr
+      delay: 1h
+      history: 7d
+      trends: '0'
+      value_type: TEXT
+      tags:
+      - tag: component
+        value: inventory
+    - uuid: 93137dfdfcc94ec6a23d9c607134da65
+      name: System name
+      type: SNMP_AGENT
+      snmp_oid: 1.3.6.1.2.1.1.5.0
+      key: printer.sysname
+      delay: 10m
+      history: 7d
+      trends: '0'
+      value_type: CHAR
+      tags:
+      - tag: component
+        value: inventory
+    - uuid: c71ba0fa07a241a29f2ba4440077a845
+      name: System object ID
+      type: SNMP_AGENT
+      snmp_oid: 1.3.6.1.2.1.1.2.0
+      key: printer.sysobjectid
+      delay: 12h
+      history: 30d
+      trends: '0'
+      value_type: CHAR
+      tags:
+      - tag: component
+        value: inventory
+    - uuid: cb73d680b18948f98dbd3675756e1ead
+      name: System location
+      type: SNMP_AGENT
+      snmp_oid: 1.3.6.1.2.1.1.6.0
+      key: printer.syslocation
+      delay: 1h
+      history: 7d
+      trends: '0'
+      value_type: CHAR
+      tags:
+      - tag: component
+        value: inventory
+    - uuid: 93ba1abaf54d435c84bc471b9aeaf07f
+      name: System contact
+      type: SNMP_AGENT
+      snmp_oid: 1.3.6.1.2.1.1.4.0
+      key: printer.syscontact
+      delay: 1h
+      history: 7d
+      trends: '0'
+      value_type: CHAR
+      tags:
+      - tag: component
+        value: inventory
+    - uuid: 3a3614a4be014c0caf72c74eff95fcb0
+      name: System uptime
+      type: SNMP_AGENT
+      snmp_oid: 1.3.6.1.2.1.1.3.0
+      key: printer.uptime
+      delay: 5m
+      history: 30d
+      value_type: FLOAT
+      units: uptime
+      preprocessing:
+      - type: MULTIPLIER
+        parameters:
+        - '0.01'
+      tags:
+      - tag: component
+        value: system
+    - uuid: 30d0aff9bdf64481929981c8d193c98d
+      name: Printer status
+      type: SNMP_AGENT
+      snmp_oid: 1.3.6.1.2.1.25.3.5.1.1.1
+      key: printer.status
+      delay: 1m
+      history: 30d
+      value_type: UNSIGNED
+      description: 'HOST-RESOURCES-MIB hrPrinterStatus: 1=other, 2=unknown, 3=idle, 4=printing, 5=warmup.'
+      valuemap:
+        name: HOST-RESOURCES-MIB::hrPrinterStatus
+      tags:
+      - tag: component
+        value: status
+      triggers:
+      - uuid: 17beff06200746dfab3d24403f1a5ca2
+        expression: last(/Zebra Zebra ZT411 RFID by SNMP/printer.status)=1 or last(/Zebra Zebra ZT411 RFID by SNMP/printer.status)=2
+        name: 'Zebra Zebra ZT411 RFID: Printer status is other or unknown'
+        priority: WARNING
+        opdata: 'Printer status: {ITEM.LASTVALUE1}'
+    - uuid: 74edb35931ab4e2780ed755367964a93
+      name: Printer name
+      type: SNMP_AGENT
+      snmp_oid: 1.3.6.1.2.1.43.5.1.1.16.1
+      key: printer.name
+      delay: 1h
+      history: 7d
+      trends: '0'
+      value_type: CHAR
+      tags:
+      - tag: component
+        value: inventory
+    - uuid: 47b3e39d603b465e80d4417cbba66dde
+      name: Printer serial number
+      type: SNMP_AGENT
+      snmp_oid: 1.3.6.1.2.1.43.5.1.1.17.1
+      key: printer.serial
+      delay: 12h
+      history: 30d
+      trends: '0'
+      value_type: CHAR
+      tags:
+      - tag: component
+        value: inventory
+    - uuid: 19c16a6f087742b1a8e7eeb3bdeb88f6
+      name: Lifetime page count
+      type: SNMP_AGENT
+      snmp_oid: 1.3.6.1.2.1.43.10.2.1.4.1.1
+      key: printer.page.count
+      delay: 5m
+      history: 90d
+      trends: 365d
+      value_type: UNSIGNED
+      units: pages
+      description: Standard Printer-MIB prtMarkerLifeCount for the common .1.1 marker instance. Some devices expose different marker indexes; the generic marker discovery
+        rule in this template can still discover alternate indexes.
+      tags:
+      - tag: component
+        value: usage
+    discovery_rules:
+    - uuid: b5d29b19dd0d4b9db41aed66611b0b9a
+      name: Printer supply discovery
+      type: SNMP_AGENT
+      snmp_oid: discovery[{#SUPPLYDESC},1.3.6.1.2.1.43.11.1.1.6,{#SUPPLYTYPE},1.3.6.1.2.1.43.11.1.1.5,{#SUPPLYUNIT},1.3.6.1.2.1.43.11.1.1.7]
+      key: printer.supply.discovery
+      delay: 1h
+      lifetime: 7d
+      description: Discovers supplies from the standard Printer-MIB. Dynamic indexes prevent assumptions about toner/drum/waste-container positions.
+      item_prototypes:
+      - uuid: 7de61e8205724466b0b4ea637f81b7c3
+        name: 'Supply {#SUPPLYDESC}: current level'
+        type: SNMP_AGENT
+        snmp_oid: 1.3.6.1.2.1.43.11.1.1.9.{#SNMPINDEX}
+        key: printer.supply.level[{#SNMPINDEX}]
+        delay: 5m
+        history: 30d
+        trends: 365d
+        value_type: FLOAT
+        description: Raw current supply level. Printer-MIB special values can include -1=other, -2=unknown, -3=some remains but exact amount is unknown.
+      - uuid: d80676ae1b9b44ba8fc0b5137471d271
+        name: 'Supply {#SUPPLYDESC}: maximum capacity'
+        type: SNMP_AGENT
+        snmp_oid: 1.3.6.1.2.1.43.11.1.1.8.{#SNMPINDEX}
+        key: printer.supply.max[{#SNMPINDEX}]
+        delay: 1h
+        history: 30d
+        trends: 365d
+        value_type: FLOAT
+        description: Raw maximum supply capacity. Printer-MIB can return negative special values when capacity is unknown.
+      trigger_prototypes:
+      - uuid: b65b242294dd488781348621d4476d20
+        expression: last(/Zebra Zebra ZT411 RFID by SNMP/printer.supply.level[{#SNMPINDEX}])=0
+        name: 'Zebra Zebra ZT411 RFID: {#SUPPLYDESC} is empty'
+        priority: HIGH
+      - uuid: 2653148c3f0b4d3fa88dbb7b25aece6c
+        expression: last(/Zebra Zebra ZT411 RFID by SNMP/printer.supply.level[{#SNMPINDEX}])>0 and last(/Zebra Zebra ZT411 RFID by SNMP/printer.supply.max[{#SNMPINDEX}])>0
+          and (100*last(/Zebra Zebra ZT411 RFID by SNMP/printer.supply.level[{#SNMPINDEX}])/last(/Zebra Zebra ZT411 RFID by SNMP/printer.supply.max[{#SNMPINDEX}]))<{$PRINTER.SUPPLY.LOW}
+        name: 'Zebra Zebra ZT411 RFID: {#SUPPLYDESC} is low'
+        priority: WARNING
+      graph_prototypes:
+      - uuid: 244cd078bf5b415696ae520139b747ce
+        name: Supply {#SUPPLYDESC}
+        graph_items:
+        - color: 199C0D
+          item:
+            host: Zebra Zebra ZT411 RFID by SNMP
+            key: printer.supply.level[{#SNMPINDEX}]
+        - sortorder: '1'
+          color: F63100
+          item:
+            host: Zebra Zebra ZT411 RFID by SNMP
+            key: printer.supply.max[{#SNMPINDEX}]
+    - uuid: ed8e0c113bf943aa8e5aec0aa31bfd14
+      name: Paper tray discovery
+      type: SNMP_AGENT
+      snmp_oid: discovery[{#TRAYNAME},1.3.6.1.2.1.43.8.2.1.13]
+      key: printer.tray.discovery
+      delay: 1h
+      lifetime: 7d
+      description: Discovers input trays using standard Printer-MIB prtInputName.
+      item_prototypes:
+      - uuid: e0e553fd039740239a39ea68de0539c8
+        name: 'Paper tray {#TRAYNAME}: current level'
+        type: SNMP_AGENT
+        snmp_oid: 1.3.6.1.2.1.43.8.2.1.10.{#SNMPINDEX}
+        key: printer.tray.level[{#SNMPINDEX}]
+        delay: 5m
+        history: 30d
+        trends: 365d
+        value_type: FLOAT
+        units: sheets
+      - uuid: 09ec7ac5e57843f8b6892b2897df8bac
+        name: 'Paper tray {#TRAYNAME}: maximum capacity'
+        type: SNMP_AGENT
+        snmp_oid: 1.3.6.1.2.1.43.8.2.1.9.{#SNMPINDEX}
+        key: printer.tray.max[{#SNMPINDEX}]
+        delay: 1h
+        history: 30d
+        trends: 365d
+        value_type: FLOAT
+        units: sheets
+      trigger_prototypes:
+      - uuid: 2869cf45ea1c4b0089aa09c1c2870b3c
+        expression: last(/Zebra Zebra ZT411 RFID by SNMP/printer.tray.level[{#SNMPINDEX}])=0
+        name: 'Zebra Zebra ZT411 RFID: Paper tray {#TRAYNAME} is empty'
+        priority: AVERAGE
+      - uuid: ae5d5225bcd14c3c82e67d8c71d5e34f
+        expression: last(/Zebra Zebra ZT411 RFID by SNMP/printer.tray.level[{#SNMPINDEX}])>0 and last(/Zebra Zebra ZT411 RFID by SNMP/printer.tray.max[{#SNMPINDEX}])>0
+          and (100*last(/Zebra Zebra ZT411 RFID by SNMP/printer.tray.level[{#SNMPINDEX}])/last(/Zebra Zebra ZT411 RFID by SNMP/printer.tray.max[{#SNMPINDEX}]))<{$PRINTER.PAPER.LOW}
+        name: 'Zebra Zebra ZT411 RFID: Paper tray {#TRAYNAME} is low'
+        priority: WARNING
+      graph_prototypes:
+      - uuid: ce30931a11aa45ebb511c296d0b40e79
+        name: Paper tray {#TRAYNAME}
+        graph_items:
+        - color: 199C0D
+          item:
+            host: Zebra Zebra ZT411 RFID by SNMP
+            key: printer.tray.level[{#SNMPINDEX}]
+        - sortorder: '1'
+          color: F63100
+          item:
+            host: Zebra Zebra ZT411 RFID by SNMP
+            key: printer.tray.max[{#SNMPINDEX}]
+    - uuid: 924e0e10aca545168fcc6799b977d9f9
+      name: Marker life counter discovery
+      type: SNMP_AGENT
+      snmp_oid: discovery[{#MARKERCOUNT},1.3.6.1.2.1.43.10.2.1.4]
+      key: printer.marker.discovery
+      delay: 1h
+      lifetime: 7d
+      description: Discovers Printer-MIB prtMarkerLifeCount entries so devices with non-.1.1 marker indexes still expose usage counters.
+      item_prototypes:
+      - uuid: 5046fa99a34d45c68e1287bf775b44ee
+        name: 'Marker {#SNMPINDEX}: lifetime count'
+        type: SNMP_AGENT
+        snmp_oid: 1.3.6.1.2.1.43.10.2.1.4.{#SNMPINDEX}
+        key: printer.marker.life[{#SNMPINDEX}]
+        delay: 5m
+        history: 90d
+        trends: 365d
+        value_type: UNSIGNED
+      graph_prototypes:
+      - uuid: 15943dddc76a4610976ff51d050cd20d
+        name: 'Marker {#SNMPINDEX}: lifetime count'
+        graph_items:
+        - color: 2774A4
+          item:
+            host: Zebra Zebra ZT411 RFID by SNMP
+            key: printer.marker.life[{#SNMPINDEX}]
+    valuemaps:
+    - uuid: 53111abb4b454fe9a1ea008891652b22
+      name: Zabbix SNMP availability
+      mappings:
+      - value: '0'
+        newvalue: Not available
+      - value: '1'
+        newvalue: Available
+      - value: '2'
+        newvalue: Unknown
+    - uuid: c9e4bb86cd2642c198be80ecf8c99c73
+      name: HOST-RESOURCES-MIB::hrPrinterStatus
+      mappings:
+      - value: '1'
+        newvalue: Other
+      - value: '2'
+        newvalue: Unknown
+      - value: '3'
+        newvalue: Idle
+      - value: '4'
+        newvalue: Printing
+      - value: '5'
+        newvalue: Warmup
+  graphs:
+  - uuid: 012bb2ff6c8f413ebd61e6ef0873ad45
+    name: 'Zebra Zebra ZT411 RFID: Lifetime page count'
+    graph_items:
+    - color: 2774A4
+      item:
+        host: Zebra Zebra ZT411 RFID by SNMP
+        key: printer.page.count

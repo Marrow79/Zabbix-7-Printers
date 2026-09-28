@@ -1,0 +1,380 @@
+zabbix_export:
+  version: '7.0'
+  template_groups:
+  - uuid: e8f2a8480d674fb2a53bea65079ae6e3
+    name: Templates/Printers
+  templates:
+  - uuid: b6f862700a084fad82c7f9a231dceb60
+    template: Sharp Sharp BP71M31 by SNMP
+    name: Sharp Sharp BP71M31 by SNMP
+    description: 'Zabbix 7.0.x SNMP template for Sharp Sharp BP71M31.
+
+
+      Verified source database date: 2026-09-27.
+
+      Family/series: Sharp BP Series.
+
+      Category: Office MFP / printer; B&W.
+
+      Network: Gigabit Ethernet; Wi-Fi standard/optional by model.
+
+      Verified SNMP support: SNMPv3.
+
+      Evidence level: B - current/recent model + BP platform.
+
+      Canada status: Sharp Canada current/recent business catalog.
+
+
+      Monitoring is intentionally based on standard SNMPv2-MIB, HOST-RESOURCES-MIB and Printer-MIB objects. Supply, tray and marker rows are discovered dynamically.
+      Manufacturer-specific private OIDs are not guessed.
+
+
+      Product/catalog source: https://sharp.ca/en/products/business-copiers-printers-office-copiers-printers/
+
+      SNMP evidence source: https://sharp.ca/en/product/business-copiers-printers-bp71m31/
+
+      Verification notes: Sharp BP product pages use a common network stack and list SNMPv3; exact current catalog status varies for older BP70/BP80 models.
+
+      '
+    groups:
+    - name: Templates/Printers
+    tags:
+    - tag: class
+      value: printer
+    - tag: manufacturer
+      value: Sharp
+    - tag: model
+      value: Sharp BP71M31
+    - tag: family
+      value: Sharp BP Series
+    - tag: category
+      value: Office MFP / printer
+    - tag: snmp_support
+      value: SNMPv3
+    - tag: evidence_level
+      value: B - current/recent model + BP platform
+    macros:
+    - macro: '{$SNMP.TIMEOUT}'
+      value: 10m
+      description: Time without successful SNMP polling before the availability trigger fires.
+    - macro: '{$PRINTER.SUPPLY.LOW}'
+      value: '10'
+      description: Low supply threshold in percent, used only when both current and maximum capacity are positive.
+    - macro: '{$PRINTER.PAPER.LOW}'
+      value: '10'
+      description: Low paper threshold in percent, used only when both current and maximum tray capacity are positive.
+    items:
+    - uuid: 9ec3ee0d337440c7a8165fd1a9ae7d09
+      name: SNMP availability
+      type: INTERNAL
+      key: zabbix[host,snmp,available]
+      delay: 1m
+      history: 7d
+      valuemap:
+        name: Zabbix SNMP availability
+      tags:
+      - tag: component
+        value: availability
+      triggers:
+      - uuid: 2a3e1e2e90864402951f7301bc6b219d
+        expression: max(/Sharp Sharp BP71M31 by SNMP/zabbix[host,snmp,available],{$SNMP.TIMEOUT})=0
+        name: 'Sharp Sharp BP71M31: No SNMP data collection'
+        priority: HIGH
+        description: Zabbix has been unable to poll this printer over SNMP for the configured timeout period.
+    - uuid: cef37857c93b488b95368ecebae21472
+      name: System description
+      type: SNMP_AGENT
+      snmp_oid: 1.3.6.1.2.1.1.1.0
+      key: printer.sysdescr
+      delay: 1h
+      history: 7d
+      trends: '0'
+      value_type: TEXT
+      tags:
+      - tag: component
+        value: inventory
+    - uuid: 4999c3ceeb57438da9d36c82f675d5f7
+      name: System name
+      type: SNMP_AGENT
+      snmp_oid: 1.3.6.1.2.1.1.5.0
+      key: printer.sysname
+      delay: 10m
+      history: 7d
+      trends: '0'
+      value_type: CHAR
+      tags:
+      - tag: component
+        value: inventory
+    - uuid: 37863a273a0a41de9d61bb185fdbf58d
+      name: System object ID
+      type: SNMP_AGENT
+      snmp_oid: 1.3.6.1.2.1.1.2.0
+      key: printer.sysobjectid
+      delay: 12h
+      history: 30d
+      trends: '0'
+      value_type: CHAR
+      tags:
+      - tag: component
+        value: inventory
+    - uuid: cffe4f20c0c642bdbd776d16dbb64edb
+      name: System location
+      type: SNMP_AGENT
+      snmp_oid: 1.3.6.1.2.1.1.6.0
+      key: printer.syslocation
+      delay: 1h
+      history: 7d
+      trends: '0'
+      value_type: CHAR
+      tags:
+      - tag: component
+        value: inventory
+    - uuid: ceec72da8dfb42af91f30e50102d9bf9
+      name: System contact
+      type: SNMP_AGENT
+      snmp_oid: 1.3.6.1.2.1.1.4.0
+      key: printer.syscontact
+      delay: 1h
+      history: 7d
+      trends: '0'
+      value_type: CHAR
+      tags:
+      - tag: component
+        value: inventory
+    - uuid: e75cc7e1502c4392a842228785c06a01
+      name: System uptime
+      type: SNMP_AGENT
+      snmp_oid: 1.3.6.1.2.1.1.3.0
+      key: printer.uptime
+      delay: 5m
+      history: 30d
+      value_type: FLOAT
+      units: uptime
+      preprocessing:
+      - type: MULTIPLIER
+        parameters:
+        - '0.01'
+      tags:
+      - tag: component
+        value: system
+    - uuid: c8f2679cfc4d4d0f99196c46305b5600
+      name: Printer status
+      type: SNMP_AGENT
+      snmp_oid: 1.3.6.1.2.1.25.3.5.1.1.1
+      key: printer.status
+      delay: 1m
+      history: 30d
+      value_type: UNSIGNED
+      description: 'HOST-RESOURCES-MIB hrPrinterStatus: 1=other, 2=unknown, 3=idle, 4=printing, 5=warmup.'
+      valuemap:
+        name: HOST-RESOURCES-MIB::hrPrinterStatus
+      tags:
+      - tag: component
+        value: status
+      triggers:
+      - uuid: 40c9f727bd8d43b0abf0013d0e7f81c0
+        expression: last(/Sharp Sharp BP71M31 by SNMP/printer.status)=1 or last(/Sharp Sharp BP71M31 by SNMP/printer.status)=2
+        name: 'Sharp Sharp BP71M31: Printer status is other or unknown'
+        priority: WARNING
+        opdata: 'Printer status: {ITEM.LASTVALUE1}'
+    - uuid: 150905a35ad04be4a2ca82653f3821af
+      name: Printer name
+      type: SNMP_AGENT
+      snmp_oid: 1.3.6.1.2.1.43.5.1.1.16.1
+      key: printer.name
+      delay: 1h
+      history: 7d
+      trends: '0'
+      value_type: CHAR
+      tags:
+      - tag: component
+        value: inventory
+    - uuid: 0815fd7f4993496c9eb06c5beed15735
+      name: Printer serial number
+      type: SNMP_AGENT
+      snmp_oid: 1.3.6.1.2.1.43.5.1.1.17.1
+      key: printer.serial
+      delay: 12h
+      history: 30d
+      trends: '0'
+      value_type: CHAR
+      tags:
+      - tag: component
+        value: inventory
+    - uuid: 41bdd19d8ebb481d9ecf14c0a8e63f94
+      name: Lifetime page count
+      type: SNMP_AGENT
+      snmp_oid: 1.3.6.1.2.1.43.10.2.1.4.1.1
+      key: printer.page.count
+      delay: 5m
+      history: 90d
+      trends: 365d
+      value_type: UNSIGNED
+      units: pages
+      description: Standard Printer-MIB prtMarkerLifeCount for the common .1.1 marker instance. Some devices expose different marker indexes; the generic marker discovery
+        rule in this template can still discover alternate indexes.
+      tags:
+      - tag: component
+        value: usage
+    discovery_rules:
+    - uuid: 1d42ffefe1f54cfe8c6eb99dbf8ff905
+      name: Printer supply discovery
+      type: SNMP_AGENT
+      snmp_oid: discovery[{#SUPPLYDESC},1.3.6.1.2.1.43.11.1.1.6,{#SUPPLYTYPE},1.3.6.1.2.1.43.11.1.1.5,{#SUPPLYUNIT},1.3.6.1.2.1.43.11.1.1.7]
+      key: printer.supply.discovery
+      delay: 1h
+      lifetime: 7d
+      description: Discovers supplies from the standard Printer-MIB. Dynamic indexes prevent assumptions about toner/drum/waste-container positions.
+      item_prototypes:
+      - uuid: e7d87665412d4fc5847d39f3219696fc
+        name: 'Supply {#SUPPLYDESC}: current level'
+        type: SNMP_AGENT
+        snmp_oid: 1.3.6.1.2.1.43.11.1.1.9.{#SNMPINDEX}
+        key: printer.supply.level[{#SNMPINDEX}]
+        delay: 5m
+        history: 30d
+        trends: 365d
+        value_type: FLOAT
+        description: Raw current supply level. Printer-MIB special values can include -1=other, -2=unknown, -3=some remains but exact amount is unknown.
+      - uuid: 86536397a08b4687950ea2312861f104
+        name: 'Supply {#SUPPLYDESC}: maximum capacity'
+        type: SNMP_AGENT
+        snmp_oid: 1.3.6.1.2.1.43.11.1.1.8.{#SNMPINDEX}
+        key: printer.supply.max[{#SNMPINDEX}]
+        delay: 1h
+        history: 30d
+        trends: 365d
+        value_type: FLOAT
+        description: Raw maximum supply capacity. Printer-MIB can return negative special values when capacity is unknown.
+      trigger_prototypes:
+      - uuid: 0d87995100bd48c9b2964e896cf79470
+        expression: last(/Sharp Sharp BP71M31 by SNMP/printer.supply.level[{#SNMPINDEX}])=0
+        name: 'Sharp Sharp BP71M31: {#SUPPLYDESC} is empty'
+        priority: HIGH
+      - uuid: ec6ccd9695304ce6b227447390425569
+        expression: last(/Sharp Sharp BP71M31 by SNMP/printer.supply.level[{#SNMPINDEX}])>0 and last(/Sharp Sharp BP71M31 by SNMP/printer.supply.max[{#SNMPINDEX}])>0
+          and (100*last(/Sharp Sharp BP71M31 by SNMP/printer.supply.level[{#SNMPINDEX}])/last(/Sharp Sharp BP71M31 by SNMP/printer.supply.max[{#SNMPINDEX}]))<{$PRINTER.SUPPLY.LOW}
+        name: 'Sharp Sharp BP71M31: {#SUPPLYDESC} is low'
+        priority: WARNING
+      graph_prototypes:
+      - uuid: dea80d63a20747b0962ba627f3739847
+        name: Supply {#SUPPLYDESC}
+        graph_items:
+        - color: 199C0D
+          item:
+            host: Sharp Sharp BP71M31 by SNMP
+            key: printer.supply.level[{#SNMPINDEX}]
+        - sortorder: '1'
+          color: F63100
+          item:
+            host: Sharp Sharp BP71M31 by SNMP
+            key: printer.supply.max[{#SNMPINDEX}]
+    - uuid: 0d40e5633e7c4c54b0056917a5861107
+      name: Paper tray discovery
+      type: SNMP_AGENT
+      snmp_oid: discovery[{#TRAYNAME},1.3.6.1.2.1.43.8.2.1.13]
+      key: printer.tray.discovery
+      delay: 1h
+      lifetime: 7d
+      description: Discovers input trays using standard Printer-MIB prtInputName.
+      item_prototypes:
+      - uuid: 22ec892ba0264b259b0d6172d00d5899
+        name: 'Paper tray {#TRAYNAME}: current level'
+        type: SNMP_AGENT
+        snmp_oid: 1.3.6.1.2.1.43.8.2.1.10.{#SNMPINDEX}
+        key: printer.tray.level[{#SNMPINDEX}]
+        delay: 5m
+        history: 30d
+        trends: 365d
+        value_type: FLOAT
+        units: sheets
+      - uuid: 02f321b9ac8c49acb69c577248534f9f
+        name: 'Paper tray {#TRAYNAME}: maximum capacity'
+        type: SNMP_AGENT
+        snmp_oid: 1.3.6.1.2.1.43.8.2.1.9.{#SNMPINDEX}
+        key: printer.tray.max[{#SNMPINDEX}]
+        delay: 1h
+        history: 30d
+        trends: 365d
+        value_type: FLOAT
+        units: sheets
+      trigger_prototypes:
+      - uuid: d3c405187f0f4958b4da3178bc2bbd06
+        expression: last(/Sharp Sharp BP71M31 by SNMP/printer.tray.level[{#SNMPINDEX}])=0
+        name: 'Sharp Sharp BP71M31: Paper tray {#TRAYNAME} is empty'
+        priority: AVERAGE
+      - uuid: d776e647b4fe4270a747f7c49e75c7c3
+        expression: last(/Sharp Sharp BP71M31 by SNMP/printer.tray.level[{#SNMPINDEX}])>0 and last(/Sharp Sharp BP71M31 by SNMP/printer.tray.max[{#SNMPINDEX}])>0
+          and (100*last(/Sharp Sharp BP71M31 by SNMP/printer.tray.level[{#SNMPINDEX}])/last(/Sharp Sharp BP71M31 by SNMP/printer.tray.max[{#SNMPINDEX}]))<{$PRINTER.PAPER.LOW}
+        name: 'Sharp Sharp BP71M31: Paper tray {#TRAYNAME} is low'
+        priority: WARNING
+      graph_prototypes:
+      - uuid: 28886202c66649bd9cd57ad88c2a1b99
+        name: Paper tray {#TRAYNAME}
+        graph_items:
+        - color: 199C0D
+          item:
+            host: Sharp Sharp BP71M31 by SNMP
+            key: printer.tray.level[{#SNMPINDEX}]
+        - sortorder: '1'
+          color: F63100
+          item:
+            host: Sharp Sharp BP71M31 by SNMP
+            key: printer.tray.max[{#SNMPINDEX}]
+    - uuid: 92297209a1c04a8a90997c22fbde9ec0
+      name: Marker life counter discovery
+      type: SNMP_AGENT
+      snmp_oid: discovery[{#MARKERCOUNT},1.3.6.1.2.1.43.10.2.1.4]
+      key: printer.marker.discovery
+      delay: 1h
+      lifetime: 7d
+      description: Discovers Printer-MIB prtMarkerLifeCount entries so devices with non-.1.1 marker indexes still expose usage counters.
+      item_prototypes:
+      - uuid: 103f246df7d3411fa480631f79bfa07a
+        name: 'Marker {#SNMPINDEX}: lifetime count'
+        type: SNMP_AGENT
+        snmp_oid: 1.3.6.1.2.1.43.10.2.1.4.{#SNMPINDEX}
+        key: printer.marker.life[{#SNMPINDEX}]
+        delay: 5m
+        history: 90d
+        trends: 365d
+        value_type: UNSIGNED
+      graph_prototypes:
+      - uuid: 406319f560ac4af4baf788050c8bce5e
+        name: 'Marker {#SNMPINDEX}: lifetime count'
+        graph_items:
+        - color: 2774A4
+          item:
+            host: Sharp Sharp BP71M31 by SNMP
+            key: printer.marker.life[{#SNMPINDEX}]
+    valuemaps:
+    - uuid: b5630bd1165747ac920c77c8766190bf
+      name: Zabbix SNMP availability
+      mappings:
+      - value: '0'
+        newvalue: Not available
+      - value: '1'
+        newvalue: Available
+      - value: '2'
+        newvalue: Unknown
+    - uuid: f13e34e36ab74d5bad110a183e4a4a54
+      name: HOST-RESOURCES-MIB::hrPrinterStatus
+      mappings:
+      - value: '1'
+        newvalue: Other
+      - value: '2'
+        newvalue: Unknown
+      - value: '3'
+        newvalue: Idle
+      - value: '4'
+        newvalue: Printing
+      - value: '5'
+        newvalue: Warmup
+  graphs:
+  - uuid: 034cc391ec65496cb77231c14101bf4d
+    name: 'Sharp Sharp BP71M31: Lifetime page count'
+    graph_items:
+    - color: 2774A4
+      item:
+        host: Sharp Sharp BP71M31 by SNMP
+        key: printer.page.count
