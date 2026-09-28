@@ -1,0 +1,380 @@
+zabbix_export:
+  version: '7.0'
+  template_groups:
+  - uuid: e8f2a8480d674fb2a53bea65079ae6e3
+    name: Templates/Printers
+  templates:
+  - uuid: 2fcf452e32e64ca589b00a7e7a4bb92a
+    template: HP HP LaserJet Pro 4201dw by SNMP
+    name: HP HP LaserJet Pro 4201dw by SNMP
+    description: 'Zabbix 7.0.x SNMP template for HP HP LaserJet Pro 4201dw.
+
+
+      Verified source database date: 2026-09-27.
+
+      Family/series: LaserJet Pro.
+
+      Category: Laser Print only; Colour.
+
+      Network: Ethernet; Wi-Fi on wireless variants.
+
+      Verified SNMP support: SNMPv1/v2/v3.
+
+      Evidence level: B - current model + family/platform.
+
+      Canada status: Current HP Canada business catalog.
+
+
+      Monitoring is intentionally based on standard SNMPv2-MIB, HOST-RESOURCES-MIB and Printer-MIB objects. Supply, tray and marker rows are discovered dynamically.
+      Manufacturer-specific private OIDs are not guessed.
+
+
+      Product/catalog source: https://www.hp.com/ca-en/shop/listings/printers?segment=business&subbrand=hp-laserjet+hp-laserjet-pro+hp-laserjet-pro
+
+      SNMP evidence source: https://www.hp.com/ca-en/shop/products/printers/hp-laserjet-pro-4301fdn-multifunction-colour-laser-printer-4ra81f-bgj
+
+      Verification notes: HP Canada catalog confirms current Ethernet models; representative current LaserJet Pro model specs explicitly list SNMPv1/v2/v3 management.
+
+      '
+    groups:
+    - name: Templates/Printers
+    tags:
+    - tag: class
+      value: printer
+    - tag: manufacturer
+      value: HP
+    - tag: model
+      value: HP LaserJet Pro 4201dw
+    - tag: family
+      value: LaserJet Pro
+    - tag: category
+      value: Laser Print only
+    - tag: snmp_support
+      value: SNMPv1/v2/v3
+    - tag: evidence_level
+      value: B - current model + family/platform
+    macros:
+    - macro: '{$SNMP.TIMEOUT}'
+      value: 10m
+      description: Time without successful SNMP polling before the availability trigger fires.
+    - macro: '{$PRINTER.SUPPLY.LOW}'
+      value: '10'
+      description: Low supply threshold in percent, used only when both current and maximum capacity are positive.
+    - macro: '{$PRINTER.PAPER.LOW}'
+      value: '10'
+      description: Low paper threshold in percent, used only when both current and maximum tray capacity are positive.
+    items:
+    - uuid: 20eb7da0818e408195553f3373509e53
+      name: SNMP availability
+      type: INTERNAL
+      key: zabbix[host,snmp,available]
+      delay: 1m
+      history: 7d
+      valuemap:
+        name: Zabbix SNMP availability
+      tags:
+      - tag: component
+        value: availability
+      triggers:
+      - uuid: b13b1d2bacab4ec5ab12894799011dbb
+        expression: max(/HP HP LaserJet Pro 4201dw by SNMP/zabbix[host,snmp,available],{$SNMP.TIMEOUT})=0
+        name: 'HP HP LaserJet Pro 4201dw: No SNMP data collection'
+        priority: HIGH
+        description: Zabbix has been unable to poll this printer over SNMP for the configured timeout period.
+    - uuid: e3e7f3d397364655b0b6b8ea04eee7b4
+      name: System description
+      type: SNMP_AGENT
+      snmp_oid: 1.3.6.1.2.1.1.1.0
+      key: printer.sysdescr
+      delay: 1h
+      history: 7d
+      trends: '0'
+      value_type: TEXT
+      tags:
+      - tag: component
+        value: inventory
+    - uuid: 512bbf4ae7b84c7f9dc2a65ee7483714
+      name: System name
+      type: SNMP_AGENT
+      snmp_oid: 1.3.6.1.2.1.1.5.0
+      key: printer.sysname
+      delay: 10m
+      history: 7d
+      trends: '0'
+      value_type: CHAR
+      tags:
+      - tag: component
+        value: inventory
+    - uuid: 15a96e083e72411d819e75315f0985bd
+      name: System object ID
+      type: SNMP_AGENT
+      snmp_oid: 1.3.6.1.2.1.1.2.0
+      key: printer.sysobjectid
+      delay: 12h
+      history: 30d
+      trends: '0'
+      value_type: CHAR
+      tags:
+      - tag: component
+        value: inventory
+    - uuid: 48b24301eb2a4cb08f16b63208ff2c89
+      name: System location
+      type: SNMP_AGENT
+      snmp_oid: 1.3.6.1.2.1.1.6.0
+      key: printer.syslocation
+      delay: 1h
+      history: 7d
+      trends: '0'
+      value_type: CHAR
+      tags:
+      - tag: component
+        value: inventory
+    - uuid: 41329bba1c1a4c6895ead64ca20e8f9f
+      name: System contact
+      type: SNMP_AGENT
+      snmp_oid: 1.3.6.1.2.1.1.4.0
+      key: printer.syscontact
+      delay: 1h
+      history: 7d
+      trends: '0'
+      value_type: CHAR
+      tags:
+      - tag: component
+        value: inventory
+    - uuid: c3246f3c3c8440afb465e6e9202214d1
+      name: System uptime
+      type: SNMP_AGENT
+      snmp_oid: 1.3.6.1.2.1.1.3.0
+      key: printer.uptime
+      delay: 5m
+      history: 30d
+      value_type: FLOAT
+      units: uptime
+      preprocessing:
+      - type: MULTIPLIER
+        parameters:
+        - '0.01'
+      tags:
+      - tag: component
+        value: system
+    - uuid: dff7bd16750d48108ff1c0f91316d91e
+      name: Printer status
+      type: SNMP_AGENT
+      snmp_oid: 1.3.6.1.2.1.25.3.5.1.1.1
+      key: printer.status
+      delay: 1m
+      history: 30d
+      value_type: UNSIGNED
+      description: 'HOST-RESOURCES-MIB hrPrinterStatus: 1=other, 2=unknown, 3=idle, 4=printing, 5=warmup.'
+      valuemap:
+        name: HOST-RESOURCES-MIB::hrPrinterStatus
+      tags:
+      - tag: component
+        value: status
+      triggers:
+      - uuid: 8852dc52f3ee4b899c6ac38d4b088564
+        expression: last(/HP HP LaserJet Pro 4201dw by SNMP/printer.status)=1 or last(/HP HP LaserJet Pro 4201dw by SNMP/printer.status)=2
+        name: 'HP HP LaserJet Pro 4201dw: Printer status is other or unknown'
+        priority: WARNING
+        opdata: 'Printer status: {ITEM.LASTVALUE1}'
+    - uuid: b8c9c2d885494c19bbeae7870b403644
+      name: Printer name
+      type: SNMP_AGENT
+      snmp_oid: 1.3.6.1.2.1.43.5.1.1.16.1
+      key: printer.name
+      delay: 1h
+      history: 7d
+      trends: '0'
+      value_type: CHAR
+      tags:
+      - tag: component
+        value: inventory
+    - uuid: ff166da5c3f24cc58af9e5fdd0b47199
+      name: Printer serial number
+      type: SNMP_AGENT
+      snmp_oid: 1.3.6.1.2.1.43.5.1.1.17.1
+      key: printer.serial
+      delay: 12h
+      history: 30d
+      trends: '0'
+      value_type: CHAR
+      tags:
+      - tag: component
+        value: inventory
+    - uuid: a8ac335f885344b6a564fdbf37efd131
+      name: Lifetime page count
+      type: SNMP_AGENT
+      snmp_oid: 1.3.6.1.2.1.43.10.2.1.4.1.1
+      key: printer.page.count
+      delay: 5m
+      history: 90d
+      trends: 365d
+      value_type: UNSIGNED
+      units: pages
+      description: Standard Printer-MIB prtMarkerLifeCount for the common .1.1 marker instance. Some devices expose different marker indexes; the generic marker discovery
+        rule in this template can still discover alternate indexes.
+      tags:
+      - tag: component
+        value: usage
+    discovery_rules:
+    - uuid: 0070d025eaaa4f249e8cc4140b5de4bb
+      name: Printer supply discovery
+      type: SNMP_AGENT
+      snmp_oid: discovery[{#SUPPLYDESC},1.3.6.1.2.1.43.11.1.1.6,{#SUPPLYTYPE},1.3.6.1.2.1.43.11.1.1.5,{#SUPPLYUNIT},1.3.6.1.2.1.43.11.1.1.7]
+      key: printer.supply.discovery
+      delay: 1h
+      lifetime: 7d
+      description: Discovers supplies from the standard Printer-MIB. Dynamic indexes prevent assumptions about toner/drum/waste-container positions.
+      item_prototypes:
+      - uuid: 1005486d87bd4401aec7d1cbef436b27
+        name: 'Supply {#SUPPLYDESC}: current level'
+        type: SNMP_AGENT
+        snmp_oid: 1.3.6.1.2.1.43.11.1.1.9.{#SNMPINDEX}
+        key: printer.supply.level[{#SNMPINDEX}]
+        delay: 5m
+        history: 30d
+        trends: 365d
+        value_type: FLOAT
+        description: Raw current supply level. Printer-MIB special values can include -1=other, -2=unknown, -3=some remains but exact amount is unknown.
+      - uuid: 08691a66c1dd40a3bdaa84c77914173b
+        name: 'Supply {#SUPPLYDESC}: maximum capacity'
+        type: SNMP_AGENT
+        snmp_oid: 1.3.6.1.2.1.43.11.1.1.8.{#SNMPINDEX}
+        key: printer.supply.max[{#SNMPINDEX}]
+        delay: 1h
+        history: 30d
+        trends: 365d
+        value_type: FLOAT
+        description: Raw maximum supply capacity. Printer-MIB can return negative special values when capacity is unknown.
+      trigger_prototypes:
+      - uuid: 9f21a320367145e997512858940ec9f8
+        expression: last(/HP HP LaserJet Pro 4201dw by SNMP/printer.supply.level[{#SNMPINDEX}])=0
+        name: 'HP HP LaserJet Pro 4201dw: {#SUPPLYDESC} is empty'
+        priority: HIGH
+      - uuid: e69f05c6a376416db8a824e874047955
+        expression: last(/HP HP LaserJet Pro 4201dw by SNMP/printer.supply.level[{#SNMPINDEX}])>0 and last(/HP HP LaserJet Pro 4201dw by SNMP/printer.supply.max[{#SNMPINDEX}])>0
+          and (100*last(/HP HP LaserJet Pro 4201dw by SNMP/printer.supply.level[{#SNMPINDEX}])/last(/HP HP LaserJet Pro 4201dw by SNMP/printer.supply.max[{#SNMPINDEX}]))<{$PRINTER.SUPPLY.LOW}
+        name: 'HP HP LaserJet Pro 4201dw: {#SUPPLYDESC} is low'
+        priority: WARNING
+      graph_prototypes:
+      - uuid: 4440a104ccf8459b9830c852c5b977a3
+        name: Supply {#SUPPLYDESC}
+        graph_items:
+        - color: 199C0D
+          item:
+            host: HP HP LaserJet Pro 4201dw by SNMP
+            key: printer.supply.level[{#SNMPINDEX}]
+        - sortorder: '1'
+          color: F63100
+          item:
+            host: HP HP LaserJet Pro 4201dw by SNMP
+            key: printer.supply.max[{#SNMPINDEX}]
+    - uuid: c030b6cdf81444db942f00177300d721
+      name: Paper tray discovery
+      type: SNMP_AGENT
+      snmp_oid: discovery[{#TRAYNAME},1.3.6.1.2.1.43.8.2.1.13]
+      key: printer.tray.discovery
+      delay: 1h
+      lifetime: 7d
+      description: Discovers input trays using standard Printer-MIB prtInputName.
+      item_prototypes:
+      - uuid: ea158b519bf845b7ade46bd2b16f1e32
+        name: 'Paper tray {#TRAYNAME}: current level'
+        type: SNMP_AGENT
+        snmp_oid: 1.3.6.1.2.1.43.8.2.1.10.{#SNMPINDEX}
+        key: printer.tray.level[{#SNMPINDEX}]
+        delay: 5m
+        history: 30d
+        trends: 365d
+        value_type: FLOAT
+        units: sheets
+      - uuid: 43516e7354b74b29b755ffead7875aa9
+        name: 'Paper tray {#TRAYNAME}: maximum capacity'
+        type: SNMP_AGENT
+        snmp_oid: 1.3.6.1.2.1.43.8.2.1.9.{#SNMPINDEX}
+        key: printer.tray.max[{#SNMPINDEX}]
+        delay: 1h
+        history: 30d
+        trends: 365d
+        value_type: FLOAT
+        units: sheets
+      trigger_prototypes:
+      - uuid: 1147681bbdcc4b5ab67c30f1b3d902ae
+        expression: last(/HP HP LaserJet Pro 4201dw by SNMP/printer.tray.level[{#SNMPINDEX}])=0
+        name: 'HP HP LaserJet Pro 4201dw: Paper tray {#TRAYNAME} is empty'
+        priority: AVERAGE
+      - uuid: 09059460c813448da8055b252a994316
+        expression: last(/HP HP LaserJet Pro 4201dw by SNMP/printer.tray.level[{#SNMPINDEX}])>0 and last(/HP HP LaserJet Pro 4201dw by SNMP/printer.tray.max[{#SNMPINDEX}])>0
+          and (100*last(/HP HP LaserJet Pro 4201dw by SNMP/printer.tray.level[{#SNMPINDEX}])/last(/HP HP LaserJet Pro 4201dw by SNMP/printer.tray.max[{#SNMPINDEX}]))<{$PRINTER.PAPER.LOW}
+        name: 'HP HP LaserJet Pro 4201dw: Paper tray {#TRAYNAME} is low'
+        priority: WARNING
+      graph_prototypes:
+      - uuid: bdd774b840214663ace87fe766c6a56c
+        name: Paper tray {#TRAYNAME}
+        graph_items:
+        - color: 199C0D
+          item:
+            host: HP HP LaserJet Pro 4201dw by SNMP
+            key: printer.tray.level[{#SNMPINDEX}]
+        - sortorder: '1'
+          color: F63100
+          item:
+            host: HP HP LaserJet Pro 4201dw by SNMP
+            key: printer.tray.max[{#SNMPINDEX}]
+    - uuid: 126a9f8b3ebb4d06aadd3f1f945325f5
+      name: Marker life counter discovery
+      type: SNMP_AGENT
+      snmp_oid: discovery[{#MARKERCOUNT},1.3.6.1.2.1.43.10.2.1.4]
+      key: printer.marker.discovery
+      delay: 1h
+      lifetime: 7d
+      description: Discovers Printer-MIB prtMarkerLifeCount entries so devices with non-.1.1 marker indexes still expose usage counters.
+      item_prototypes:
+      - uuid: 48e53ecf018a42959aedce662e581541
+        name: 'Marker {#SNMPINDEX}: lifetime count'
+        type: SNMP_AGENT
+        snmp_oid: 1.3.6.1.2.1.43.10.2.1.4.{#SNMPINDEX}
+        key: printer.marker.life[{#SNMPINDEX}]
+        delay: 5m
+        history: 90d
+        trends: 365d
+        value_type: UNSIGNED
+      graph_prototypes:
+      - uuid: cfad8b3209c44385b36cea6cefec0e21
+        name: 'Marker {#SNMPINDEX}: lifetime count'
+        graph_items:
+        - color: 2774A4
+          item:
+            host: HP HP LaserJet Pro 4201dw by SNMP
+            key: printer.marker.life[{#SNMPINDEX}]
+    valuemaps:
+    - uuid: 8eb62e88446a4a6f9cee0a1d74d54d69
+      name: Zabbix SNMP availability
+      mappings:
+      - value: '0'
+        newvalue: Not available
+      - value: '1'
+        newvalue: Available
+      - value: '2'
+        newvalue: Unknown
+    - uuid: 4db89ad697344fc1bd277a68a451014e
+      name: HOST-RESOURCES-MIB::hrPrinterStatus
+      mappings:
+      - value: '1'
+        newvalue: Other
+      - value: '2'
+        newvalue: Unknown
+      - value: '3'
+        newvalue: Idle
+      - value: '4'
+        newvalue: Printing
+      - value: '5'
+        newvalue: Warmup
+  graphs:
+  - uuid: 9d8b418c6d8e4f768a2cdb8a5943bf14
+    name: 'HP HP LaserJet Pro 4201dw: Lifetime page count'
+    graph_items:
+    - color: 2774A4
+      item:
+        host: HP HP LaserJet Pro 4201dw by SNMP
+        key: printer.page.count

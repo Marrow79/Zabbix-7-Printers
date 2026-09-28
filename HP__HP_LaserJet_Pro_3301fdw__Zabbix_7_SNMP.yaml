@@ -1,0 +1,380 @@
+zabbix_export:
+  version: '7.0'
+  template_groups:
+  - uuid: e8f2a8480d674fb2a53bea65079ae6e3
+    name: Templates/Printers
+  templates:
+  - uuid: ab22c1c1cf5a4f4a8602d4391d1b7ab8
+    template: HP HP LaserJet Pro 3301fdw by SNMP
+    name: HP HP LaserJet Pro 3301fdw by SNMP
+    description: 'Zabbix 7.0.x SNMP template for HP HP LaserJet Pro 3301fdw.
+
+
+      Verified source database date: 2026-09-27.
+
+      Family/series: LaserJet Pro.
+
+      Category: Laser MFP; Colour.
+
+      Network: Ethernet; Wi-Fi on wireless variants.
+
+      Verified SNMP support: SNMPv1/v2/v3.
+
+      Evidence level: B - current model + family/platform.
+
+      Canada status: Current HP Canada business catalog.
+
+
+      Monitoring is intentionally based on standard SNMPv2-MIB, HOST-RESOURCES-MIB and Printer-MIB objects. Supply, tray and marker rows are discovered dynamically.
+      Manufacturer-specific private OIDs are not guessed.
+
+
+      Product/catalog source: https://www.hp.com/ca-en/shop/listings/printers?segment=business&subbrand=hp-laserjet+hp-laserjet-pro+hp-laserjet-pro
+
+      SNMP evidence source: https://www.hp.com/ca-en/shop/products/printers/hp-laserjet-pro-4301fdn-multifunction-colour-laser-printer-4ra81f-bgj
+
+      Verification notes: HP Canada catalog confirms current Ethernet models; representative current LaserJet Pro model specs explicitly list SNMPv1/v2/v3 management.
+
+      '
+    groups:
+    - name: Templates/Printers
+    tags:
+    - tag: class
+      value: printer
+    - tag: manufacturer
+      value: HP
+    - tag: model
+      value: HP LaserJet Pro 3301fdw
+    - tag: family
+      value: LaserJet Pro
+    - tag: category
+      value: Laser MFP
+    - tag: snmp_support
+      value: SNMPv1/v2/v3
+    - tag: evidence_level
+      value: B - current model + family/platform
+    macros:
+    - macro: '{$SNMP.TIMEOUT}'
+      value: 10m
+      description: Time without successful SNMP polling before the availability trigger fires.
+    - macro: '{$PRINTER.SUPPLY.LOW}'
+      value: '10'
+      description: Low supply threshold in percent, used only when both current and maximum capacity are positive.
+    - macro: '{$PRINTER.PAPER.LOW}'
+      value: '10'
+      description: Low paper threshold in percent, used only when both current and maximum tray capacity are positive.
+    items:
+    - uuid: b55b21ed8f264314b0e43d519ee6729d
+      name: SNMP availability
+      type: INTERNAL
+      key: zabbix[host,snmp,available]
+      delay: 1m
+      history: 7d
+      valuemap:
+        name: Zabbix SNMP availability
+      tags:
+      - tag: component
+        value: availability
+      triggers:
+      - uuid: c288dc19b8944bc3ab1db18351704b88
+        expression: max(/HP HP LaserJet Pro 3301fdw by SNMP/zabbix[host,snmp,available],{$SNMP.TIMEOUT})=0
+        name: 'HP HP LaserJet Pro 3301fdw: No SNMP data collection'
+        priority: HIGH
+        description: Zabbix has been unable to poll this printer over SNMP for the configured timeout period.
+    - uuid: ec464ad24a1d444d834dc53731c6ba6c
+      name: System description
+      type: SNMP_AGENT
+      snmp_oid: 1.3.6.1.2.1.1.1.0
+      key: printer.sysdescr
+      delay: 1h
+      history: 7d
+      trends: '0'
+      value_type: TEXT
+      tags:
+      - tag: component
+        value: inventory
+    - uuid: 1f1a7312fa5f4ee1a99f54c54051715e
+      name: System name
+      type: SNMP_AGENT
+      snmp_oid: 1.3.6.1.2.1.1.5.0
+      key: printer.sysname
+      delay: 10m
+      history: 7d
+      trends: '0'
+      value_type: CHAR
+      tags:
+      - tag: component
+        value: inventory
+    - uuid: d69db5080eae41f2a42e5ab564e9a19e
+      name: System object ID
+      type: SNMP_AGENT
+      snmp_oid: 1.3.6.1.2.1.1.2.0
+      key: printer.sysobjectid
+      delay: 12h
+      history: 30d
+      trends: '0'
+      value_type: CHAR
+      tags:
+      - tag: component
+        value: inventory
+    - uuid: ec6d7dbc993445c482b4106b5c78fd90
+      name: System location
+      type: SNMP_AGENT
+      snmp_oid: 1.3.6.1.2.1.1.6.0
+      key: printer.syslocation
+      delay: 1h
+      history: 7d
+      trends: '0'
+      value_type: CHAR
+      tags:
+      - tag: component
+        value: inventory
+    - uuid: 9e386aa666f5406487777ddd6b7d7d48
+      name: System contact
+      type: SNMP_AGENT
+      snmp_oid: 1.3.6.1.2.1.1.4.0
+      key: printer.syscontact
+      delay: 1h
+      history: 7d
+      trends: '0'
+      value_type: CHAR
+      tags:
+      - tag: component
+        value: inventory
+    - uuid: 1882eb9cf4a5405d9e44a464eec80808
+      name: System uptime
+      type: SNMP_AGENT
+      snmp_oid: 1.3.6.1.2.1.1.3.0
+      key: printer.uptime
+      delay: 5m
+      history: 30d
+      value_type: FLOAT
+      units: uptime
+      preprocessing:
+      - type: MULTIPLIER
+        parameters:
+        - '0.01'
+      tags:
+      - tag: component
+        value: system
+    - uuid: a77bf402f2e64b1196e1ee5926c4431b
+      name: Printer status
+      type: SNMP_AGENT
+      snmp_oid: 1.3.6.1.2.1.25.3.5.1.1.1
+      key: printer.status
+      delay: 1m
+      history: 30d
+      value_type: UNSIGNED
+      description: 'HOST-RESOURCES-MIB hrPrinterStatus: 1=other, 2=unknown, 3=idle, 4=printing, 5=warmup.'
+      valuemap:
+        name: HOST-RESOURCES-MIB::hrPrinterStatus
+      tags:
+      - tag: component
+        value: status
+      triggers:
+      - uuid: 45d710f9575d4d6a99c20130c1e7267c
+        expression: last(/HP HP LaserJet Pro 3301fdw by SNMP/printer.status)=1 or last(/HP HP LaserJet Pro 3301fdw by SNMP/printer.status)=2
+        name: 'HP HP LaserJet Pro 3301fdw: Printer status is other or unknown'
+        priority: WARNING
+        opdata: 'Printer status: {ITEM.LASTVALUE1}'
+    - uuid: 628afaf1abf243f8944f04afba109f7b
+      name: Printer name
+      type: SNMP_AGENT
+      snmp_oid: 1.3.6.1.2.1.43.5.1.1.16.1
+      key: printer.name
+      delay: 1h
+      history: 7d
+      trends: '0'
+      value_type: CHAR
+      tags:
+      - tag: component
+        value: inventory
+    - uuid: 9cf918c2124d4362900c946778d3ec02
+      name: Printer serial number
+      type: SNMP_AGENT
+      snmp_oid: 1.3.6.1.2.1.43.5.1.1.17.1
+      key: printer.serial
+      delay: 12h
+      history: 30d
+      trends: '0'
+      value_type: CHAR
+      tags:
+      - tag: component
+        value: inventory
+    - uuid: f9a88dc4a0b44d2393425ba71d0d27ad
+      name: Lifetime page count
+      type: SNMP_AGENT
+      snmp_oid: 1.3.6.1.2.1.43.10.2.1.4.1.1
+      key: printer.page.count
+      delay: 5m
+      history: 90d
+      trends: 365d
+      value_type: UNSIGNED
+      units: pages
+      description: Standard Printer-MIB prtMarkerLifeCount for the common .1.1 marker instance. Some devices expose different marker indexes; the generic marker discovery
+        rule in this template can still discover alternate indexes.
+      tags:
+      - tag: component
+        value: usage
+    discovery_rules:
+    - uuid: 8154372c216e459b9e547eaf6c008aaa
+      name: Printer supply discovery
+      type: SNMP_AGENT
+      snmp_oid: discovery[{#SUPPLYDESC},1.3.6.1.2.1.43.11.1.1.6,{#SUPPLYTYPE},1.3.6.1.2.1.43.11.1.1.5,{#SUPPLYUNIT},1.3.6.1.2.1.43.11.1.1.7]
+      key: printer.supply.discovery
+      delay: 1h
+      lifetime: 7d
+      description: Discovers supplies from the standard Printer-MIB. Dynamic indexes prevent assumptions about toner/drum/waste-container positions.
+      item_prototypes:
+      - uuid: 2ebc1280ab95426da2be2ce6b1d812b0
+        name: 'Supply {#SUPPLYDESC}: current level'
+        type: SNMP_AGENT
+        snmp_oid: 1.3.6.1.2.1.43.11.1.1.9.{#SNMPINDEX}
+        key: printer.supply.level[{#SNMPINDEX}]
+        delay: 5m
+        history: 30d
+        trends: 365d
+        value_type: FLOAT
+        description: Raw current supply level. Printer-MIB special values can include -1=other, -2=unknown, -3=some remains but exact amount is unknown.
+      - uuid: 223ba5bb2ce94b4b8de2ab362c766055
+        name: 'Supply {#SUPPLYDESC}: maximum capacity'
+        type: SNMP_AGENT
+        snmp_oid: 1.3.6.1.2.1.43.11.1.1.8.{#SNMPINDEX}
+        key: printer.supply.max[{#SNMPINDEX}]
+        delay: 1h
+        history: 30d
+        trends: 365d
+        value_type: FLOAT
+        description: Raw maximum supply capacity. Printer-MIB can return negative special values when capacity is unknown.
+      trigger_prototypes:
+      - uuid: be9107768fd94f7ba5ef54b8e43243ad
+        expression: last(/HP HP LaserJet Pro 3301fdw by SNMP/printer.supply.level[{#SNMPINDEX}])=0
+        name: 'HP HP LaserJet Pro 3301fdw: {#SUPPLYDESC} is empty'
+        priority: HIGH
+      - uuid: 12cb72c9b0924d50bc256c923f9557f1
+        expression: last(/HP HP LaserJet Pro 3301fdw by SNMP/printer.supply.level[{#SNMPINDEX}])>0 and last(/HP HP LaserJet Pro 3301fdw by SNMP/printer.supply.max[{#SNMPINDEX}])>0
+          and (100*last(/HP HP LaserJet Pro 3301fdw by SNMP/printer.supply.level[{#SNMPINDEX}])/last(/HP HP LaserJet Pro 3301fdw by SNMP/printer.supply.max[{#SNMPINDEX}]))<{$PRINTER.SUPPLY.LOW}
+        name: 'HP HP LaserJet Pro 3301fdw: {#SUPPLYDESC} is low'
+        priority: WARNING
+      graph_prototypes:
+      - uuid: 757dbbc0931c4a1abea0a676cffcfad5
+        name: Supply {#SUPPLYDESC}
+        graph_items:
+        - color: 199C0D
+          item:
+            host: HP HP LaserJet Pro 3301fdw by SNMP
+            key: printer.supply.level[{#SNMPINDEX}]
+        - sortorder: '1'
+          color: F63100
+          item:
+            host: HP HP LaserJet Pro 3301fdw by SNMP
+            key: printer.supply.max[{#SNMPINDEX}]
+    - uuid: 272a85b46f60424f94b7e24249ac93ec
+      name: Paper tray discovery
+      type: SNMP_AGENT
+      snmp_oid: discovery[{#TRAYNAME},1.3.6.1.2.1.43.8.2.1.13]
+      key: printer.tray.discovery
+      delay: 1h
+      lifetime: 7d
+      description: Discovers input trays using standard Printer-MIB prtInputName.
+      item_prototypes:
+      - uuid: a44d4eab436c4fa58754af8b0d635fd7
+        name: 'Paper tray {#TRAYNAME}: current level'
+        type: SNMP_AGENT
+        snmp_oid: 1.3.6.1.2.1.43.8.2.1.10.{#SNMPINDEX}
+        key: printer.tray.level[{#SNMPINDEX}]
+        delay: 5m
+        history: 30d
+        trends: 365d
+        value_type: FLOAT
+        units: sheets
+      - uuid: 509360196d444e5ca67e15d0ce5f204f
+        name: 'Paper tray {#TRAYNAME}: maximum capacity'
+        type: SNMP_AGENT
+        snmp_oid: 1.3.6.1.2.1.43.8.2.1.9.{#SNMPINDEX}
+        key: printer.tray.max[{#SNMPINDEX}]
+        delay: 1h
+        history: 30d
+        trends: 365d
+        value_type: FLOAT
+        units: sheets
+      trigger_prototypes:
+      - uuid: fde36b3b82494cff810361543710aae0
+        expression: last(/HP HP LaserJet Pro 3301fdw by SNMP/printer.tray.level[{#SNMPINDEX}])=0
+        name: 'HP HP LaserJet Pro 3301fdw: Paper tray {#TRAYNAME} is empty'
+        priority: AVERAGE
+      - uuid: 86fc696f970144c49ee60790c6aee561
+        expression: last(/HP HP LaserJet Pro 3301fdw by SNMP/printer.tray.level[{#SNMPINDEX}])>0 and last(/HP HP LaserJet Pro 3301fdw by SNMP/printer.tray.max[{#SNMPINDEX}])>0
+          and (100*last(/HP HP LaserJet Pro 3301fdw by SNMP/printer.tray.level[{#SNMPINDEX}])/last(/HP HP LaserJet Pro 3301fdw by SNMP/printer.tray.max[{#SNMPINDEX}]))<{$PRINTER.PAPER.LOW}
+        name: 'HP HP LaserJet Pro 3301fdw: Paper tray {#TRAYNAME} is low'
+        priority: WARNING
+      graph_prototypes:
+      - uuid: bef4e3d965374c48b4b5401e29b06fb6
+        name: Paper tray {#TRAYNAME}
+        graph_items:
+        - color: 199C0D
+          item:
+            host: HP HP LaserJet Pro 3301fdw by SNMP
+            key: printer.tray.level[{#SNMPINDEX}]
+        - sortorder: '1'
+          color: F63100
+          item:
+            host: HP HP LaserJet Pro 3301fdw by SNMP
+            key: printer.tray.max[{#SNMPINDEX}]
+    - uuid: d383e9334032470abd124526bb867e01
+      name: Marker life counter discovery
+      type: SNMP_AGENT
+      snmp_oid: discovery[{#MARKERCOUNT},1.3.6.1.2.1.43.10.2.1.4]
+      key: printer.marker.discovery
+      delay: 1h
+      lifetime: 7d
+      description: Discovers Printer-MIB prtMarkerLifeCount entries so devices with non-.1.1 marker indexes still expose usage counters.
+      item_prototypes:
+      - uuid: aad817b17b0c4270b2fb444935597044
+        name: 'Marker {#SNMPINDEX}: lifetime count'
+        type: SNMP_AGENT
+        snmp_oid: 1.3.6.1.2.1.43.10.2.1.4.{#SNMPINDEX}
+        key: printer.marker.life[{#SNMPINDEX}]
+        delay: 5m
+        history: 90d
+        trends: 365d
+        value_type: UNSIGNED
+      graph_prototypes:
+      - uuid: 929d0efb7862400aaf0d1ca6452696ec
+        name: 'Marker {#SNMPINDEX}: lifetime count'
+        graph_items:
+        - color: 2774A4
+          item:
+            host: HP HP LaserJet Pro 3301fdw by SNMP
+            key: printer.marker.life[{#SNMPINDEX}]
+    valuemaps:
+    - uuid: 1cdd35c8fbcc41b1a8bf16f4af937df4
+      name: Zabbix SNMP availability
+      mappings:
+      - value: '0'
+        newvalue: Not available
+      - value: '1'
+        newvalue: Available
+      - value: '2'
+        newvalue: Unknown
+    - uuid: e9d99c281c074bbe974656b87c53f006
+      name: HOST-RESOURCES-MIB::hrPrinterStatus
+      mappings:
+      - value: '1'
+        newvalue: Other
+      - value: '2'
+        newvalue: Unknown
+      - value: '3'
+        newvalue: Idle
+      - value: '4'
+        newvalue: Printing
+      - value: '5'
+        newvalue: Warmup
+  graphs:
+  - uuid: 07bcfe221bb0469088614529b4716274
+    name: 'HP HP LaserJet Pro 3301fdw: Lifetime page count'
+    graph_items:
+    - color: 2774A4
+      item:
+        host: HP HP LaserJet Pro 3301fdw by SNMP
+        key: printer.page.count

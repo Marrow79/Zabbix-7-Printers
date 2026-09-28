@@ -1,0 +1,380 @@
+zabbix_export:
+  version: '7.0'
+  template_groups:
+  - uuid: e8f2a8480d674fb2a53bea65079ae6e3
+    name: Templates/Printers
+  templates:
+  - uuid: d0135359cd6a467e9c37c3835fc581b3
+    template: HP HP LaserJet Pro 4001dn by SNMP
+    name: HP HP LaserJet Pro 4001dn by SNMP
+    description: 'Zabbix 7.0.x SNMP template for HP HP LaserJet Pro 4001dn.
+
+
+      Verified source database date: 2026-09-27.
+
+      Family/series: LaserJet Pro.
+
+      Category: Laser Print only; B&W.
+
+      Network: Ethernet; Wi-Fi on wireless variants.
+
+      Verified SNMP support: SNMPv1/v2/v3.
+
+      Evidence level: B - current model + family/platform.
+
+      Canada status: Current HP Canada business catalog.
+
+
+      Monitoring is intentionally based on standard SNMPv2-MIB, HOST-RESOURCES-MIB and Printer-MIB objects. Supply, tray and marker rows are discovered dynamically.
+      Manufacturer-specific private OIDs are not guessed.
+
+
+      Product/catalog source: https://www.hp.com/ca-en/shop/listings/printers?segment=business&subbrand=hp-laserjet+hp-laserjet-pro+hp-laserjet-pro
+
+      SNMP evidence source: https://www.hp.com/ca-en/shop/products/printers/hp-laserjet-pro-4301fdn-multifunction-colour-laser-printer-4ra81f-bgj
+
+      Verification notes: HP Canada catalog confirms current Ethernet models; representative current LaserJet Pro model specs explicitly list SNMPv1/v2/v3 management.
+
+      '
+    groups:
+    - name: Templates/Printers
+    tags:
+    - tag: class
+      value: printer
+    - tag: manufacturer
+      value: HP
+    - tag: model
+      value: HP LaserJet Pro 4001dn
+    - tag: family
+      value: LaserJet Pro
+    - tag: category
+      value: Laser Print only
+    - tag: snmp_support
+      value: SNMPv1/v2/v3
+    - tag: evidence_level
+      value: B - current model + family/platform
+    macros:
+    - macro: '{$SNMP.TIMEOUT}'
+      value: 10m
+      description: Time without successful SNMP polling before the availability trigger fires.
+    - macro: '{$PRINTER.SUPPLY.LOW}'
+      value: '10'
+      description: Low supply threshold in percent, used only when both current and maximum capacity are positive.
+    - macro: '{$PRINTER.PAPER.LOW}'
+      value: '10'
+      description: Low paper threshold in percent, used only when both current and maximum tray capacity are positive.
+    items:
+    - uuid: 3e939c0842c94ab48943c8a2c6217165
+      name: SNMP availability
+      type: INTERNAL
+      key: zabbix[host,snmp,available]
+      delay: 1m
+      history: 7d
+      valuemap:
+        name: Zabbix SNMP availability
+      tags:
+      - tag: component
+        value: availability
+      triggers:
+      - uuid: c5026830417644e091ca9b885c2d9fa6
+        expression: max(/HP HP LaserJet Pro 4001dn by SNMP/zabbix[host,snmp,available],{$SNMP.TIMEOUT})=0
+        name: 'HP HP LaserJet Pro 4001dn: No SNMP data collection'
+        priority: HIGH
+        description: Zabbix has been unable to poll this printer over SNMP for the configured timeout period.
+    - uuid: 05e9bb89fac4463e917cf859da96a05e
+      name: System description
+      type: SNMP_AGENT
+      snmp_oid: 1.3.6.1.2.1.1.1.0
+      key: printer.sysdescr
+      delay: 1h
+      history: 7d
+      trends: '0'
+      value_type: TEXT
+      tags:
+      - tag: component
+        value: inventory
+    - uuid: a452d46665534040acb52830c7b67104
+      name: System name
+      type: SNMP_AGENT
+      snmp_oid: 1.3.6.1.2.1.1.5.0
+      key: printer.sysname
+      delay: 10m
+      history: 7d
+      trends: '0'
+      value_type: CHAR
+      tags:
+      - tag: component
+        value: inventory
+    - uuid: dc231b8464fa4a9e9af9a48eae8e2823
+      name: System object ID
+      type: SNMP_AGENT
+      snmp_oid: 1.3.6.1.2.1.1.2.0
+      key: printer.sysobjectid
+      delay: 12h
+      history: 30d
+      trends: '0'
+      value_type: CHAR
+      tags:
+      - tag: component
+        value: inventory
+    - uuid: 968bdf97caee47779e87c297bb041712
+      name: System location
+      type: SNMP_AGENT
+      snmp_oid: 1.3.6.1.2.1.1.6.0
+      key: printer.syslocation
+      delay: 1h
+      history: 7d
+      trends: '0'
+      value_type: CHAR
+      tags:
+      - tag: component
+        value: inventory
+    - uuid: 9294434a55624e168a5f4b20cc442da4
+      name: System contact
+      type: SNMP_AGENT
+      snmp_oid: 1.3.6.1.2.1.1.4.0
+      key: printer.syscontact
+      delay: 1h
+      history: 7d
+      trends: '0'
+      value_type: CHAR
+      tags:
+      - tag: component
+        value: inventory
+    - uuid: 328c285ac04c40eb9e4f0d367ac882c6
+      name: System uptime
+      type: SNMP_AGENT
+      snmp_oid: 1.3.6.1.2.1.1.3.0
+      key: printer.uptime
+      delay: 5m
+      history: 30d
+      value_type: FLOAT
+      units: uptime
+      preprocessing:
+      - type: MULTIPLIER
+        parameters:
+        - '0.01'
+      tags:
+      - tag: component
+        value: system
+    - uuid: a92807d4b68649d98399c6403e0590fb
+      name: Printer status
+      type: SNMP_AGENT
+      snmp_oid: 1.3.6.1.2.1.25.3.5.1.1.1
+      key: printer.status
+      delay: 1m
+      history: 30d
+      value_type: UNSIGNED
+      description: 'HOST-RESOURCES-MIB hrPrinterStatus: 1=other, 2=unknown, 3=idle, 4=printing, 5=warmup.'
+      valuemap:
+        name: HOST-RESOURCES-MIB::hrPrinterStatus
+      tags:
+      - tag: component
+        value: status
+      triggers:
+      - uuid: 3bb07d4f724449afbf6848aa96d71af5
+        expression: last(/HP HP LaserJet Pro 4001dn by SNMP/printer.status)=1 or last(/HP HP LaserJet Pro 4001dn by SNMP/printer.status)=2
+        name: 'HP HP LaserJet Pro 4001dn: Printer status is other or unknown'
+        priority: WARNING
+        opdata: 'Printer status: {ITEM.LASTVALUE1}'
+    - uuid: 329e22340ebb44918c588a9634757ea4
+      name: Printer name
+      type: SNMP_AGENT
+      snmp_oid: 1.3.6.1.2.1.43.5.1.1.16.1
+      key: printer.name
+      delay: 1h
+      history: 7d
+      trends: '0'
+      value_type: CHAR
+      tags:
+      - tag: component
+        value: inventory
+    - uuid: b77e75db35c04b7791b89024438f6ec6
+      name: Printer serial number
+      type: SNMP_AGENT
+      snmp_oid: 1.3.6.1.2.1.43.5.1.1.17.1
+      key: printer.serial
+      delay: 12h
+      history: 30d
+      trends: '0'
+      value_type: CHAR
+      tags:
+      - tag: component
+        value: inventory
+    - uuid: a349698535414f3d9e43271855b91e75
+      name: Lifetime page count
+      type: SNMP_AGENT
+      snmp_oid: 1.3.6.1.2.1.43.10.2.1.4.1.1
+      key: printer.page.count
+      delay: 5m
+      history: 90d
+      trends: 365d
+      value_type: UNSIGNED
+      units: pages
+      description: Standard Printer-MIB prtMarkerLifeCount for the common .1.1 marker instance. Some devices expose different marker indexes; the generic marker discovery
+        rule in this template can still discover alternate indexes.
+      tags:
+      - tag: component
+        value: usage
+    discovery_rules:
+    - uuid: 0a78e7b778cb483fb06bb8e93ede6f86
+      name: Printer supply discovery
+      type: SNMP_AGENT
+      snmp_oid: discovery[{#SUPPLYDESC},1.3.6.1.2.1.43.11.1.1.6,{#SUPPLYTYPE},1.3.6.1.2.1.43.11.1.1.5,{#SUPPLYUNIT},1.3.6.1.2.1.43.11.1.1.7]
+      key: printer.supply.discovery
+      delay: 1h
+      lifetime: 7d
+      description: Discovers supplies from the standard Printer-MIB. Dynamic indexes prevent assumptions about toner/drum/waste-container positions.
+      item_prototypes:
+      - uuid: 010f958d51f04de396d946a9f3fd253d
+        name: 'Supply {#SUPPLYDESC}: current level'
+        type: SNMP_AGENT
+        snmp_oid: 1.3.6.1.2.1.43.11.1.1.9.{#SNMPINDEX}
+        key: printer.supply.level[{#SNMPINDEX}]
+        delay: 5m
+        history: 30d
+        trends: 365d
+        value_type: FLOAT
+        description: Raw current supply level. Printer-MIB special values can include -1=other, -2=unknown, -3=some remains but exact amount is unknown.
+      - uuid: 255e5a4c412f4d6faf88bbcf782b6ee7
+        name: 'Supply {#SUPPLYDESC}: maximum capacity'
+        type: SNMP_AGENT
+        snmp_oid: 1.3.6.1.2.1.43.11.1.1.8.{#SNMPINDEX}
+        key: printer.supply.max[{#SNMPINDEX}]
+        delay: 1h
+        history: 30d
+        trends: 365d
+        value_type: FLOAT
+        description: Raw maximum supply capacity. Printer-MIB can return negative special values when capacity is unknown.
+      trigger_prototypes:
+      - uuid: 39deec776f234191b0aca36a3a7b9903
+        expression: last(/HP HP LaserJet Pro 4001dn by SNMP/printer.supply.level[{#SNMPINDEX}])=0
+        name: 'HP HP LaserJet Pro 4001dn: {#SUPPLYDESC} is empty'
+        priority: HIGH
+      - uuid: a3907a556804451da37a9ebe59720867
+        expression: last(/HP HP LaserJet Pro 4001dn by SNMP/printer.supply.level[{#SNMPINDEX}])>0 and last(/HP HP LaserJet Pro 4001dn by SNMP/printer.supply.max[{#SNMPINDEX}])>0
+          and (100*last(/HP HP LaserJet Pro 4001dn by SNMP/printer.supply.level[{#SNMPINDEX}])/last(/HP HP LaserJet Pro 4001dn by SNMP/printer.supply.max[{#SNMPINDEX}]))<{$PRINTER.SUPPLY.LOW}
+        name: 'HP HP LaserJet Pro 4001dn: {#SUPPLYDESC} is low'
+        priority: WARNING
+      graph_prototypes:
+      - uuid: 4ea934a58c584515acf657a71a25f6aa
+        name: Supply {#SUPPLYDESC}
+        graph_items:
+        - color: 199C0D
+          item:
+            host: HP HP LaserJet Pro 4001dn by SNMP
+            key: printer.supply.level[{#SNMPINDEX}]
+        - sortorder: '1'
+          color: F63100
+          item:
+            host: HP HP LaserJet Pro 4001dn by SNMP
+            key: printer.supply.max[{#SNMPINDEX}]
+    - uuid: bf58e6fc5e1444da9fcb8b9fff83ff86
+      name: Paper tray discovery
+      type: SNMP_AGENT
+      snmp_oid: discovery[{#TRAYNAME},1.3.6.1.2.1.43.8.2.1.13]
+      key: printer.tray.discovery
+      delay: 1h
+      lifetime: 7d
+      description: Discovers input trays using standard Printer-MIB prtInputName.
+      item_prototypes:
+      - uuid: 8b54bd7d4f964888aa79004b580071f4
+        name: 'Paper tray {#TRAYNAME}: current level'
+        type: SNMP_AGENT
+        snmp_oid: 1.3.6.1.2.1.43.8.2.1.10.{#SNMPINDEX}
+        key: printer.tray.level[{#SNMPINDEX}]
+        delay: 5m
+        history: 30d
+        trends: 365d
+        value_type: FLOAT
+        units: sheets
+      - uuid: 8e1c90387cf749f5b098315b12ab6136
+        name: 'Paper tray {#TRAYNAME}: maximum capacity'
+        type: SNMP_AGENT
+        snmp_oid: 1.3.6.1.2.1.43.8.2.1.9.{#SNMPINDEX}
+        key: printer.tray.max[{#SNMPINDEX}]
+        delay: 1h
+        history: 30d
+        trends: 365d
+        value_type: FLOAT
+        units: sheets
+      trigger_prototypes:
+      - uuid: 9b3c288a833f41dcb14124a32a23aa7d
+        expression: last(/HP HP LaserJet Pro 4001dn by SNMP/printer.tray.level[{#SNMPINDEX}])=0
+        name: 'HP HP LaserJet Pro 4001dn: Paper tray {#TRAYNAME} is empty'
+        priority: AVERAGE
+      - uuid: aa881be444e240a3b36db17c83008fec
+        expression: last(/HP HP LaserJet Pro 4001dn by SNMP/printer.tray.level[{#SNMPINDEX}])>0 and last(/HP HP LaserJet Pro 4001dn by SNMP/printer.tray.max[{#SNMPINDEX}])>0
+          and (100*last(/HP HP LaserJet Pro 4001dn by SNMP/printer.tray.level[{#SNMPINDEX}])/last(/HP HP LaserJet Pro 4001dn by SNMP/printer.tray.max[{#SNMPINDEX}]))<{$PRINTER.PAPER.LOW}
+        name: 'HP HP LaserJet Pro 4001dn: Paper tray {#TRAYNAME} is low'
+        priority: WARNING
+      graph_prototypes:
+      - uuid: cf664c4aa88748268ab15ea6b83d5103
+        name: Paper tray {#TRAYNAME}
+        graph_items:
+        - color: 199C0D
+          item:
+            host: HP HP LaserJet Pro 4001dn by SNMP
+            key: printer.tray.level[{#SNMPINDEX}]
+        - sortorder: '1'
+          color: F63100
+          item:
+            host: HP HP LaserJet Pro 4001dn by SNMP
+            key: printer.tray.max[{#SNMPINDEX}]
+    - uuid: b310b82a8867454a994d3a0d87bcb805
+      name: Marker life counter discovery
+      type: SNMP_AGENT
+      snmp_oid: discovery[{#MARKERCOUNT},1.3.6.1.2.1.43.10.2.1.4]
+      key: printer.marker.discovery
+      delay: 1h
+      lifetime: 7d
+      description: Discovers Printer-MIB prtMarkerLifeCount entries so devices with non-.1.1 marker indexes still expose usage counters.
+      item_prototypes:
+      - uuid: 8003af3475d042668b2264ffd033d081
+        name: 'Marker {#SNMPINDEX}: lifetime count'
+        type: SNMP_AGENT
+        snmp_oid: 1.3.6.1.2.1.43.10.2.1.4.{#SNMPINDEX}
+        key: printer.marker.life[{#SNMPINDEX}]
+        delay: 5m
+        history: 90d
+        trends: 365d
+        value_type: UNSIGNED
+      graph_prototypes:
+      - uuid: 8a5d6b220f2e441c9bbd748539c6d241
+        name: 'Marker {#SNMPINDEX}: lifetime count'
+        graph_items:
+        - color: 2774A4
+          item:
+            host: HP HP LaserJet Pro 4001dn by SNMP
+            key: printer.marker.life[{#SNMPINDEX}]
+    valuemaps:
+    - uuid: b3efba3028b9473ebc14856765607d7e
+      name: Zabbix SNMP availability
+      mappings:
+      - value: '0'
+        newvalue: Not available
+      - value: '1'
+        newvalue: Available
+      - value: '2'
+        newvalue: Unknown
+    - uuid: 07ed99486aa8480eb691c774090ca103
+      name: HOST-RESOURCES-MIB::hrPrinterStatus
+      mappings:
+      - value: '1'
+        newvalue: Other
+      - value: '2'
+        newvalue: Unknown
+      - value: '3'
+        newvalue: Idle
+      - value: '4'
+        newvalue: Printing
+      - value: '5'
+        newvalue: Warmup
+  graphs:
+  - uuid: 6d76917d07354dd887d9b0c5303b773e
+    name: 'HP HP LaserJet Pro 4001dn: Lifetime page count'
+    graph_items:
+    - color: 2774A4
+      item:
+        host: HP HP LaserJet Pro 4001dn by SNMP
+        key: printer.page.count

@@ -1,0 +1,380 @@
+zabbix_export:
+  version: '7.0'
+  template_groups:
+  - uuid: e8f2a8480d674fb2a53bea65079ae6e3
+    name: Templates/Printers
+  templates:
+  - uuid: 1b71ca1f6d2f491898838b23a5ffd348
+    template: HP HP LaserJet Enterprise 5700dn by SNMP
+    name: HP HP LaserJet Enterprise 5700dn by SNMP
+    description: 'Zabbix 7.0.x SNMP template for HP HP LaserJet Enterprise 5700dn.
+
+
+      Verified source database date: 2026-09-27.
+
+      Family/series: LaserJet Enterprise.
+
+      Category: Laser Printer; Colour.
+
+      Network: Gigabit Ethernet; Wi-Fi where configured.
+
+      Verified SNMP support: SNMPv2/v3 (v1 on some models).
+
+      Evidence level: B - current model + family/platform.
+
+      Canada status: Current HP Canada enterprise catalog.
+
+
+      Monitoring is intentionally based on standard SNMPv2-MIB, HOST-RESOURCES-MIB and Printer-MIB objects. Supply, tray and marker rows are discovered dynamically.
+      Manufacturer-specific private OIDs are not guessed.
+
+
+      Product/catalog source: https://www.hp.com/ca-en/shop/listings/printers?jumpid=in_r11839_fr&segment=business&subbrand=laserjet-enterprise
+
+      SNMP evidence source: https://www.hp.com/ca-en/shop/products/printers/hp-laserjet-enterprise-m430f-multifunction-black-white-laser-printer-3pz55a-bgj
+
+      Verification notes: HP Enterprise platform documentation/product specs expose SNMP network management; exact legacy SNMP version mix varies by model.
+
+      '
+    groups:
+    - name: Templates/Printers
+    tags:
+    - tag: class
+      value: printer
+    - tag: manufacturer
+      value: HP
+    - tag: model
+      value: HP LaserJet Enterprise 5700dn
+    - tag: family
+      value: LaserJet Enterprise
+    - tag: category
+      value: Laser Printer
+    - tag: snmp_support
+      value: SNMPv2/v3 (v1 on some models)
+    - tag: evidence_level
+      value: B - current model + family/platform
+    macros:
+    - macro: '{$SNMP.TIMEOUT}'
+      value: 10m
+      description: Time without successful SNMP polling before the availability trigger fires.
+    - macro: '{$PRINTER.SUPPLY.LOW}'
+      value: '10'
+      description: Low supply threshold in percent, used only when both current and maximum capacity are positive.
+    - macro: '{$PRINTER.PAPER.LOW}'
+      value: '10'
+      description: Low paper threshold in percent, used only when both current and maximum tray capacity are positive.
+    items:
+    - uuid: c50b36ee804a4aa2a24e9e1cc9ebf8c6
+      name: SNMP availability
+      type: INTERNAL
+      key: zabbix[host,snmp,available]
+      delay: 1m
+      history: 7d
+      valuemap:
+        name: Zabbix SNMP availability
+      tags:
+      - tag: component
+        value: availability
+      triggers:
+      - uuid: 6b9d4e17932249bd96c37dd967ae9c2d
+        expression: max(/HP HP LaserJet Enterprise 5700dn by SNMP/zabbix[host,snmp,available],{$SNMP.TIMEOUT})=0
+        name: 'HP HP LaserJet Enterprise 5700dn: No SNMP data collection'
+        priority: HIGH
+        description: Zabbix has been unable to poll this printer over SNMP for the configured timeout period.
+    - uuid: 1f4f79412bd14c929b774f9cb5dc545a
+      name: System description
+      type: SNMP_AGENT
+      snmp_oid: 1.3.6.1.2.1.1.1.0
+      key: printer.sysdescr
+      delay: 1h
+      history: 7d
+      trends: '0'
+      value_type: TEXT
+      tags:
+      - tag: component
+        value: inventory
+    - uuid: f1d4db3c656c4e8988e6c1441861cb57
+      name: System name
+      type: SNMP_AGENT
+      snmp_oid: 1.3.6.1.2.1.1.5.0
+      key: printer.sysname
+      delay: 10m
+      history: 7d
+      trends: '0'
+      value_type: CHAR
+      tags:
+      - tag: component
+        value: inventory
+    - uuid: 90224059146948d7b88d3f6c6e30b30a
+      name: System object ID
+      type: SNMP_AGENT
+      snmp_oid: 1.3.6.1.2.1.1.2.0
+      key: printer.sysobjectid
+      delay: 12h
+      history: 30d
+      trends: '0'
+      value_type: CHAR
+      tags:
+      - tag: component
+        value: inventory
+    - uuid: 91a60f9ef2414417ba40f59eb95a9106
+      name: System location
+      type: SNMP_AGENT
+      snmp_oid: 1.3.6.1.2.1.1.6.0
+      key: printer.syslocation
+      delay: 1h
+      history: 7d
+      trends: '0'
+      value_type: CHAR
+      tags:
+      - tag: component
+        value: inventory
+    - uuid: 342a2abe1f6d474d9133077147cfbd48
+      name: System contact
+      type: SNMP_AGENT
+      snmp_oid: 1.3.6.1.2.1.1.4.0
+      key: printer.syscontact
+      delay: 1h
+      history: 7d
+      trends: '0'
+      value_type: CHAR
+      tags:
+      - tag: component
+        value: inventory
+    - uuid: 72e8e34548b547608fe4668dc653db95
+      name: System uptime
+      type: SNMP_AGENT
+      snmp_oid: 1.3.6.1.2.1.1.3.0
+      key: printer.uptime
+      delay: 5m
+      history: 30d
+      value_type: FLOAT
+      units: uptime
+      preprocessing:
+      - type: MULTIPLIER
+        parameters:
+        - '0.01'
+      tags:
+      - tag: component
+        value: system
+    - uuid: b0f0d49436cd4176850cb2c092221a17
+      name: Printer status
+      type: SNMP_AGENT
+      snmp_oid: 1.3.6.1.2.1.25.3.5.1.1.1
+      key: printer.status
+      delay: 1m
+      history: 30d
+      value_type: UNSIGNED
+      description: 'HOST-RESOURCES-MIB hrPrinterStatus: 1=other, 2=unknown, 3=idle, 4=printing, 5=warmup.'
+      valuemap:
+        name: HOST-RESOURCES-MIB::hrPrinterStatus
+      tags:
+      - tag: component
+        value: status
+      triggers:
+      - uuid: 74130a79ec6e478d998828729f9fb0dd
+        expression: last(/HP HP LaserJet Enterprise 5700dn by SNMP/printer.status)=1 or last(/HP HP LaserJet Enterprise 5700dn by SNMP/printer.status)=2
+        name: 'HP HP LaserJet Enterprise 5700dn: Printer status is other or unknown'
+        priority: WARNING
+        opdata: 'Printer status: {ITEM.LASTVALUE1}'
+    - uuid: aa15cab553a14a6b9a37ad88cbc2a0ed
+      name: Printer name
+      type: SNMP_AGENT
+      snmp_oid: 1.3.6.1.2.1.43.5.1.1.16.1
+      key: printer.name
+      delay: 1h
+      history: 7d
+      trends: '0'
+      value_type: CHAR
+      tags:
+      - tag: component
+        value: inventory
+    - uuid: 1dd440429e9c416997e5f17dbd338a21
+      name: Printer serial number
+      type: SNMP_AGENT
+      snmp_oid: 1.3.6.1.2.1.43.5.1.1.17.1
+      key: printer.serial
+      delay: 12h
+      history: 30d
+      trends: '0'
+      value_type: CHAR
+      tags:
+      - tag: component
+        value: inventory
+    - uuid: 038decad0ca14414b314774c2de0b4b6
+      name: Lifetime page count
+      type: SNMP_AGENT
+      snmp_oid: 1.3.6.1.2.1.43.10.2.1.4.1.1
+      key: printer.page.count
+      delay: 5m
+      history: 90d
+      trends: 365d
+      value_type: UNSIGNED
+      units: pages
+      description: Standard Printer-MIB prtMarkerLifeCount for the common .1.1 marker instance. Some devices expose different marker indexes; the generic marker discovery
+        rule in this template can still discover alternate indexes.
+      tags:
+      - tag: component
+        value: usage
+    discovery_rules:
+    - uuid: 96740e565ab742418b0103e24237eee4
+      name: Printer supply discovery
+      type: SNMP_AGENT
+      snmp_oid: discovery[{#SUPPLYDESC},1.3.6.1.2.1.43.11.1.1.6,{#SUPPLYTYPE},1.3.6.1.2.1.43.11.1.1.5,{#SUPPLYUNIT},1.3.6.1.2.1.43.11.1.1.7]
+      key: printer.supply.discovery
+      delay: 1h
+      lifetime: 7d
+      description: Discovers supplies from the standard Printer-MIB. Dynamic indexes prevent assumptions about toner/drum/waste-container positions.
+      item_prototypes:
+      - uuid: b92a1146efd64d8c9e43cc0e717c1fa1
+        name: 'Supply {#SUPPLYDESC}: current level'
+        type: SNMP_AGENT
+        snmp_oid: 1.3.6.1.2.1.43.11.1.1.9.{#SNMPINDEX}
+        key: printer.supply.level[{#SNMPINDEX}]
+        delay: 5m
+        history: 30d
+        trends: 365d
+        value_type: FLOAT
+        description: Raw current supply level. Printer-MIB special values can include -1=other, -2=unknown, -3=some remains but exact amount is unknown.
+      - uuid: 600a9d6c35cc4390a057d03d041e5a3f
+        name: 'Supply {#SUPPLYDESC}: maximum capacity'
+        type: SNMP_AGENT
+        snmp_oid: 1.3.6.1.2.1.43.11.1.1.8.{#SNMPINDEX}
+        key: printer.supply.max[{#SNMPINDEX}]
+        delay: 1h
+        history: 30d
+        trends: 365d
+        value_type: FLOAT
+        description: Raw maximum supply capacity. Printer-MIB can return negative special values when capacity is unknown.
+      trigger_prototypes:
+      - uuid: f85fa512bfee439f89759ae8a71e515d
+        expression: last(/HP HP LaserJet Enterprise 5700dn by SNMP/printer.supply.level[{#SNMPINDEX}])=0
+        name: 'HP HP LaserJet Enterprise 5700dn: {#SUPPLYDESC} is empty'
+        priority: HIGH
+      - uuid: 1f05ecffbd6e49d8b164d2abb2b40cc9
+        expression: last(/HP HP LaserJet Enterprise 5700dn by SNMP/printer.supply.level[{#SNMPINDEX}])>0 and last(/HP HP LaserJet Enterprise 5700dn by SNMP/printer.supply.max[{#SNMPINDEX}])>0
+          and (100*last(/HP HP LaserJet Enterprise 5700dn by SNMP/printer.supply.level[{#SNMPINDEX}])/last(/HP HP LaserJet Enterprise 5700dn by SNMP/printer.supply.max[{#SNMPINDEX}]))<{$PRINTER.SUPPLY.LOW}
+        name: 'HP HP LaserJet Enterprise 5700dn: {#SUPPLYDESC} is low'
+        priority: WARNING
+      graph_prototypes:
+      - uuid: 4077231ab5a34f2e9b04d60067b3b42d
+        name: Supply {#SUPPLYDESC}
+        graph_items:
+        - color: 199C0D
+          item:
+            host: HP HP LaserJet Enterprise 5700dn by SNMP
+            key: printer.supply.level[{#SNMPINDEX}]
+        - sortorder: '1'
+          color: F63100
+          item:
+            host: HP HP LaserJet Enterprise 5700dn by SNMP
+            key: printer.supply.max[{#SNMPINDEX}]
+    - uuid: 3da7685e759341f5b5beda8dfdc7ae74
+      name: Paper tray discovery
+      type: SNMP_AGENT
+      snmp_oid: discovery[{#TRAYNAME},1.3.6.1.2.1.43.8.2.1.13]
+      key: printer.tray.discovery
+      delay: 1h
+      lifetime: 7d
+      description: Discovers input trays using standard Printer-MIB prtInputName.
+      item_prototypes:
+      - uuid: 404cf0a513de4a6ab7c790506535be7c
+        name: 'Paper tray {#TRAYNAME}: current level'
+        type: SNMP_AGENT
+        snmp_oid: 1.3.6.1.2.1.43.8.2.1.10.{#SNMPINDEX}
+        key: printer.tray.level[{#SNMPINDEX}]
+        delay: 5m
+        history: 30d
+        trends: 365d
+        value_type: FLOAT
+        units: sheets
+      - uuid: 768fed2ed97f413991a423f6ce22c33a
+        name: 'Paper tray {#TRAYNAME}: maximum capacity'
+        type: SNMP_AGENT
+        snmp_oid: 1.3.6.1.2.1.43.8.2.1.9.{#SNMPINDEX}
+        key: printer.tray.max[{#SNMPINDEX}]
+        delay: 1h
+        history: 30d
+        trends: 365d
+        value_type: FLOAT
+        units: sheets
+      trigger_prototypes:
+      - uuid: 292b252745ac492fba36e19286cdf663
+        expression: last(/HP HP LaserJet Enterprise 5700dn by SNMP/printer.tray.level[{#SNMPINDEX}])=0
+        name: 'HP HP LaserJet Enterprise 5700dn: Paper tray {#TRAYNAME} is empty'
+        priority: AVERAGE
+      - uuid: 3178ff5320434b0ab1597059d4092142
+        expression: last(/HP HP LaserJet Enterprise 5700dn by SNMP/printer.tray.level[{#SNMPINDEX}])>0 and last(/HP HP LaserJet Enterprise 5700dn by SNMP/printer.tray.max[{#SNMPINDEX}])>0
+          and (100*last(/HP HP LaserJet Enterprise 5700dn by SNMP/printer.tray.level[{#SNMPINDEX}])/last(/HP HP LaserJet Enterprise 5700dn by SNMP/printer.tray.max[{#SNMPINDEX}]))<{$PRINTER.PAPER.LOW}
+        name: 'HP HP LaserJet Enterprise 5700dn: Paper tray {#TRAYNAME} is low'
+        priority: WARNING
+      graph_prototypes:
+      - uuid: 4c21f42bd2c142ea997f2ba3207a5993
+        name: Paper tray {#TRAYNAME}
+        graph_items:
+        - color: 199C0D
+          item:
+            host: HP HP LaserJet Enterprise 5700dn by SNMP
+            key: printer.tray.level[{#SNMPINDEX}]
+        - sortorder: '1'
+          color: F63100
+          item:
+            host: HP HP LaserJet Enterprise 5700dn by SNMP
+            key: printer.tray.max[{#SNMPINDEX}]
+    - uuid: f15eaeac0a3942aca832b4a6f3a5f309
+      name: Marker life counter discovery
+      type: SNMP_AGENT
+      snmp_oid: discovery[{#MARKERCOUNT},1.3.6.1.2.1.43.10.2.1.4]
+      key: printer.marker.discovery
+      delay: 1h
+      lifetime: 7d
+      description: Discovers Printer-MIB prtMarkerLifeCount entries so devices with non-.1.1 marker indexes still expose usage counters.
+      item_prototypes:
+      - uuid: 0476713180b245cfb6d48d584e3afe25
+        name: 'Marker {#SNMPINDEX}: lifetime count'
+        type: SNMP_AGENT
+        snmp_oid: 1.3.6.1.2.1.43.10.2.1.4.{#SNMPINDEX}
+        key: printer.marker.life[{#SNMPINDEX}]
+        delay: 5m
+        history: 90d
+        trends: 365d
+        value_type: UNSIGNED
+      graph_prototypes:
+      - uuid: d2308056f1e44df58e830b7edd1003e3
+        name: 'Marker {#SNMPINDEX}: lifetime count'
+        graph_items:
+        - color: 2774A4
+          item:
+            host: HP HP LaserJet Enterprise 5700dn by SNMP
+            key: printer.marker.life[{#SNMPINDEX}]
+    valuemaps:
+    - uuid: e8c00d6b0046482dafb382b45ac690d7
+      name: Zabbix SNMP availability
+      mappings:
+      - value: '0'
+        newvalue: Not available
+      - value: '1'
+        newvalue: Available
+      - value: '2'
+        newvalue: Unknown
+    - uuid: edac9a6e68c645ada8cd48f68457d76b
+      name: HOST-RESOURCES-MIB::hrPrinterStatus
+      mappings:
+      - value: '1'
+        newvalue: Other
+      - value: '2'
+        newvalue: Unknown
+      - value: '3'
+        newvalue: Idle
+      - value: '4'
+        newvalue: Printing
+      - value: '5'
+        newvalue: Warmup
+  graphs:
+  - uuid: e960c53d77a84bdfba127ca48757ae86
+    name: 'HP HP LaserJet Enterprise 5700dn: Lifetime page count'
+    graph_items:
+    - color: 2774A4
+      item:
+        host: HP HP LaserJet Enterprise 5700dn by SNMP
+        key: printer.page.count

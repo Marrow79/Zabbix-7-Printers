@@ -1,0 +1,380 @@
+zabbix_export:
+  version: '7.0'
+  template_groups:
+  - uuid: e8f2a8480d674fb2a53bea65079ae6e3
+    name: Templates/Printers
+  templates:
+  - uuid: 4ccdde23aa594e05b525171560806cba
+    template: HP HP LaserJet Enterprise M528f MFP by SNMP
+    name: HP HP LaserJet Enterprise M528f MFP by SNMP
+    description: 'Zabbix 7.0.x SNMP template for HP HP LaserJet Enterprise M528f MFP.
+
+
+      Verified source database date: 2026-09-27.
+
+      Family/series: LaserJet Enterprise.
+
+      Category: Laser MFP; B&W.
+
+      Network: Gigabit Ethernet; Wi-Fi where configured.
+
+      Verified SNMP support: SNMPv2/v3 (v1 on some models).
+
+      Evidence level: B - current model + family/platform.
+
+      Canada status: Current HP Canada enterprise catalog.
+
+
+      Monitoring is intentionally based on standard SNMPv2-MIB, HOST-RESOURCES-MIB and Printer-MIB objects. Supply, tray and marker rows are discovered dynamically.
+      Manufacturer-specific private OIDs are not guessed.
+
+
+      Product/catalog source: https://www.hp.com/ca-en/shop/listings/printers?jumpid=in_r11839_fr&segment=business&subbrand=laserjet-enterprise
+
+      SNMP evidence source: https://www.hp.com/ca-en/shop/products/printers/hp-laserjet-enterprise-m430f-multifunction-black-white-laser-printer-3pz55a-bgj
+
+      Verification notes: HP Enterprise platform documentation/product specs expose SNMP network management; exact legacy SNMP version mix varies by model.
+
+      '
+    groups:
+    - name: Templates/Printers
+    tags:
+    - tag: class
+      value: printer
+    - tag: manufacturer
+      value: HP
+    - tag: model
+      value: HP LaserJet Enterprise M528f MFP
+    - tag: family
+      value: LaserJet Enterprise
+    - tag: category
+      value: Laser MFP
+    - tag: snmp_support
+      value: SNMPv2/v3 (v1 on some models)
+    - tag: evidence_level
+      value: B - current model + family/platform
+    macros:
+    - macro: '{$SNMP.TIMEOUT}'
+      value: 10m
+      description: Time without successful SNMP polling before the availability trigger fires.
+    - macro: '{$PRINTER.SUPPLY.LOW}'
+      value: '10'
+      description: Low supply threshold in percent, used only when both current and maximum capacity are positive.
+    - macro: '{$PRINTER.PAPER.LOW}'
+      value: '10'
+      description: Low paper threshold in percent, used only when both current and maximum tray capacity are positive.
+    items:
+    - uuid: 299b3aefdd4d4cb89a0e5bdd03f7c198
+      name: SNMP availability
+      type: INTERNAL
+      key: zabbix[host,snmp,available]
+      delay: 1m
+      history: 7d
+      valuemap:
+        name: Zabbix SNMP availability
+      tags:
+      - tag: component
+        value: availability
+      triggers:
+      - uuid: aad745e602fb46fd9bf6359a3c89e2db
+        expression: max(/HP HP LaserJet Enterprise M528f MFP by SNMP/zabbix[host,snmp,available],{$SNMP.TIMEOUT})=0
+        name: 'HP HP LaserJet Enterprise M528f MFP: No SNMP data collection'
+        priority: HIGH
+        description: Zabbix has been unable to poll this printer over SNMP for the configured timeout period.
+    - uuid: 36075cac598c4f289d2819335881651b
+      name: System description
+      type: SNMP_AGENT
+      snmp_oid: 1.3.6.1.2.1.1.1.0
+      key: printer.sysdescr
+      delay: 1h
+      history: 7d
+      trends: '0'
+      value_type: TEXT
+      tags:
+      - tag: component
+        value: inventory
+    - uuid: 562f58af85794f019d2fd78193b3b209
+      name: System name
+      type: SNMP_AGENT
+      snmp_oid: 1.3.6.1.2.1.1.5.0
+      key: printer.sysname
+      delay: 10m
+      history: 7d
+      trends: '0'
+      value_type: CHAR
+      tags:
+      - tag: component
+        value: inventory
+    - uuid: 37bed163ee864fa7a49785ae4a582487
+      name: System object ID
+      type: SNMP_AGENT
+      snmp_oid: 1.3.6.1.2.1.1.2.0
+      key: printer.sysobjectid
+      delay: 12h
+      history: 30d
+      trends: '0'
+      value_type: CHAR
+      tags:
+      - tag: component
+        value: inventory
+    - uuid: 103bff128f51471dbd748f96401ba744
+      name: System location
+      type: SNMP_AGENT
+      snmp_oid: 1.3.6.1.2.1.1.6.0
+      key: printer.syslocation
+      delay: 1h
+      history: 7d
+      trends: '0'
+      value_type: CHAR
+      tags:
+      - tag: component
+        value: inventory
+    - uuid: 4d9e77d2921946fa991aac39d1478780
+      name: System contact
+      type: SNMP_AGENT
+      snmp_oid: 1.3.6.1.2.1.1.4.0
+      key: printer.syscontact
+      delay: 1h
+      history: 7d
+      trends: '0'
+      value_type: CHAR
+      tags:
+      - tag: component
+        value: inventory
+    - uuid: c7324f95219d4c208c5d2f0b616699d8
+      name: System uptime
+      type: SNMP_AGENT
+      snmp_oid: 1.3.6.1.2.1.1.3.0
+      key: printer.uptime
+      delay: 5m
+      history: 30d
+      value_type: FLOAT
+      units: uptime
+      preprocessing:
+      - type: MULTIPLIER
+        parameters:
+        - '0.01'
+      tags:
+      - tag: component
+        value: system
+    - uuid: a51e1577a99d4326a02269ea4413f401
+      name: Printer status
+      type: SNMP_AGENT
+      snmp_oid: 1.3.6.1.2.1.25.3.5.1.1.1
+      key: printer.status
+      delay: 1m
+      history: 30d
+      value_type: UNSIGNED
+      description: 'HOST-RESOURCES-MIB hrPrinterStatus: 1=other, 2=unknown, 3=idle, 4=printing, 5=warmup.'
+      valuemap:
+        name: HOST-RESOURCES-MIB::hrPrinterStatus
+      tags:
+      - tag: component
+        value: status
+      triggers:
+      - uuid: b45dddfe580b4f0890e9f15a90975d3f
+        expression: last(/HP HP LaserJet Enterprise M528f MFP by SNMP/printer.status)=1 or last(/HP HP LaserJet Enterprise M528f MFP by SNMP/printer.status)=2
+        name: 'HP HP LaserJet Enterprise M528f MFP: Printer status is other or unknown'
+        priority: WARNING
+        opdata: 'Printer status: {ITEM.LASTVALUE1}'
+    - uuid: bfd023a9530c47958de4da980fcf7c93
+      name: Printer name
+      type: SNMP_AGENT
+      snmp_oid: 1.3.6.1.2.1.43.5.1.1.16.1
+      key: printer.name
+      delay: 1h
+      history: 7d
+      trends: '0'
+      value_type: CHAR
+      tags:
+      - tag: component
+        value: inventory
+    - uuid: e6cbff24517f42d4a0f8f29f3da26332
+      name: Printer serial number
+      type: SNMP_AGENT
+      snmp_oid: 1.3.6.1.2.1.43.5.1.1.17.1
+      key: printer.serial
+      delay: 12h
+      history: 30d
+      trends: '0'
+      value_type: CHAR
+      tags:
+      - tag: component
+        value: inventory
+    - uuid: 55101a1ff34143af998fe99b66dabc91
+      name: Lifetime page count
+      type: SNMP_AGENT
+      snmp_oid: 1.3.6.1.2.1.43.10.2.1.4.1.1
+      key: printer.page.count
+      delay: 5m
+      history: 90d
+      trends: 365d
+      value_type: UNSIGNED
+      units: pages
+      description: Standard Printer-MIB prtMarkerLifeCount for the common .1.1 marker instance. Some devices expose different marker indexes; the generic marker discovery
+        rule in this template can still discover alternate indexes.
+      tags:
+      - tag: component
+        value: usage
+    discovery_rules:
+    - uuid: 482b8c76762746e5a4ba16ba8751016d
+      name: Printer supply discovery
+      type: SNMP_AGENT
+      snmp_oid: discovery[{#SUPPLYDESC},1.3.6.1.2.1.43.11.1.1.6,{#SUPPLYTYPE},1.3.6.1.2.1.43.11.1.1.5,{#SUPPLYUNIT},1.3.6.1.2.1.43.11.1.1.7]
+      key: printer.supply.discovery
+      delay: 1h
+      lifetime: 7d
+      description: Discovers supplies from the standard Printer-MIB. Dynamic indexes prevent assumptions about toner/drum/waste-container positions.
+      item_prototypes:
+      - uuid: f5d28c3f2e9b4a2d92b1ebfe2fbbdee4
+        name: 'Supply {#SUPPLYDESC}: current level'
+        type: SNMP_AGENT
+        snmp_oid: 1.3.6.1.2.1.43.11.1.1.9.{#SNMPINDEX}
+        key: printer.supply.level[{#SNMPINDEX}]
+        delay: 5m
+        history: 30d
+        trends: 365d
+        value_type: FLOAT
+        description: Raw current supply level. Printer-MIB special values can include -1=other, -2=unknown, -3=some remains but exact amount is unknown.
+      - uuid: 10a38d84098448a6adbd3621859af1fc
+        name: 'Supply {#SUPPLYDESC}: maximum capacity'
+        type: SNMP_AGENT
+        snmp_oid: 1.3.6.1.2.1.43.11.1.1.8.{#SNMPINDEX}
+        key: printer.supply.max[{#SNMPINDEX}]
+        delay: 1h
+        history: 30d
+        trends: 365d
+        value_type: FLOAT
+        description: Raw maximum supply capacity. Printer-MIB can return negative special values when capacity is unknown.
+      trigger_prototypes:
+      - uuid: 02d0dd4c2fb549c4828a343ed9fe90ea
+        expression: last(/HP HP LaserJet Enterprise M528f MFP by SNMP/printer.supply.level[{#SNMPINDEX}])=0
+        name: 'HP HP LaserJet Enterprise M528f MFP: {#SUPPLYDESC} is empty'
+        priority: HIGH
+      - uuid: 0c3988c7eb604e1aacbb357964530871
+        expression: last(/HP HP LaserJet Enterprise M528f MFP by SNMP/printer.supply.level[{#SNMPINDEX}])>0 and last(/HP HP LaserJet Enterprise M528f MFP by SNMP/printer.supply.max[{#SNMPINDEX}])>0
+          and (100*last(/HP HP LaserJet Enterprise M528f MFP by SNMP/printer.supply.level[{#SNMPINDEX}])/last(/HP HP LaserJet Enterprise M528f MFP by SNMP/printer.supply.max[{#SNMPINDEX}]))<{$PRINTER.SUPPLY.LOW}
+        name: 'HP HP LaserJet Enterprise M528f MFP: {#SUPPLYDESC} is low'
+        priority: WARNING
+      graph_prototypes:
+      - uuid: 41086a08fab4472d98e02ad42410b664
+        name: Supply {#SUPPLYDESC}
+        graph_items:
+        - color: 199C0D
+          item:
+            host: HP HP LaserJet Enterprise M528f MFP by SNMP
+            key: printer.supply.level[{#SNMPINDEX}]
+        - sortorder: '1'
+          color: F63100
+          item:
+            host: HP HP LaserJet Enterprise M528f MFP by SNMP
+            key: printer.supply.max[{#SNMPINDEX}]
+    - uuid: c387dc3ada874626ba4a2f94fc927cac
+      name: Paper tray discovery
+      type: SNMP_AGENT
+      snmp_oid: discovery[{#TRAYNAME},1.3.6.1.2.1.43.8.2.1.13]
+      key: printer.tray.discovery
+      delay: 1h
+      lifetime: 7d
+      description: Discovers input trays using standard Printer-MIB prtInputName.
+      item_prototypes:
+      - uuid: 09a67e669db342ffac1c35d0f35e0440
+        name: 'Paper tray {#TRAYNAME}: current level'
+        type: SNMP_AGENT
+        snmp_oid: 1.3.6.1.2.1.43.8.2.1.10.{#SNMPINDEX}
+        key: printer.tray.level[{#SNMPINDEX}]
+        delay: 5m
+        history: 30d
+        trends: 365d
+        value_type: FLOAT
+        units: sheets
+      - uuid: cda28989be594dd989ce1ae85251acc8
+        name: 'Paper tray {#TRAYNAME}: maximum capacity'
+        type: SNMP_AGENT
+        snmp_oid: 1.3.6.1.2.1.43.8.2.1.9.{#SNMPINDEX}
+        key: printer.tray.max[{#SNMPINDEX}]
+        delay: 1h
+        history: 30d
+        trends: 365d
+        value_type: FLOAT
+        units: sheets
+      trigger_prototypes:
+      - uuid: ade8c13301cb40589badaba489af6cad
+        expression: last(/HP HP LaserJet Enterprise M528f MFP by SNMP/printer.tray.level[{#SNMPINDEX}])=0
+        name: 'HP HP LaserJet Enterprise M528f MFP: Paper tray {#TRAYNAME} is empty'
+        priority: AVERAGE
+      - uuid: 2bf7a89242364684ab4797a41ea1795d
+        expression: last(/HP HP LaserJet Enterprise M528f MFP by SNMP/printer.tray.level[{#SNMPINDEX}])>0 and last(/HP HP LaserJet Enterprise M528f MFP by SNMP/printer.tray.max[{#SNMPINDEX}])>0
+          and (100*last(/HP HP LaserJet Enterprise M528f MFP by SNMP/printer.tray.level[{#SNMPINDEX}])/last(/HP HP LaserJet Enterprise M528f MFP by SNMP/printer.tray.max[{#SNMPINDEX}]))<{$PRINTER.PAPER.LOW}
+        name: 'HP HP LaserJet Enterprise M528f MFP: Paper tray {#TRAYNAME} is low'
+        priority: WARNING
+      graph_prototypes:
+      - uuid: 247d479fa1414f3d99174d84d37147b7
+        name: Paper tray {#TRAYNAME}
+        graph_items:
+        - color: 199C0D
+          item:
+            host: HP HP LaserJet Enterprise M528f MFP by SNMP
+            key: printer.tray.level[{#SNMPINDEX}]
+        - sortorder: '1'
+          color: F63100
+          item:
+            host: HP HP LaserJet Enterprise M528f MFP by SNMP
+            key: printer.tray.max[{#SNMPINDEX}]
+    - uuid: 5b477ac0ec4c4984a13026c7fe734b58
+      name: Marker life counter discovery
+      type: SNMP_AGENT
+      snmp_oid: discovery[{#MARKERCOUNT},1.3.6.1.2.1.43.10.2.1.4]
+      key: printer.marker.discovery
+      delay: 1h
+      lifetime: 7d
+      description: Discovers Printer-MIB prtMarkerLifeCount entries so devices with non-.1.1 marker indexes still expose usage counters.
+      item_prototypes:
+      - uuid: 683f4dcdc12944b9bcb0c404e2ea9ac7
+        name: 'Marker {#SNMPINDEX}: lifetime count'
+        type: SNMP_AGENT
+        snmp_oid: 1.3.6.1.2.1.43.10.2.1.4.{#SNMPINDEX}
+        key: printer.marker.life[{#SNMPINDEX}]
+        delay: 5m
+        history: 90d
+        trends: 365d
+        value_type: UNSIGNED
+      graph_prototypes:
+      - uuid: aaf322f73f9248b68d5d7650387625cd
+        name: 'Marker {#SNMPINDEX}: lifetime count'
+        graph_items:
+        - color: 2774A4
+          item:
+            host: HP HP LaserJet Enterprise M528f MFP by SNMP
+            key: printer.marker.life[{#SNMPINDEX}]
+    valuemaps:
+    - uuid: 0da6f5602c6f42cb8bc49e192434fc83
+      name: Zabbix SNMP availability
+      mappings:
+      - value: '0'
+        newvalue: Not available
+      - value: '1'
+        newvalue: Available
+      - value: '2'
+        newvalue: Unknown
+    - uuid: b96e6b8eec214b398c6b76faddb5d867
+      name: HOST-RESOURCES-MIB::hrPrinterStatus
+      mappings:
+      - value: '1'
+        newvalue: Other
+      - value: '2'
+        newvalue: Unknown
+      - value: '3'
+        newvalue: Idle
+      - value: '4'
+        newvalue: Printing
+      - value: '5'
+        newvalue: Warmup
+  graphs:
+  - uuid: 60401d4b38a74f69ab2ea539089e640a
+    name: 'HP HP LaserJet Enterprise M528f MFP: Lifetime page count'
+    graph_items:
+    - color: 2774A4
+      item:
+        host: HP HP LaserJet Enterprise M528f MFP by SNMP
+        key: printer.page.count

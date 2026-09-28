@@ -1,0 +1,383 @@
+zabbix_export:
+  version: '7.0'
+  template_groups:
+  - uuid: e8f2a8480d674fb2a53bea65079ae6e3
+    name: Templates/Printers
+  templates:
+  - uuid: c5299626bac34b9f849d2e7c7cc0489f
+    template: Honeywell (Productivity Solutions / Brady) PX940 by SNMP
+    name: Honeywell (Productivity Solutions / Brady) PX940 by SNMP
+    description: 'Zabbix 7.0.x SNMP template for Honeywell (Productivity Solutions / Brady) PX940.
+
+
+      Verified source database date: 2026-09-27.
+
+      Family/series: PX940.
+
+      Category: Industrial label printer; B&W/label.
+
+      Network: Ethernet; optional wireless depending configuration.
+
+      Verified SNMP support: SNMPv1/v2.
+
+      Evidence level: A - model-specific manual.
+
+      Canada status: Honeywell Canada product line; business now part of Brady.
+
+
+      Monitoring is intentionally based on standard SNMPv2-MIB, HOST-RESOURCES-MIB and Printer-MIB objects. Supply, tray and marker rows are discovered dynamically.
+      Manufacturer-specific private OIDs are not guessed.
+
+
+      Product/catalog source: https://automation.honeywell.com/ca/en/products/productivity-solutions/printers/industrial-printers/px940-industrial-printer
+
+      SNMP evidence source: https://prod-edam.honeywell.com/content/dam/honeywell-edam/sps/ppr/en-us/public/products/printers/industrial/px940/documents/sps-ppr-px940-en-ug-rev-a.pdf
+
+      Verification notes: Official Honeywell Canada product page plus PX940 user guide documenting SNMP.
+
+      '
+    groups:
+    - name: Templates/Printers
+    tags:
+    - tag: class
+      value: printer
+    - tag: manufacturer
+      value: Honeywell (Productivity Solutions / Brady)
+    - tag: model
+      value: PX940
+    - tag: family
+      value: PX940
+    - tag: category
+      value: Industrial label printer
+    - tag: snmp_support
+      value: SNMPv1/v2
+    - tag: evidence_level
+      value: A - model-specific manual
+    macros:
+    - macro: '{$SNMP.TIMEOUT}'
+      value: 10m
+      description: Time without successful SNMP polling before the availability trigger fires.
+    - macro: '{$PRINTER.SUPPLY.LOW}'
+      value: '10'
+      description: Low supply threshold in percent, used only when both current and maximum capacity are positive.
+    - macro: '{$PRINTER.PAPER.LOW}'
+      value: '10'
+      description: Low paper threshold in percent, used only when both current and maximum tray capacity are positive.
+    items:
+    - uuid: 58a02c18731440c9af1f7b53e2b58fbd
+      name: SNMP availability
+      type: INTERNAL
+      key: zabbix[host,snmp,available]
+      delay: 1m
+      history: 7d
+      valuemap:
+        name: Zabbix SNMP availability
+      tags:
+      - tag: component
+        value: availability
+      triggers:
+      - uuid: dcca0a42328b4a318204c26e1c734639
+        expression: max(/Honeywell (Productivity Solutions / Brady) PX940 by SNMP/zabbix[host,snmp,available],{$SNMP.TIMEOUT})=0
+        name: 'Honeywell (Productivity Solutions / Brady) PX940: No SNMP data collection'
+        priority: HIGH
+        description: Zabbix has been unable to poll this printer over SNMP for the configured timeout period.
+    - uuid: 4c2042c4535549578f96e07d120e9def
+      name: System description
+      type: SNMP_AGENT
+      snmp_oid: 1.3.6.1.2.1.1.1.0
+      key: printer.sysdescr
+      delay: 1h
+      history: 7d
+      trends: '0'
+      value_type: TEXT
+      tags:
+      - tag: component
+        value: inventory
+    - uuid: 6afd8eb221f6436f8276110e4230f3af
+      name: System name
+      type: SNMP_AGENT
+      snmp_oid: 1.3.6.1.2.1.1.5.0
+      key: printer.sysname
+      delay: 10m
+      history: 7d
+      trends: '0'
+      value_type: CHAR
+      tags:
+      - tag: component
+        value: inventory
+    - uuid: 9e273bf818a54958ae2ce2a8bd011ad2
+      name: System object ID
+      type: SNMP_AGENT
+      snmp_oid: 1.3.6.1.2.1.1.2.0
+      key: printer.sysobjectid
+      delay: 12h
+      history: 30d
+      trends: '0'
+      value_type: CHAR
+      tags:
+      - tag: component
+        value: inventory
+    - uuid: 542481c987b2477aa8e5fead574e7152
+      name: System location
+      type: SNMP_AGENT
+      snmp_oid: 1.3.6.1.2.1.1.6.0
+      key: printer.syslocation
+      delay: 1h
+      history: 7d
+      trends: '0'
+      value_type: CHAR
+      tags:
+      - tag: component
+        value: inventory
+    - uuid: 736cd084a64849989860bccb02e1e33d
+      name: System contact
+      type: SNMP_AGENT
+      snmp_oid: 1.3.6.1.2.1.1.4.0
+      key: printer.syscontact
+      delay: 1h
+      history: 7d
+      trends: '0'
+      value_type: CHAR
+      tags:
+      - tag: component
+        value: inventory
+    - uuid: d749f74731ab4df6817223495f83b82a
+      name: System uptime
+      type: SNMP_AGENT
+      snmp_oid: 1.3.6.1.2.1.1.3.0
+      key: printer.uptime
+      delay: 5m
+      history: 30d
+      value_type: FLOAT
+      units: uptime
+      preprocessing:
+      - type: MULTIPLIER
+        parameters:
+        - '0.01'
+      tags:
+      - tag: component
+        value: system
+    - uuid: a86b680700f4471a8f7be68be2155f08
+      name: Printer status
+      type: SNMP_AGENT
+      snmp_oid: 1.3.6.1.2.1.25.3.5.1.1.1
+      key: printer.status
+      delay: 1m
+      history: 30d
+      value_type: UNSIGNED
+      description: 'HOST-RESOURCES-MIB hrPrinterStatus: 1=other, 2=unknown, 3=idle, 4=printing, 5=warmup.'
+      valuemap:
+        name: HOST-RESOURCES-MIB::hrPrinterStatus
+      tags:
+      - tag: component
+        value: status
+      triggers:
+      - uuid: fa1b651698bb4112b25c3e29fc519170
+        expression: last(/Honeywell (Productivity Solutions / Brady) PX940 by SNMP/printer.status)=1 or last(/Honeywell (Productivity Solutions / Brady) PX940 by
+          SNMP/printer.status)=2
+        name: 'Honeywell (Productivity Solutions / Brady) PX940: Printer status is other or unknown'
+        priority: WARNING
+        opdata: 'Printer status: {ITEM.LASTVALUE1}'
+    - uuid: e5d03147c2924310aa57d1a29362a80a
+      name: Printer name
+      type: SNMP_AGENT
+      snmp_oid: 1.3.6.1.2.1.43.5.1.1.16.1
+      key: printer.name
+      delay: 1h
+      history: 7d
+      trends: '0'
+      value_type: CHAR
+      tags:
+      - tag: component
+        value: inventory
+    - uuid: d422b8f1ecb742588b5d7229dedb7d10
+      name: Printer serial number
+      type: SNMP_AGENT
+      snmp_oid: 1.3.6.1.2.1.43.5.1.1.17.1
+      key: printer.serial
+      delay: 12h
+      history: 30d
+      trends: '0'
+      value_type: CHAR
+      tags:
+      - tag: component
+        value: inventory
+    - uuid: c1c6351122e94e9483af78c556913954
+      name: Lifetime page count
+      type: SNMP_AGENT
+      snmp_oid: 1.3.6.1.2.1.43.10.2.1.4.1.1
+      key: printer.page.count
+      delay: 5m
+      history: 90d
+      trends: 365d
+      value_type: UNSIGNED
+      units: pages
+      description: Standard Printer-MIB prtMarkerLifeCount for the common .1.1 marker instance. Some devices expose different marker indexes; the generic marker discovery
+        rule in this template can still discover alternate indexes.
+      tags:
+      - tag: component
+        value: usage
+    discovery_rules:
+    - uuid: d704376481b24822a2d564b601a0fc6e
+      name: Printer supply discovery
+      type: SNMP_AGENT
+      snmp_oid: discovery[{#SUPPLYDESC},1.3.6.1.2.1.43.11.1.1.6,{#SUPPLYTYPE},1.3.6.1.2.1.43.11.1.1.5,{#SUPPLYUNIT},1.3.6.1.2.1.43.11.1.1.7]
+      key: printer.supply.discovery
+      delay: 1h
+      lifetime: 7d
+      description: Discovers supplies from the standard Printer-MIB. Dynamic indexes prevent assumptions about toner/drum/waste-container positions.
+      item_prototypes:
+      - uuid: 6f9d7ee4b7b74a72a9cd43a90caa7031
+        name: 'Supply {#SUPPLYDESC}: current level'
+        type: SNMP_AGENT
+        snmp_oid: 1.3.6.1.2.1.43.11.1.1.9.{#SNMPINDEX}
+        key: printer.supply.level[{#SNMPINDEX}]
+        delay: 5m
+        history: 30d
+        trends: 365d
+        value_type: FLOAT
+        description: Raw current supply level. Printer-MIB special values can include -1=other, -2=unknown, -3=some remains but exact amount is unknown.
+      - uuid: 18f99b9592aa440f8764654888aca6c8
+        name: 'Supply {#SUPPLYDESC}: maximum capacity'
+        type: SNMP_AGENT
+        snmp_oid: 1.3.6.1.2.1.43.11.1.1.8.{#SNMPINDEX}
+        key: printer.supply.max[{#SNMPINDEX}]
+        delay: 1h
+        history: 30d
+        trends: 365d
+        value_type: FLOAT
+        description: Raw maximum supply capacity. Printer-MIB can return negative special values when capacity is unknown.
+      trigger_prototypes:
+      - uuid: 74ae3faf63af46d5a5838c3425a5fdca
+        expression: last(/Honeywell (Productivity Solutions / Brady) PX940 by SNMP/printer.supply.level[{#SNMPINDEX}])=0
+        name: 'Honeywell (Productivity Solutions / Brady) PX940: {#SUPPLYDESC} is empty'
+        priority: HIGH
+      - uuid: 40a30d4095384e2996810e573398bf6e
+        expression: last(/Honeywell (Productivity Solutions / Brady) PX940 by SNMP/printer.supply.level[{#SNMPINDEX}])>0 and last(/Honeywell (Productivity Solutions
+          / Brady) PX940 by SNMP/printer.supply.max[{#SNMPINDEX}])>0 and (100*last(/Honeywell (Productivity Solutions / Brady) PX940 by SNMP/printer.supply.level[{#SNMPINDEX}])/last(/Honeywell
+          (Productivity Solutions / Brady) PX940 by SNMP/printer.supply.max[{#SNMPINDEX}]))<{$PRINTER.SUPPLY.LOW}
+        name: 'Honeywell (Productivity Solutions / Brady) PX940: {#SUPPLYDESC} is low'
+        priority: WARNING
+      graph_prototypes:
+      - uuid: 17d3c321823a4ede9d3307571ddbb128
+        name: Supply {#SUPPLYDESC}
+        graph_items:
+        - color: 199C0D
+          item:
+            host: Honeywell (Productivity Solutions / Brady) PX940 by SNMP
+            key: printer.supply.level[{#SNMPINDEX}]
+        - sortorder: '1'
+          color: F63100
+          item:
+            host: Honeywell (Productivity Solutions / Brady) PX940 by SNMP
+            key: printer.supply.max[{#SNMPINDEX}]
+    - uuid: e21e5e78e3f548d389395211910505bc
+      name: Paper tray discovery
+      type: SNMP_AGENT
+      snmp_oid: discovery[{#TRAYNAME},1.3.6.1.2.1.43.8.2.1.13]
+      key: printer.tray.discovery
+      delay: 1h
+      lifetime: 7d
+      description: Discovers input trays using standard Printer-MIB prtInputName.
+      item_prototypes:
+      - uuid: 076e845e55e642b7897c3eeda0924bc5
+        name: 'Paper tray {#TRAYNAME}: current level'
+        type: SNMP_AGENT
+        snmp_oid: 1.3.6.1.2.1.43.8.2.1.10.{#SNMPINDEX}
+        key: printer.tray.level[{#SNMPINDEX}]
+        delay: 5m
+        history: 30d
+        trends: 365d
+        value_type: FLOAT
+        units: sheets
+      - uuid: f06d90eec6dd4b928cc319fb1206d48b
+        name: 'Paper tray {#TRAYNAME}: maximum capacity'
+        type: SNMP_AGENT
+        snmp_oid: 1.3.6.1.2.1.43.8.2.1.9.{#SNMPINDEX}
+        key: printer.tray.max[{#SNMPINDEX}]
+        delay: 1h
+        history: 30d
+        trends: 365d
+        value_type: FLOAT
+        units: sheets
+      trigger_prototypes:
+      - uuid: 0bc0d3c770994e80bf661483181ad83c
+        expression: last(/Honeywell (Productivity Solutions / Brady) PX940 by SNMP/printer.tray.level[{#SNMPINDEX}])=0
+        name: 'Honeywell (Productivity Solutions / Brady) PX940: Paper tray {#TRAYNAME} is empty'
+        priority: AVERAGE
+      - uuid: 3b7ead4062ea49228f8df7cd353f6ba2
+        expression: last(/Honeywell (Productivity Solutions / Brady) PX940 by SNMP/printer.tray.level[{#SNMPINDEX}])>0 and last(/Honeywell (Productivity Solutions
+          / Brady) PX940 by SNMP/printer.tray.max[{#SNMPINDEX}])>0 and (100*last(/Honeywell (Productivity Solutions / Brady) PX940 by SNMP/printer.tray.level[{#SNMPINDEX}])/last(/Honeywell
+          (Productivity Solutions / Brady) PX940 by SNMP/printer.tray.max[{#SNMPINDEX}]))<{$PRINTER.PAPER.LOW}
+        name: 'Honeywell (Productivity Solutions / Brady) PX940: Paper tray {#TRAYNAME} is low'
+        priority: WARNING
+      graph_prototypes:
+      - uuid: f17b3cf88c3d484587699a37e2771b43
+        name: Paper tray {#TRAYNAME}
+        graph_items:
+        - color: 199C0D
+          item:
+            host: Honeywell (Productivity Solutions / Brady) PX940 by SNMP
+            key: printer.tray.level[{#SNMPINDEX}]
+        - sortorder: '1'
+          color: F63100
+          item:
+            host: Honeywell (Productivity Solutions / Brady) PX940 by SNMP
+            key: printer.tray.max[{#SNMPINDEX}]
+    - uuid: ddd0878777dc40ccacf3dc9ce921b9e7
+      name: Marker life counter discovery
+      type: SNMP_AGENT
+      snmp_oid: discovery[{#MARKERCOUNT},1.3.6.1.2.1.43.10.2.1.4]
+      key: printer.marker.discovery
+      delay: 1h
+      lifetime: 7d
+      description: Discovers Printer-MIB prtMarkerLifeCount entries so devices with non-.1.1 marker indexes still expose usage counters.
+      item_prototypes:
+      - uuid: 87f9dc1c6cce4a8da91cb7113e767321
+        name: 'Marker {#SNMPINDEX}: lifetime count'
+        type: SNMP_AGENT
+        snmp_oid: 1.3.6.1.2.1.43.10.2.1.4.{#SNMPINDEX}
+        key: printer.marker.life[{#SNMPINDEX}]
+        delay: 5m
+        history: 90d
+        trends: 365d
+        value_type: UNSIGNED
+      graph_prototypes:
+      - uuid: 396b3c33710b462c9cbb1b634b0a7a93
+        name: 'Marker {#SNMPINDEX}: lifetime count'
+        graph_items:
+        - color: 2774A4
+          item:
+            host: Honeywell (Productivity Solutions / Brady) PX940 by SNMP
+            key: printer.marker.life[{#SNMPINDEX}]
+    valuemaps:
+    - uuid: 93b65a47863d45f9998f624617af4444
+      name: Zabbix SNMP availability
+      mappings:
+      - value: '0'
+        newvalue: Not available
+      - value: '1'
+        newvalue: Available
+      - value: '2'
+        newvalue: Unknown
+    - uuid: dfe11219f10547eebe55432b53df4852
+      name: HOST-RESOURCES-MIB::hrPrinterStatus
+      mappings:
+      - value: '1'
+        newvalue: Other
+      - value: '2'
+        newvalue: Unknown
+      - value: '3'
+        newvalue: Idle
+      - value: '4'
+        newvalue: Printing
+      - value: '5'
+        newvalue: Warmup
+  graphs:
+  - uuid: 3db7fe55bd20435f8c67faaab6e9dcd4
+    name: 'Honeywell (Productivity Solutions / Brady) PX940: Lifetime page count'
+    graph_items:
+    - color: 2774A4
+      item:
+        host: Honeywell (Productivity Solutions / Brady) PX940 by SNMP
+        key: printer.page.count

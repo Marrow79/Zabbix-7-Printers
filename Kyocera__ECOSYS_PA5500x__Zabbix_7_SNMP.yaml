@@ -1,0 +1,380 @@
+zabbix_export:
+  version: '7.0'
+  template_groups:
+  - uuid: e8f2a8480d674fb2a53bea65079ae6e3
+    name: Templates/Printers
+  templates:
+  - uuid: 8cbf04a274704613b188947ec0bb9c84
+    template: Kyocera ECOSYS PA5500x by SNMP
+    name: Kyocera ECOSYS PA5500x by SNMP
+    description: 'Zabbix 7.0.x SNMP template for Kyocera ECOSYS PA5500x.
+
+
+      Verified source database date: 2026-09-27.
+
+      Family/series: ECOSYS PA6000x Series.
+
+      Category: Mono printer; B&W.
+
+      Network: Gigabit Ethernet; optional Wi-Fi.
+
+      Verified SNMP support: SNMPv1/v2c/v3.
+
+      Evidence level: B - current model + series/platform.
+
+      Canada status: Current Kyocera Canada PA6000x family.
+
+
+      Monitoring is intentionally based on standard SNMPv2-MIB, HOST-RESOURCES-MIB and Printer-MIB objects. Supply, tray and marker rows are discovered dynamically.
+      Manufacturer-specific private OIDs are not guessed.
+
+
+      Product/catalog source: https://www.kyoceradocumentsolutions.ca/en/products/printers/kyocera-ecosys-pa6000x-series.html
+
+      SNMP evidence source: https://www.kyoceradocumentsolutions.ca/content/download-center-americas/ca/documents/brochures-and-specs/KYOCERA_Spec_Sheet_ECOSYS_PA6000x_061223_pdf.download.pdf
+
+      Verification notes: PA6000x series current page plus official series spec; exact feature set may vary slightly by member.
+
+      '
+    groups:
+    - name: Templates/Printers
+    tags:
+    - tag: class
+      value: printer
+    - tag: manufacturer
+      value: Kyocera
+    - tag: model
+      value: ECOSYS PA5500x
+    - tag: family
+      value: ECOSYS PA6000x Series
+    - tag: category
+      value: Mono printer
+    - tag: snmp_support
+      value: SNMPv1/v2c/v3
+    - tag: evidence_level
+      value: B - current model + series/platform
+    macros:
+    - macro: '{$SNMP.TIMEOUT}'
+      value: 10m
+      description: Time without successful SNMP polling before the availability trigger fires.
+    - macro: '{$PRINTER.SUPPLY.LOW}'
+      value: '10'
+      description: Low supply threshold in percent, used only when both current and maximum capacity are positive.
+    - macro: '{$PRINTER.PAPER.LOW}'
+      value: '10'
+      description: Low paper threshold in percent, used only when both current and maximum tray capacity are positive.
+    items:
+    - uuid: 956b2102a12c4fa7a269da44f6923d60
+      name: SNMP availability
+      type: INTERNAL
+      key: zabbix[host,snmp,available]
+      delay: 1m
+      history: 7d
+      valuemap:
+        name: Zabbix SNMP availability
+      tags:
+      - tag: component
+        value: availability
+      triggers:
+      - uuid: 4c545bbc45ef4f09954dc49084562147
+        expression: max(/Kyocera ECOSYS PA5500x by SNMP/zabbix[host,snmp,available],{$SNMP.TIMEOUT})=0
+        name: 'Kyocera ECOSYS PA5500x: No SNMP data collection'
+        priority: HIGH
+        description: Zabbix has been unable to poll this printer over SNMP for the configured timeout period.
+    - uuid: 531bff9caac14cd3885660a44ca6403f
+      name: System description
+      type: SNMP_AGENT
+      snmp_oid: 1.3.6.1.2.1.1.1.0
+      key: printer.sysdescr
+      delay: 1h
+      history: 7d
+      trends: '0'
+      value_type: TEXT
+      tags:
+      - tag: component
+        value: inventory
+    - uuid: cb33c2f06d0349d8bea7635d409bbe0b
+      name: System name
+      type: SNMP_AGENT
+      snmp_oid: 1.3.6.1.2.1.1.5.0
+      key: printer.sysname
+      delay: 10m
+      history: 7d
+      trends: '0'
+      value_type: CHAR
+      tags:
+      - tag: component
+        value: inventory
+    - uuid: c577002c77be4fb48bf5b3fbabccc286
+      name: System object ID
+      type: SNMP_AGENT
+      snmp_oid: 1.3.6.1.2.1.1.2.0
+      key: printer.sysobjectid
+      delay: 12h
+      history: 30d
+      trends: '0'
+      value_type: CHAR
+      tags:
+      - tag: component
+        value: inventory
+    - uuid: c71251305c4d4307a82a67f76e45db56
+      name: System location
+      type: SNMP_AGENT
+      snmp_oid: 1.3.6.1.2.1.1.6.0
+      key: printer.syslocation
+      delay: 1h
+      history: 7d
+      trends: '0'
+      value_type: CHAR
+      tags:
+      - tag: component
+        value: inventory
+    - uuid: c9003dd9d2314da09fa2b955ebc9abd0
+      name: System contact
+      type: SNMP_AGENT
+      snmp_oid: 1.3.6.1.2.1.1.4.0
+      key: printer.syscontact
+      delay: 1h
+      history: 7d
+      trends: '0'
+      value_type: CHAR
+      tags:
+      - tag: component
+        value: inventory
+    - uuid: 488463cf82574b7095a8999d05ea57a7
+      name: System uptime
+      type: SNMP_AGENT
+      snmp_oid: 1.3.6.1.2.1.1.3.0
+      key: printer.uptime
+      delay: 5m
+      history: 30d
+      value_type: FLOAT
+      units: uptime
+      preprocessing:
+      - type: MULTIPLIER
+        parameters:
+        - '0.01'
+      tags:
+      - tag: component
+        value: system
+    - uuid: 7e99730334a74ec28adcb0e69b59fb7e
+      name: Printer status
+      type: SNMP_AGENT
+      snmp_oid: 1.3.6.1.2.1.25.3.5.1.1.1
+      key: printer.status
+      delay: 1m
+      history: 30d
+      value_type: UNSIGNED
+      description: 'HOST-RESOURCES-MIB hrPrinterStatus: 1=other, 2=unknown, 3=idle, 4=printing, 5=warmup.'
+      valuemap:
+        name: HOST-RESOURCES-MIB::hrPrinterStatus
+      tags:
+      - tag: component
+        value: status
+      triggers:
+      - uuid: 0b27b3799d51490e8b14ebb4e5281c0a
+        expression: last(/Kyocera ECOSYS PA5500x by SNMP/printer.status)=1 or last(/Kyocera ECOSYS PA5500x by SNMP/printer.status)=2
+        name: 'Kyocera ECOSYS PA5500x: Printer status is other or unknown'
+        priority: WARNING
+        opdata: 'Printer status: {ITEM.LASTVALUE1}'
+    - uuid: 9d619429d0d64627b7c8cce5aad5bb6f
+      name: Printer name
+      type: SNMP_AGENT
+      snmp_oid: 1.3.6.1.2.1.43.5.1.1.16.1
+      key: printer.name
+      delay: 1h
+      history: 7d
+      trends: '0'
+      value_type: CHAR
+      tags:
+      - tag: component
+        value: inventory
+    - uuid: a430e2de5195498aa21c46f6c607da08
+      name: Printer serial number
+      type: SNMP_AGENT
+      snmp_oid: 1.3.6.1.2.1.43.5.1.1.17.1
+      key: printer.serial
+      delay: 12h
+      history: 30d
+      trends: '0'
+      value_type: CHAR
+      tags:
+      - tag: component
+        value: inventory
+    - uuid: 6fab64c5af9247ed91658c237539ea3b
+      name: Lifetime page count
+      type: SNMP_AGENT
+      snmp_oid: 1.3.6.1.2.1.43.10.2.1.4.1.1
+      key: printer.page.count
+      delay: 5m
+      history: 90d
+      trends: 365d
+      value_type: UNSIGNED
+      units: pages
+      description: Standard Printer-MIB prtMarkerLifeCount for the common .1.1 marker instance. Some devices expose different marker indexes; the generic marker discovery
+        rule in this template can still discover alternate indexes.
+      tags:
+      - tag: component
+        value: usage
+    discovery_rules:
+    - uuid: 2537a3dfb6814376be74096a547902d9
+      name: Printer supply discovery
+      type: SNMP_AGENT
+      snmp_oid: discovery[{#SUPPLYDESC},1.3.6.1.2.1.43.11.1.1.6,{#SUPPLYTYPE},1.3.6.1.2.1.43.11.1.1.5,{#SUPPLYUNIT},1.3.6.1.2.1.43.11.1.1.7]
+      key: printer.supply.discovery
+      delay: 1h
+      lifetime: 7d
+      description: Discovers supplies from the standard Printer-MIB. Dynamic indexes prevent assumptions about toner/drum/waste-container positions.
+      item_prototypes:
+      - uuid: 9415af14d3734570a3a0fe00d1372d42
+        name: 'Supply {#SUPPLYDESC}: current level'
+        type: SNMP_AGENT
+        snmp_oid: 1.3.6.1.2.1.43.11.1.1.9.{#SNMPINDEX}
+        key: printer.supply.level[{#SNMPINDEX}]
+        delay: 5m
+        history: 30d
+        trends: 365d
+        value_type: FLOAT
+        description: Raw current supply level. Printer-MIB special values can include -1=other, -2=unknown, -3=some remains but exact amount is unknown.
+      - uuid: 6ef36c5fa14b4725a82cf1f0912e2bde
+        name: 'Supply {#SUPPLYDESC}: maximum capacity'
+        type: SNMP_AGENT
+        snmp_oid: 1.3.6.1.2.1.43.11.1.1.8.{#SNMPINDEX}
+        key: printer.supply.max[{#SNMPINDEX}]
+        delay: 1h
+        history: 30d
+        trends: 365d
+        value_type: FLOAT
+        description: Raw maximum supply capacity. Printer-MIB can return negative special values when capacity is unknown.
+      trigger_prototypes:
+      - uuid: 0770e6f058dd48208f013a8e8a80b6d3
+        expression: last(/Kyocera ECOSYS PA5500x by SNMP/printer.supply.level[{#SNMPINDEX}])=0
+        name: 'Kyocera ECOSYS PA5500x: {#SUPPLYDESC} is empty'
+        priority: HIGH
+      - uuid: e79f9bab6169440a93b5d3b713ccd488
+        expression: last(/Kyocera ECOSYS PA5500x by SNMP/printer.supply.level[{#SNMPINDEX}])>0 and last(/Kyocera ECOSYS PA5500x by SNMP/printer.supply.max[{#SNMPINDEX}])>0
+          and (100*last(/Kyocera ECOSYS PA5500x by SNMP/printer.supply.level[{#SNMPINDEX}])/last(/Kyocera ECOSYS PA5500x by SNMP/printer.supply.max[{#SNMPINDEX}]))<{$PRINTER.SUPPLY.LOW}
+        name: 'Kyocera ECOSYS PA5500x: {#SUPPLYDESC} is low'
+        priority: WARNING
+      graph_prototypes:
+      - uuid: 5708b072c6f2480bba4ef31e567768cf
+        name: Supply {#SUPPLYDESC}
+        graph_items:
+        - color: 199C0D
+          item:
+            host: Kyocera ECOSYS PA5500x by SNMP
+            key: printer.supply.level[{#SNMPINDEX}]
+        - sortorder: '1'
+          color: F63100
+          item:
+            host: Kyocera ECOSYS PA5500x by SNMP
+            key: printer.supply.max[{#SNMPINDEX}]
+    - uuid: 012257586cf04cf2a3b8d09ba40dcb4d
+      name: Paper tray discovery
+      type: SNMP_AGENT
+      snmp_oid: discovery[{#TRAYNAME},1.3.6.1.2.1.43.8.2.1.13]
+      key: printer.tray.discovery
+      delay: 1h
+      lifetime: 7d
+      description: Discovers input trays using standard Printer-MIB prtInputName.
+      item_prototypes:
+      - uuid: 28e1d06d3a43417bb9f1bb94b0a9508f
+        name: 'Paper tray {#TRAYNAME}: current level'
+        type: SNMP_AGENT
+        snmp_oid: 1.3.6.1.2.1.43.8.2.1.10.{#SNMPINDEX}
+        key: printer.tray.level[{#SNMPINDEX}]
+        delay: 5m
+        history: 30d
+        trends: 365d
+        value_type: FLOAT
+        units: sheets
+      - uuid: 424c9fbf683541fc990ee0657c6d30f7
+        name: 'Paper tray {#TRAYNAME}: maximum capacity'
+        type: SNMP_AGENT
+        snmp_oid: 1.3.6.1.2.1.43.8.2.1.9.{#SNMPINDEX}
+        key: printer.tray.max[{#SNMPINDEX}]
+        delay: 1h
+        history: 30d
+        trends: 365d
+        value_type: FLOAT
+        units: sheets
+      trigger_prototypes:
+      - uuid: 99b8d22c48f8469c95b0f639e7545c96
+        expression: last(/Kyocera ECOSYS PA5500x by SNMP/printer.tray.level[{#SNMPINDEX}])=0
+        name: 'Kyocera ECOSYS PA5500x: Paper tray {#TRAYNAME} is empty'
+        priority: AVERAGE
+      - uuid: b6d8f2e8b9284095bafe31458f5a2498
+        expression: last(/Kyocera ECOSYS PA5500x by SNMP/printer.tray.level[{#SNMPINDEX}])>0 and last(/Kyocera ECOSYS PA5500x by SNMP/printer.tray.max[{#SNMPINDEX}])>0
+          and (100*last(/Kyocera ECOSYS PA5500x by SNMP/printer.tray.level[{#SNMPINDEX}])/last(/Kyocera ECOSYS PA5500x by SNMP/printer.tray.max[{#SNMPINDEX}]))<{$PRINTER.PAPER.LOW}
+        name: 'Kyocera ECOSYS PA5500x: Paper tray {#TRAYNAME} is low'
+        priority: WARNING
+      graph_prototypes:
+      - uuid: b76dc2ec245e4a3b9c471888b731a09f
+        name: Paper tray {#TRAYNAME}
+        graph_items:
+        - color: 199C0D
+          item:
+            host: Kyocera ECOSYS PA5500x by SNMP
+            key: printer.tray.level[{#SNMPINDEX}]
+        - sortorder: '1'
+          color: F63100
+          item:
+            host: Kyocera ECOSYS PA5500x by SNMP
+            key: printer.tray.max[{#SNMPINDEX}]
+    - uuid: 183135d70e344e62bc573db1fa335c17
+      name: Marker life counter discovery
+      type: SNMP_AGENT
+      snmp_oid: discovery[{#MARKERCOUNT},1.3.6.1.2.1.43.10.2.1.4]
+      key: printer.marker.discovery
+      delay: 1h
+      lifetime: 7d
+      description: Discovers Printer-MIB prtMarkerLifeCount entries so devices with non-.1.1 marker indexes still expose usage counters.
+      item_prototypes:
+      - uuid: 9a3016b8d6bb491d8ca0070bb936033a
+        name: 'Marker {#SNMPINDEX}: lifetime count'
+        type: SNMP_AGENT
+        snmp_oid: 1.3.6.1.2.1.43.10.2.1.4.{#SNMPINDEX}
+        key: printer.marker.life[{#SNMPINDEX}]
+        delay: 5m
+        history: 90d
+        trends: 365d
+        value_type: UNSIGNED
+      graph_prototypes:
+      - uuid: dd78d166eac744e0b88050ae3f4ab41a
+        name: 'Marker {#SNMPINDEX}: lifetime count'
+        graph_items:
+        - color: 2774A4
+          item:
+            host: Kyocera ECOSYS PA5500x by SNMP
+            key: printer.marker.life[{#SNMPINDEX}]
+    valuemaps:
+    - uuid: 76be9f1e0b6047fdbc4b2f07597ea485
+      name: Zabbix SNMP availability
+      mappings:
+      - value: '0'
+        newvalue: Not available
+      - value: '1'
+        newvalue: Available
+      - value: '2'
+        newvalue: Unknown
+    - uuid: b10c86f5c11f4525b1fce88002a43923
+      name: HOST-RESOURCES-MIB::hrPrinterStatus
+      mappings:
+      - value: '1'
+        newvalue: Other
+      - value: '2'
+        newvalue: Unknown
+      - value: '3'
+        newvalue: Idle
+      - value: '4'
+        newvalue: Printing
+      - value: '5'
+        newvalue: Warmup
+  graphs:
+  - uuid: 31978dea9f814afa96f948b75c1db32c
+    name: 'Kyocera ECOSYS PA5500x: Lifetime page count'
+    graph_items:
+    - color: 2774A4
+      item:
+        host: Kyocera ECOSYS PA5500x by SNMP
+        key: printer.page.count

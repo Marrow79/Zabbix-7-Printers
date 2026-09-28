@@ -1,0 +1,380 @@
+zabbix_export:
+  version: '7.0'
+  template_groups:
+  - uuid: e8f2a8480d674fb2a53bea65079ae6e3
+    name: Templates/Printers
+  templates:
+  - uuid: 72f8d03f2d574fda9a8d9a10a550bdcd
+    template: Konica Minolta bizhub C451i by SNMP
+    name: Konica Minolta bizhub C451i by SNMP
+    description: 'Zabbix 7.0.x SNMP template for Konica Minolta bizhub C451i.
+
+
+      Verified source database date: 2026-09-27.
+
+      Family/series: bizhub One i-Series.
+
+      Category: MFP / printer; Colour.
+
+      Network: Ethernet; Wi-Fi options vary.
+
+      Verified SNMP support: SNMPv1/SNMPv3 platform support.
+
+      Evidence level: B - current model + platform security paper.
+
+      Canada status: Current Konica Minolta Canada i-Series.
+
+
+      Monitoring is intentionally based on standard SNMPv2-MIB, HOST-RESOURCES-MIB and Printer-MIB objects. Supply, tray and marker rows are discovered dynamically.
+      Manufacturer-specific private OIDs are not guessed.
+
+
+      Product/catalog source: https://konicaminolta.ca/en/business/technology/i-series
+
+      SNMP evidence source: https://www.konicaminolta.com/global-en/security/mfp/setting/pdf/SecurityTechnicalSupportPaper_en.pdf
+
+      Verification notes: Current Canada i-Series model list combined with Konica Minolta''s security technical support paper documenting SNMP device management.
+
+      '
+    groups:
+    - name: Templates/Printers
+    tags:
+    - tag: class
+      value: printer
+    - tag: manufacturer
+      value: Konica Minolta
+    - tag: model
+      value: bizhub C451i
+    - tag: family
+      value: bizhub One i-Series
+    - tag: category
+      value: MFP / printer
+    - tag: snmp_support
+      value: SNMPv1/SNMPv3 platform support
+    - tag: evidence_level
+      value: B - current model + platform security paper
+    macros:
+    - macro: '{$SNMP.TIMEOUT}'
+      value: 10m
+      description: Time without successful SNMP polling before the availability trigger fires.
+    - macro: '{$PRINTER.SUPPLY.LOW}'
+      value: '10'
+      description: Low supply threshold in percent, used only when both current and maximum capacity are positive.
+    - macro: '{$PRINTER.PAPER.LOW}'
+      value: '10'
+      description: Low paper threshold in percent, used only when both current and maximum tray capacity are positive.
+    items:
+    - uuid: a9696b77033e4a7c84f4fad8acd82894
+      name: SNMP availability
+      type: INTERNAL
+      key: zabbix[host,snmp,available]
+      delay: 1m
+      history: 7d
+      valuemap:
+        name: Zabbix SNMP availability
+      tags:
+      - tag: component
+        value: availability
+      triggers:
+      - uuid: cfff36f90701409c84a43c1d783cd91a
+        expression: max(/Konica Minolta bizhub C451i by SNMP/zabbix[host,snmp,available],{$SNMP.TIMEOUT})=0
+        name: 'Konica Minolta bizhub C451i: No SNMP data collection'
+        priority: HIGH
+        description: Zabbix has been unable to poll this printer over SNMP for the configured timeout period.
+    - uuid: 7326b74c51c54687b6edcec19ebf2872
+      name: System description
+      type: SNMP_AGENT
+      snmp_oid: 1.3.6.1.2.1.1.1.0
+      key: printer.sysdescr
+      delay: 1h
+      history: 7d
+      trends: '0'
+      value_type: TEXT
+      tags:
+      - tag: component
+        value: inventory
+    - uuid: 4ddc3c5efce24ecf96a7725c6e90aa78
+      name: System name
+      type: SNMP_AGENT
+      snmp_oid: 1.3.6.1.2.1.1.5.0
+      key: printer.sysname
+      delay: 10m
+      history: 7d
+      trends: '0'
+      value_type: CHAR
+      tags:
+      - tag: component
+        value: inventory
+    - uuid: 043ac9adebe74c4ead8317d1fc60fe26
+      name: System object ID
+      type: SNMP_AGENT
+      snmp_oid: 1.3.6.1.2.1.1.2.0
+      key: printer.sysobjectid
+      delay: 12h
+      history: 30d
+      trends: '0'
+      value_type: CHAR
+      tags:
+      - tag: component
+        value: inventory
+    - uuid: 5c00b2d054474c768817317c6e0adfe0
+      name: System location
+      type: SNMP_AGENT
+      snmp_oid: 1.3.6.1.2.1.1.6.0
+      key: printer.syslocation
+      delay: 1h
+      history: 7d
+      trends: '0'
+      value_type: CHAR
+      tags:
+      - tag: component
+        value: inventory
+    - uuid: ba5e5034b6db42f7a3adb29f8cd3db8b
+      name: System contact
+      type: SNMP_AGENT
+      snmp_oid: 1.3.6.1.2.1.1.4.0
+      key: printer.syscontact
+      delay: 1h
+      history: 7d
+      trends: '0'
+      value_type: CHAR
+      tags:
+      - tag: component
+        value: inventory
+    - uuid: 3479c17f64124707b1701d28118e8745
+      name: System uptime
+      type: SNMP_AGENT
+      snmp_oid: 1.3.6.1.2.1.1.3.0
+      key: printer.uptime
+      delay: 5m
+      history: 30d
+      value_type: FLOAT
+      units: uptime
+      preprocessing:
+      - type: MULTIPLIER
+        parameters:
+        - '0.01'
+      tags:
+      - tag: component
+        value: system
+    - uuid: 2170fb9868f4468d800432ce2c02cb78
+      name: Printer status
+      type: SNMP_AGENT
+      snmp_oid: 1.3.6.1.2.1.25.3.5.1.1.1
+      key: printer.status
+      delay: 1m
+      history: 30d
+      value_type: UNSIGNED
+      description: 'HOST-RESOURCES-MIB hrPrinterStatus: 1=other, 2=unknown, 3=idle, 4=printing, 5=warmup.'
+      valuemap:
+        name: HOST-RESOURCES-MIB::hrPrinterStatus
+      tags:
+      - tag: component
+        value: status
+      triggers:
+      - uuid: 742b1a8334214f8082ac4e10d2fbd950
+        expression: last(/Konica Minolta bizhub C451i by SNMP/printer.status)=1 or last(/Konica Minolta bizhub C451i by SNMP/printer.status)=2
+        name: 'Konica Minolta bizhub C451i: Printer status is other or unknown'
+        priority: WARNING
+        opdata: 'Printer status: {ITEM.LASTVALUE1}'
+    - uuid: 28d922152d33422d93bab910b60dd1cd
+      name: Printer name
+      type: SNMP_AGENT
+      snmp_oid: 1.3.6.1.2.1.43.5.1.1.16.1
+      key: printer.name
+      delay: 1h
+      history: 7d
+      trends: '0'
+      value_type: CHAR
+      tags:
+      - tag: component
+        value: inventory
+    - uuid: 1b27a6f3afa9482aa97bf29bc719f672
+      name: Printer serial number
+      type: SNMP_AGENT
+      snmp_oid: 1.3.6.1.2.1.43.5.1.1.17.1
+      key: printer.serial
+      delay: 12h
+      history: 30d
+      trends: '0'
+      value_type: CHAR
+      tags:
+      - tag: component
+        value: inventory
+    - uuid: cc99053233934571aa9c3d71fbf0f889
+      name: Lifetime page count
+      type: SNMP_AGENT
+      snmp_oid: 1.3.6.1.2.1.43.10.2.1.4.1.1
+      key: printer.page.count
+      delay: 5m
+      history: 90d
+      trends: 365d
+      value_type: UNSIGNED
+      units: pages
+      description: Standard Printer-MIB prtMarkerLifeCount for the common .1.1 marker instance. Some devices expose different marker indexes; the generic marker discovery
+        rule in this template can still discover alternate indexes.
+      tags:
+      - tag: component
+        value: usage
+    discovery_rules:
+    - uuid: a1c990d47ee745e6b6863d56a67a1815
+      name: Printer supply discovery
+      type: SNMP_AGENT
+      snmp_oid: discovery[{#SUPPLYDESC},1.3.6.1.2.1.43.11.1.1.6,{#SUPPLYTYPE},1.3.6.1.2.1.43.11.1.1.5,{#SUPPLYUNIT},1.3.6.1.2.1.43.11.1.1.7]
+      key: printer.supply.discovery
+      delay: 1h
+      lifetime: 7d
+      description: Discovers supplies from the standard Printer-MIB. Dynamic indexes prevent assumptions about toner/drum/waste-container positions.
+      item_prototypes:
+      - uuid: 1619886d035a4c9f8417b910f802e8a6
+        name: 'Supply {#SUPPLYDESC}: current level'
+        type: SNMP_AGENT
+        snmp_oid: 1.3.6.1.2.1.43.11.1.1.9.{#SNMPINDEX}
+        key: printer.supply.level[{#SNMPINDEX}]
+        delay: 5m
+        history: 30d
+        trends: 365d
+        value_type: FLOAT
+        description: Raw current supply level. Printer-MIB special values can include -1=other, -2=unknown, -3=some remains but exact amount is unknown.
+      - uuid: c0138dbeff3f4f1ab64ba13f805e698c
+        name: 'Supply {#SUPPLYDESC}: maximum capacity'
+        type: SNMP_AGENT
+        snmp_oid: 1.3.6.1.2.1.43.11.1.1.8.{#SNMPINDEX}
+        key: printer.supply.max[{#SNMPINDEX}]
+        delay: 1h
+        history: 30d
+        trends: 365d
+        value_type: FLOAT
+        description: Raw maximum supply capacity. Printer-MIB can return negative special values when capacity is unknown.
+      trigger_prototypes:
+      - uuid: 4d13d894e13840659afbc5173d831104
+        expression: last(/Konica Minolta bizhub C451i by SNMP/printer.supply.level[{#SNMPINDEX}])=0
+        name: 'Konica Minolta bizhub C451i: {#SUPPLYDESC} is empty'
+        priority: HIGH
+      - uuid: 1191f24ff05f4fe6b6e9dae2d8b3aec8
+        expression: last(/Konica Minolta bizhub C451i by SNMP/printer.supply.level[{#SNMPINDEX}])>0 and last(/Konica Minolta bizhub C451i by SNMP/printer.supply.max[{#SNMPINDEX}])>0
+          and (100*last(/Konica Minolta bizhub C451i by SNMP/printer.supply.level[{#SNMPINDEX}])/last(/Konica Minolta bizhub C451i by SNMP/printer.supply.max[{#SNMPINDEX}]))<{$PRINTER.SUPPLY.LOW}
+        name: 'Konica Minolta bizhub C451i: {#SUPPLYDESC} is low'
+        priority: WARNING
+      graph_prototypes:
+      - uuid: 0a241c86449142ed822d838663363d7c
+        name: Supply {#SUPPLYDESC}
+        graph_items:
+        - color: 199C0D
+          item:
+            host: Konica Minolta bizhub C451i by SNMP
+            key: printer.supply.level[{#SNMPINDEX}]
+        - sortorder: '1'
+          color: F63100
+          item:
+            host: Konica Minolta bizhub C451i by SNMP
+            key: printer.supply.max[{#SNMPINDEX}]
+    - uuid: d11b3d0369934718ab9928775f1d54e9
+      name: Paper tray discovery
+      type: SNMP_AGENT
+      snmp_oid: discovery[{#TRAYNAME},1.3.6.1.2.1.43.8.2.1.13]
+      key: printer.tray.discovery
+      delay: 1h
+      lifetime: 7d
+      description: Discovers input trays using standard Printer-MIB prtInputName.
+      item_prototypes:
+      - uuid: e40355d709404c22bc526dbde994f3f2
+        name: 'Paper tray {#TRAYNAME}: current level'
+        type: SNMP_AGENT
+        snmp_oid: 1.3.6.1.2.1.43.8.2.1.10.{#SNMPINDEX}
+        key: printer.tray.level[{#SNMPINDEX}]
+        delay: 5m
+        history: 30d
+        trends: 365d
+        value_type: FLOAT
+        units: sheets
+      - uuid: 2ab1fbb3657544e88c80f2314d95fe89
+        name: 'Paper tray {#TRAYNAME}: maximum capacity'
+        type: SNMP_AGENT
+        snmp_oid: 1.3.6.1.2.1.43.8.2.1.9.{#SNMPINDEX}
+        key: printer.tray.max[{#SNMPINDEX}]
+        delay: 1h
+        history: 30d
+        trends: 365d
+        value_type: FLOAT
+        units: sheets
+      trigger_prototypes:
+      - uuid: fa66bc0e9501434694456dffecdf1e0a
+        expression: last(/Konica Minolta bizhub C451i by SNMP/printer.tray.level[{#SNMPINDEX}])=0
+        name: 'Konica Minolta bizhub C451i: Paper tray {#TRAYNAME} is empty'
+        priority: AVERAGE
+      - uuid: ee574a8bfabe4d5dac95f1c3cf09b52a
+        expression: last(/Konica Minolta bizhub C451i by SNMP/printer.tray.level[{#SNMPINDEX}])>0 and last(/Konica Minolta bizhub C451i by SNMP/printer.tray.max[{#SNMPINDEX}])>0
+          and (100*last(/Konica Minolta bizhub C451i by SNMP/printer.tray.level[{#SNMPINDEX}])/last(/Konica Minolta bizhub C451i by SNMP/printer.tray.max[{#SNMPINDEX}]))<{$PRINTER.PAPER.LOW}
+        name: 'Konica Minolta bizhub C451i: Paper tray {#TRAYNAME} is low'
+        priority: WARNING
+      graph_prototypes:
+      - uuid: 00ed4e77f4664e72afc77cf89cc52155
+        name: Paper tray {#TRAYNAME}
+        graph_items:
+        - color: 199C0D
+          item:
+            host: Konica Minolta bizhub C451i by SNMP
+            key: printer.tray.level[{#SNMPINDEX}]
+        - sortorder: '1'
+          color: F63100
+          item:
+            host: Konica Minolta bizhub C451i by SNMP
+            key: printer.tray.max[{#SNMPINDEX}]
+    - uuid: 281c762d4cdd4745a56d7190fffeb633
+      name: Marker life counter discovery
+      type: SNMP_AGENT
+      snmp_oid: discovery[{#MARKERCOUNT},1.3.6.1.2.1.43.10.2.1.4]
+      key: printer.marker.discovery
+      delay: 1h
+      lifetime: 7d
+      description: Discovers Printer-MIB prtMarkerLifeCount entries so devices with non-.1.1 marker indexes still expose usage counters.
+      item_prototypes:
+      - uuid: 592e7b1c4cc54fedbefb656653245b47
+        name: 'Marker {#SNMPINDEX}: lifetime count'
+        type: SNMP_AGENT
+        snmp_oid: 1.3.6.1.2.1.43.10.2.1.4.{#SNMPINDEX}
+        key: printer.marker.life[{#SNMPINDEX}]
+        delay: 5m
+        history: 90d
+        trends: 365d
+        value_type: UNSIGNED
+      graph_prototypes:
+      - uuid: 13b8e5402a754e9690fa1e07ebb922fd
+        name: 'Marker {#SNMPINDEX}: lifetime count'
+        graph_items:
+        - color: 2774A4
+          item:
+            host: Konica Minolta bizhub C451i by SNMP
+            key: printer.marker.life[{#SNMPINDEX}]
+    valuemaps:
+    - uuid: b46fa018676f44beae076a81a1821d63
+      name: Zabbix SNMP availability
+      mappings:
+      - value: '0'
+        newvalue: Not available
+      - value: '1'
+        newvalue: Available
+      - value: '2'
+        newvalue: Unknown
+    - uuid: cc23c8028e144f52bfed39fcf7397865
+      name: HOST-RESOURCES-MIB::hrPrinterStatus
+      mappings:
+      - value: '1'
+        newvalue: Other
+      - value: '2'
+        newvalue: Unknown
+      - value: '3'
+        newvalue: Idle
+      - value: '4'
+        newvalue: Printing
+      - value: '5'
+        newvalue: Warmup
+  graphs:
+  - uuid: 2324f85181e3469eb6a3d446fb4fd6b0
+    name: 'Konica Minolta bizhub C451i: Lifetime page count'
+    graph_items:
+    - color: 2774A4
+      item:
+        host: Konica Minolta bizhub C451i by SNMP
+        key: printer.page.count

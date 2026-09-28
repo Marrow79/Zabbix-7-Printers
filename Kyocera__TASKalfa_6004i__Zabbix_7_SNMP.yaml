@@ -1,0 +1,380 @@
+zabbix_export:
+  version: '7.0'
+  template_groups:
+  - uuid: e8f2a8480d674fb2a53bea65079ae6e3
+    name: Templates/Printers
+  templates:
+  - uuid: 04271a5d41704ed09d966d8de667024f
+    template: Kyocera TASKalfa 6004i by SNMP
+    name: Kyocera TASKalfa 6004i by SNMP
+    description: 'Zabbix 7.0.x SNMP template for Kyocera TASKalfa 6004i.
+
+
+      Verified source database date: 2026-09-27.
+
+      Family/series: TASKalfa Evolution.
+
+      Category: A3 MFP; B&W.
+
+      Network: Gigabit Ethernet; Wi-Fi optional/standard by model.
+
+      Verified SNMP support: SNMPv1/v2c/v3.
+
+      Evidence level: B - current model + series/platform.
+
+      Canada status: Current Kyocera Canada Evolution Series.
+
+
+      Monitoring is intentionally based on standard SNMPv2-MIB, HOST-RESOURCES-MIB and Printer-MIB objects. Supply, tray and marker rows are discovered dynamically.
+      Manufacturer-specific private OIDs are not guessed.
+
+
+      Product/catalog source: https://www.kyoceradocumentsolutions.ca/en/products/mfp/kyocera-evolution-series.html
+
+      SNMP evidence source: https://www.kyoceradocumentsolutions.ca/content/download-center-americas/ca/documents/brochures-and-specs/KYOCERA_TASKalfa3554ci_SpecGuide_2023JAN09_pdf.download.pdf
+
+      Verification notes: Kyocera Canada Evolution family is current; series specification/driver grouping and model spec document SNMPv1/v2c/v3.
+
+      '
+    groups:
+    - name: Templates/Printers
+    tags:
+    - tag: class
+      value: printer
+    - tag: manufacturer
+      value: Kyocera
+    - tag: model
+      value: TASKalfa 6004i
+    - tag: family
+      value: TASKalfa Evolution
+    - tag: category
+      value: A3 MFP
+    - tag: snmp_support
+      value: SNMPv1/v2c/v3
+    - tag: evidence_level
+      value: B - current model + series/platform
+    macros:
+    - macro: '{$SNMP.TIMEOUT}'
+      value: 10m
+      description: Time without successful SNMP polling before the availability trigger fires.
+    - macro: '{$PRINTER.SUPPLY.LOW}'
+      value: '10'
+      description: Low supply threshold in percent, used only when both current and maximum capacity are positive.
+    - macro: '{$PRINTER.PAPER.LOW}'
+      value: '10'
+      description: Low paper threshold in percent, used only when both current and maximum tray capacity are positive.
+    items:
+    - uuid: 7d3f697bd95541268881082a964fbad5
+      name: SNMP availability
+      type: INTERNAL
+      key: zabbix[host,snmp,available]
+      delay: 1m
+      history: 7d
+      valuemap:
+        name: Zabbix SNMP availability
+      tags:
+      - tag: component
+        value: availability
+      triggers:
+      - uuid: bebaa3aa6d1946ffb3f5980fb4df4bfd
+        expression: max(/Kyocera TASKalfa 6004i by SNMP/zabbix[host,snmp,available],{$SNMP.TIMEOUT})=0
+        name: 'Kyocera TASKalfa 6004i: No SNMP data collection'
+        priority: HIGH
+        description: Zabbix has been unable to poll this printer over SNMP for the configured timeout period.
+    - uuid: 09d41a3af47043f8b63070905bc6d105
+      name: System description
+      type: SNMP_AGENT
+      snmp_oid: 1.3.6.1.2.1.1.1.0
+      key: printer.sysdescr
+      delay: 1h
+      history: 7d
+      trends: '0'
+      value_type: TEXT
+      tags:
+      - tag: component
+        value: inventory
+    - uuid: a94bd596b1cb4e818fef609f2c425f07
+      name: System name
+      type: SNMP_AGENT
+      snmp_oid: 1.3.6.1.2.1.1.5.0
+      key: printer.sysname
+      delay: 10m
+      history: 7d
+      trends: '0'
+      value_type: CHAR
+      tags:
+      - tag: component
+        value: inventory
+    - uuid: 0130c1a95dfe4240b67d28976e6cdb36
+      name: System object ID
+      type: SNMP_AGENT
+      snmp_oid: 1.3.6.1.2.1.1.2.0
+      key: printer.sysobjectid
+      delay: 12h
+      history: 30d
+      trends: '0'
+      value_type: CHAR
+      tags:
+      - tag: component
+        value: inventory
+    - uuid: fd3f32c3cfd045beb68c1d20d68ff456
+      name: System location
+      type: SNMP_AGENT
+      snmp_oid: 1.3.6.1.2.1.1.6.0
+      key: printer.syslocation
+      delay: 1h
+      history: 7d
+      trends: '0'
+      value_type: CHAR
+      tags:
+      - tag: component
+        value: inventory
+    - uuid: 5a11b9145f0c4681b5a896145d60229c
+      name: System contact
+      type: SNMP_AGENT
+      snmp_oid: 1.3.6.1.2.1.1.4.0
+      key: printer.syscontact
+      delay: 1h
+      history: 7d
+      trends: '0'
+      value_type: CHAR
+      tags:
+      - tag: component
+        value: inventory
+    - uuid: 1732bff5139b4c05ad26a434eb408e2c
+      name: System uptime
+      type: SNMP_AGENT
+      snmp_oid: 1.3.6.1.2.1.1.3.0
+      key: printer.uptime
+      delay: 5m
+      history: 30d
+      value_type: FLOAT
+      units: uptime
+      preprocessing:
+      - type: MULTIPLIER
+        parameters:
+        - '0.01'
+      tags:
+      - tag: component
+        value: system
+    - uuid: ed175d635d454e8cb21de51ac3cb892e
+      name: Printer status
+      type: SNMP_AGENT
+      snmp_oid: 1.3.6.1.2.1.25.3.5.1.1.1
+      key: printer.status
+      delay: 1m
+      history: 30d
+      value_type: UNSIGNED
+      description: 'HOST-RESOURCES-MIB hrPrinterStatus: 1=other, 2=unknown, 3=idle, 4=printing, 5=warmup.'
+      valuemap:
+        name: HOST-RESOURCES-MIB::hrPrinterStatus
+      tags:
+      - tag: component
+        value: status
+      triggers:
+      - uuid: cf456955ab7942428e6818d6e2e48009
+        expression: last(/Kyocera TASKalfa 6004i by SNMP/printer.status)=1 or last(/Kyocera TASKalfa 6004i by SNMP/printer.status)=2
+        name: 'Kyocera TASKalfa 6004i: Printer status is other or unknown'
+        priority: WARNING
+        opdata: 'Printer status: {ITEM.LASTVALUE1}'
+    - uuid: 1d63babb37ec4ae486e219ed6819fdbf
+      name: Printer name
+      type: SNMP_AGENT
+      snmp_oid: 1.3.6.1.2.1.43.5.1.1.16.1
+      key: printer.name
+      delay: 1h
+      history: 7d
+      trends: '0'
+      value_type: CHAR
+      tags:
+      - tag: component
+        value: inventory
+    - uuid: adce9ed711154c49afbe7f13d99cd19c
+      name: Printer serial number
+      type: SNMP_AGENT
+      snmp_oid: 1.3.6.1.2.1.43.5.1.1.17.1
+      key: printer.serial
+      delay: 12h
+      history: 30d
+      trends: '0'
+      value_type: CHAR
+      tags:
+      - tag: component
+        value: inventory
+    - uuid: aa63cec8d564485ab82488e4da2400c9
+      name: Lifetime page count
+      type: SNMP_AGENT
+      snmp_oid: 1.3.6.1.2.1.43.10.2.1.4.1.1
+      key: printer.page.count
+      delay: 5m
+      history: 90d
+      trends: 365d
+      value_type: UNSIGNED
+      units: pages
+      description: Standard Printer-MIB prtMarkerLifeCount for the common .1.1 marker instance. Some devices expose different marker indexes; the generic marker discovery
+        rule in this template can still discover alternate indexes.
+      tags:
+      - tag: component
+        value: usage
+    discovery_rules:
+    - uuid: 109139fc47254b00a8109db72828c274
+      name: Printer supply discovery
+      type: SNMP_AGENT
+      snmp_oid: discovery[{#SUPPLYDESC},1.3.6.1.2.1.43.11.1.1.6,{#SUPPLYTYPE},1.3.6.1.2.1.43.11.1.1.5,{#SUPPLYUNIT},1.3.6.1.2.1.43.11.1.1.7]
+      key: printer.supply.discovery
+      delay: 1h
+      lifetime: 7d
+      description: Discovers supplies from the standard Printer-MIB. Dynamic indexes prevent assumptions about toner/drum/waste-container positions.
+      item_prototypes:
+      - uuid: 0318a30f6e7e4c839c73116295e7aa32
+        name: 'Supply {#SUPPLYDESC}: current level'
+        type: SNMP_AGENT
+        snmp_oid: 1.3.6.1.2.1.43.11.1.1.9.{#SNMPINDEX}
+        key: printer.supply.level[{#SNMPINDEX}]
+        delay: 5m
+        history: 30d
+        trends: 365d
+        value_type: FLOAT
+        description: Raw current supply level. Printer-MIB special values can include -1=other, -2=unknown, -3=some remains but exact amount is unknown.
+      - uuid: ac79802d807f45f592613d9ca426fb9e
+        name: 'Supply {#SUPPLYDESC}: maximum capacity'
+        type: SNMP_AGENT
+        snmp_oid: 1.3.6.1.2.1.43.11.1.1.8.{#SNMPINDEX}
+        key: printer.supply.max[{#SNMPINDEX}]
+        delay: 1h
+        history: 30d
+        trends: 365d
+        value_type: FLOAT
+        description: Raw maximum supply capacity. Printer-MIB can return negative special values when capacity is unknown.
+      trigger_prototypes:
+      - uuid: 694cd02f2142448ea386461f3befa847
+        expression: last(/Kyocera TASKalfa 6004i by SNMP/printer.supply.level[{#SNMPINDEX}])=0
+        name: 'Kyocera TASKalfa 6004i: {#SUPPLYDESC} is empty'
+        priority: HIGH
+      - uuid: df6d5a3c72e043cd9e64b57d8a3363f5
+        expression: last(/Kyocera TASKalfa 6004i by SNMP/printer.supply.level[{#SNMPINDEX}])>0 and last(/Kyocera TASKalfa 6004i by SNMP/printer.supply.max[{#SNMPINDEX}])>0
+          and (100*last(/Kyocera TASKalfa 6004i by SNMP/printer.supply.level[{#SNMPINDEX}])/last(/Kyocera TASKalfa 6004i by SNMP/printer.supply.max[{#SNMPINDEX}]))<{$PRINTER.SUPPLY.LOW}
+        name: 'Kyocera TASKalfa 6004i: {#SUPPLYDESC} is low'
+        priority: WARNING
+      graph_prototypes:
+      - uuid: b8bc43d011f64520966e7d6a15c4c039
+        name: Supply {#SUPPLYDESC}
+        graph_items:
+        - color: 199C0D
+          item:
+            host: Kyocera TASKalfa 6004i by SNMP
+            key: printer.supply.level[{#SNMPINDEX}]
+        - sortorder: '1'
+          color: F63100
+          item:
+            host: Kyocera TASKalfa 6004i by SNMP
+            key: printer.supply.max[{#SNMPINDEX}]
+    - uuid: 6d0cfd26ec914fd2864f97b28dd562fc
+      name: Paper tray discovery
+      type: SNMP_AGENT
+      snmp_oid: discovery[{#TRAYNAME},1.3.6.1.2.1.43.8.2.1.13]
+      key: printer.tray.discovery
+      delay: 1h
+      lifetime: 7d
+      description: Discovers input trays using standard Printer-MIB prtInputName.
+      item_prototypes:
+      - uuid: 85bea876bb90467499a63d7067aee6f5
+        name: 'Paper tray {#TRAYNAME}: current level'
+        type: SNMP_AGENT
+        snmp_oid: 1.3.6.1.2.1.43.8.2.1.10.{#SNMPINDEX}
+        key: printer.tray.level[{#SNMPINDEX}]
+        delay: 5m
+        history: 30d
+        trends: 365d
+        value_type: FLOAT
+        units: sheets
+      - uuid: e802e7441b5a4093a543757d2398d275
+        name: 'Paper tray {#TRAYNAME}: maximum capacity'
+        type: SNMP_AGENT
+        snmp_oid: 1.3.6.1.2.1.43.8.2.1.9.{#SNMPINDEX}
+        key: printer.tray.max[{#SNMPINDEX}]
+        delay: 1h
+        history: 30d
+        trends: 365d
+        value_type: FLOAT
+        units: sheets
+      trigger_prototypes:
+      - uuid: aaafdbaf71ca4221860767408ad8bcc1
+        expression: last(/Kyocera TASKalfa 6004i by SNMP/printer.tray.level[{#SNMPINDEX}])=0
+        name: 'Kyocera TASKalfa 6004i: Paper tray {#TRAYNAME} is empty'
+        priority: AVERAGE
+      - uuid: 356bcf6813594816843cf333535b534b
+        expression: last(/Kyocera TASKalfa 6004i by SNMP/printer.tray.level[{#SNMPINDEX}])>0 and last(/Kyocera TASKalfa 6004i by SNMP/printer.tray.max[{#SNMPINDEX}])>0
+          and (100*last(/Kyocera TASKalfa 6004i by SNMP/printer.tray.level[{#SNMPINDEX}])/last(/Kyocera TASKalfa 6004i by SNMP/printer.tray.max[{#SNMPINDEX}]))<{$PRINTER.PAPER.LOW}
+        name: 'Kyocera TASKalfa 6004i: Paper tray {#TRAYNAME} is low'
+        priority: WARNING
+      graph_prototypes:
+      - uuid: 7f2c20c909bd41f3ad8a32013178c5e5
+        name: Paper tray {#TRAYNAME}
+        graph_items:
+        - color: 199C0D
+          item:
+            host: Kyocera TASKalfa 6004i by SNMP
+            key: printer.tray.level[{#SNMPINDEX}]
+        - sortorder: '1'
+          color: F63100
+          item:
+            host: Kyocera TASKalfa 6004i by SNMP
+            key: printer.tray.max[{#SNMPINDEX}]
+    - uuid: 0e315285b75841abb78b2ce6fbbc4188
+      name: Marker life counter discovery
+      type: SNMP_AGENT
+      snmp_oid: discovery[{#MARKERCOUNT},1.3.6.1.2.1.43.10.2.1.4]
+      key: printer.marker.discovery
+      delay: 1h
+      lifetime: 7d
+      description: Discovers Printer-MIB prtMarkerLifeCount entries so devices with non-.1.1 marker indexes still expose usage counters.
+      item_prototypes:
+      - uuid: 53f182ade8774eb4818d68cfbd863f18
+        name: 'Marker {#SNMPINDEX}: lifetime count'
+        type: SNMP_AGENT
+        snmp_oid: 1.3.6.1.2.1.43.10.2.1.4.{#SNMPINDEX}
+        key: printer.marker.life[{#SNMPINDEX}]
+        delay: 5m
+        history: 90d
+        trends: 365d
+        value_type: UNSIGNED
+      graph_prototypes:
+      - uuid: d4055626ecef453f9b33b415ba9e10c5
+        name: 'Marker {#SNMPINDEX}: lifetime count'
+        graph_items:
+        - color: 2774A4
+          item:
+            host: Kyocera TASKalfa 6004i by SNMP
+            key: printer.marker.life[{#SNMPINDEX}]
+    valuemaps:
+    - uuid: 889ab5d641f84883a88576da7b8942d5
+      name: Zabbix SNMP availability
+      mappings:
+      - value: '0'
+        newvalue: Not available
+      - value: '1'
+        newvalue: Available
+      - value: '2'
+        newvalue: Unknown
+    - uuid: 584b40b4af0c4c9fbfd2b7c9aaf68742
+      name: HOST-RESOURCES-MIB::hrPrinterStatus
+      mappings:
+      - value: '1'
+        newvalue: Other
+      - value: '2'
+        newvalue: Unknown
+      - value: '3'
+        newvalue: Idle
+      - value: '4'
+        newvalue: Printing
+      - value: '5'
+        newvalue: Warmup
+  graphs:
+  - uuid: 43b2df3a01224c7084e6a7b4f4ea2d7d
+    name: 'Kyocera TASKalfa 6004i: Lifetime page count'
+    graph_items:
+    - color: 2774A4
+      item:
+        host: Kyocera TASKalfa 6004i by SNMP
+        key: printer.page.count
