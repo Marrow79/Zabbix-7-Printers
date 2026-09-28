@@ -1,0 +1,381 @@
+zabbix_export:
+  version: '7.0'
+  template_groups:
+  - uuid: e8f2a8480d674fb2a53bea65079ae6e3
+    name: Templates/Printers
+  templates:
+  - uuid: 5aad3a66cb2a4280a868ad7e3b0d90b7
+    template: Epson Epson LQ-690IIN by SNMP
+    name: Epson Epson LQ-690IIN by SNMP
+    description: 'Zabbix 7.0.x SNMP template for Epson Epson LQ-690IIN.
+
+
+      Verified source database date: 2026-09-27.
+
+      Family/series: Impact / Dot Matrix.
+
+      Category: Impact / dot-matrix printer; B&W.
+
+      Network: IP network interface (wired and/or wireless by model).
+
+      Verified SNMP support: SNMP (remote SNMP confirmed; version varies).
+
+      Evidence level: A - model-specific SNMP advisory.
+
+      Canada status: Epson Canada support-listed; current-sale status varies.
+
+
+      Monitoring is intentionally based on standard SNMPv2-MIB, HOST-RESOURCES-MIB and Printer-MIB objects. Supply, tray and marker rows are discovered dynamically.
+      Manufacturer-specific private OIDs are not guessed.
+
+
+      Product/catalog source: https://epson.ca/support/wa00965
+
+      SNMP evidence source: https://epson.ca/support/wa00965
+
+      Verification notes: Epson Canada''s SNMP vulnerability advisory explicitly lists this model, establishing remote SNMP support. Check the product page for exact
+      interface and SNMP version before deployment.
+
+      '
+    groups:
+    - name: Templates/Printers
+    tags:
+    - tag: class
+      value: printer
+    - tag: manufacturer
+      value: Epson
+    - tag: model
+      value: Epson LQ-690IIN
+    - tag: family
+      value: Impact / Dot Matrix
+    - tag: category
+      value: Impact / dot-matrix printer
+    - tag: snmp_support
+      value: SNMP (remote SNMP confirmed; version varies)
+    - tag: evidence_level
+      value: A - model-specific SNMP advisory
+    macros:
+    - macro: '{$SNMP.TIMEOUT}'
+      value: 10m
+      description: Time without successful SNMP polling before the availability trigger fires.
+    - macro: '{$PRINTER.SUPPLY.LOW}'
+      value: '10'
+      description: Low supply threshold in percent, used only when both current and maximum capacity are positive.
+    - macro: '{$PRINTER.PAPER.LOW}'
+      value: '10'
+      description: Low paper threshold in percent, used only when both current and maximum tray capacity are positive.
+    items:
+    - uuid: a211222e2a254b88b1962f8652b36e88
+      name: SNMP availability
+      type: INTERNAL
+      key: zabbix[host,snmp,available]
+      delay: 1m
+      history: 7d
+      valuemap:
+        name: Zabbix SNMP availability
+      tags:
+      - tag: component
+        value: availability
+      triggers:
+      - uuid: 12b4745d806e4572994e3984bd3b129c
+        expression: max(/Epson Epson LQ-690IIN by SNMP/zabbix[host,snmp,available],{$SNMP.TIMEOUT})=0
+        name: 'Epson Epson LQ-690IIN: No SNMP data collection'
+        priority: HIGH
+        description: Zabbix has been unable to poll this printer over SNMP for the configured timeout period.
+    - uuid: a669999f772f48f69f00fdc1dc05c055
+      name: System description
+      type: SNMP_AGENT
+      snmp_oid: 1.3.6.1.2.1.1.1.0
+      key: printer.sysdescr
+      delay: 1h
+      history: 7d
+      trends: '0'
+      value_type: TEXT
+      tags:
+      - tag: component
+        value: inventory
+    - uuid: 5ff5d23e0623471b9d1f5297854665c8
+      name: System name
+      type: SNMP_AGENT
+      snmp_oid: 1.3.6.1.2.1.1.5.0
+      key: printer.sysname
+      delay: 10m
+      history: 7d
+      trends: '0'
+      value_type: CHAR
+      tags:
+      - tag: component
+        value: inventory
+    - uuid: 2af0f4eff52245718cb7ca794f815e84
+      name: System object ID
+      type: SNMP_AGENT
+      snmp_oid: 1.3.6.1.2.1.1.2.0
+      key: printer.sysobjectid
+      delay: 12h
+      history: 30d
+      trends: '0'
+      value_type: CHAR
+      tags:
+      - tag: component
+        value: inventory
+    - uuid: 7a170f0ef36a493f94447797cf2df706
+      name: System location
+      type: SNMP_AGENT
+      snmp_oid: 1.3.6.1.2.1.1.6.0
+      key: printer.syslocation
+      delay: 1h
+      history: 7d
+      trends: '0'
+      value_type: CHAR
+      tags:
+      - tag: component
+        value: inventory
+    - uuid: 94997cfb45ec4c7bb726159e09679110
+      name: System contact
+      type: SNMP_AGENT
+      snmp_oid: 1.3.6.1.2.1.1.4.0
+      key: printer.syscontact
+      delay: 1h
+      history: 7d
+      trends: '0'
+      value_type: CHAR
+      tags:
+      - tag: component
+        value: inventory
+    - uuid: 7f42142a47684db38bf71ca920deae6b
+      name: System uptime
+      type: SNMP_AGENT
+      snmp_oid: 1.3.6.1.2.1.1.3.0
+      key: printer.uptime
+      delay: 5m
+      history: 30d
+      value_type: FLOAT
+      units: uptime
+      preprocessing:
+      - type: MULTIPLIER
+        parameters:
+        - '0.01'
+      tags:
+      - tag: component
+        value: system
+    - uuid: 1f0909cbef4c44729709fae63f0af442
+      name: Printer status
+      type: SNMP_AGENT
+      snmp_oid: 1.3.6.1.2.1.25.3.5.1.1.1
+      key: printer.status
+      delay: 1m
+      history: 30d
+      value_type: UNSIGNED
+      description: 'HOST-RESOURCES-MIB hrPrinterStatus: 1=other, 2=unknown, 3=idle, 4=printing, 5=warmup.'
+      valuemap:
+        name: HOST-RESOURCES-MIB::hrPrinterStatus
+      tags:
+      - tag: component
+        value: status
+      triggers:
+      - uuid: 1a6da82a1cbf4c8cb3ddcc9af27f3a6b
+        expression: last(/Epson Epson LQ-690IIN by SNMP/printer.status)=1 or last(/Epson Epson LQ-690IIN by SNMP/printer.status)=2
+        name: 'Epson Epson LQ-690IIN: Printer status is other or unknown'
+        priority: WARNING
+        opdata: 'Printer status: {ITEM.LASTVALUE1}'
+    - uuid: 14b8907ceaa04c3880963ce9470e8f96
+      name: Printer name
+      type: SNMP_AGENT
+      snmp_oid: 1.3.6.1.2.1.43.5.1.1.16.1
+      key: printer.name
+      delay: 1h
+      history: 7d
+      trends: '0'
+      value_type: CHAR
+      tags:
+      - tag: component
+        value: inventory
+    - uuid: 580e9c84cdb64f3389fa8b43a8d14397
+      name: Printer serial number
+      type: SNMP_AGENT
+      snmp_oid: 1.3.6.1.2.1.43.5.1.1.17.1
+      key: printer.serial
+      delay: 12h
+      history: 30d
+      trends: '0'
+      value_type: CHAR
+      tags:
+      - tag: component
+        value: inventory
+    - uuid: df206424db904cd0859c1c6ebf665ca7
+      name: Lifetime page count
+      type: SNMP_AGENT
+      snmp_oid: 1.3.6.1.2.1.43.10.2.1.4.1.1
+      key: printer.page.count
+      delay: 5m
+      history: 90d
+      trends: 365d
+      value_type: UNSIGNED
+      units: pages
+      description: Standard Printer-MIB prtMarkerLifeCount for the common .1.1 marker instance. Some devices expose different marker indexes; the generic marker discovery
+        rule in this template can still discover alternate indexes.
+      tags:
+      - tag: component
+        value: usage
+    discovery_rules:
+    - uuid: ea289a4ab56c486eb50bd155d26ed45a
+      name: Printer supply discovery
+      type: SNMP_AGENT
+      snmp_oid: discovery[{#SUPPLYDESC},1.3.6.1.2.1.43.11.1.1.6,{#SUPPLYTYPE},1.3.6.1.2.1.43.11.1.1.5,{#SUPPLYUNIT},1.3.6.1.2.1.43.11.1.1.7]
+      key: printer.supply.discovery
+      delay: 1h
+      lifetime: 7d
+      description: Discovers supplies from the standard Printer-MIB. Dynamic indexes prevent assumptions about toner/drum/waste-container positions.
+      item_prototypes:
+      - uuid: 29e4b2616eaf4235bf82907856120787
+        name: 'Supply {#SUPPLYDESC}: current level'
+        type: SNMP_AGENT
+        snmp_oid: 1.3.6.1.2.1.43.11.1.1.9.{#SNMPINDEX}
+        key: printer.supply.level[{#SNMPINDEX}]
+        delay: 5m
+        history: 30d
+        trends: 365d
+        value_type: FLOAT
+        description: Raw current supply level. Printer-MIB special values can include -1=other, -2=unknown, -3=some remains but exact amount is unknown.
+      - uuid: 62e4fe218b0843ba9bf984a71744a200
+        name: 'Supply {#SUPPLYDESC}: maximum capacity'
+        type: SNMP_AGENT
+        snmp_oid: 1.3.6.1.2.1.43.11.1.1.8.{#SNMPINDEX}
+        key: printer.supply.max[{#SNMPINDEX}]
+        delay: 1h
+        history: 30d
+        trends: 365d
+        value_type: FLOAT
+        description: Raw maximum supply capacity. Printer-MIB can return negative special values when capacity is unknown.
+      trigger_prototypes:
+      - uuid: 2d9c7f46620e4ce0ba68e3d35aa71efb
+        expression: last(/Epson Epson LQ-690IIN by SNMP/printer.supply.level[{#SNMPINDEX}])=0
+        name: 'Epson Epson LQ-690IIN: {#SUPPLYDESC} is empty'
+        priority: HIGH
+      - uuid: 8f2d92b292074e0b87e92674d6ed0750
+        expression: last(/Epson Epson LQ-690IIN by SNMP/printer.supply.level[{#SNMPINDEX}])>0 and last(/Epson Epson LQ-690IIN by SNMP/printer.supply.max[{#SNMPINDEX}])>0
+          and (100*last(/Epson Epson LQ-690IIN by SNMP/printer.supply.level[{#SNMPINDEX}])/last(/Epson Epson LQ-690IIN by SNMP/printer.supply.max[{#SNMPINDEX}]))<{$PRINTER.SUPPLY.LOW}
+        name: 'Epson Epson LQ-690IIN: {#SUPPLYDESC} is low'
+        priority: WARNING
+      graph_prototypes:
+      - uuid: 52069920116d4c1dbf16148ca636ed66
+        name: Supply {#SUPPLYDESC}
+        graph_items:
+        - color: 199C0D
+          item:
+            host: Epson Epson LQ-690IIN by SNMP
+            key: printer.supply.level[{#SNMPINDEX}]
+        - sortorder: '1'
+          color: F63100
+          item:
+            host: Epson Epson LQ-690IIN by SNMP
+            key: printer.supply.max[{#SNMPINDEX}]
+    - uuid: 9f3718d576784c4ca001454b45359d40
+      name: Paper tray discovery
+      type: SNMP_AGENT
+      snmp_oid: discovery[{#TRAYNAME},1.3.6.1.2.1.43.8.2.1.13]
+      key: printer.tray.discovery
+      delay: 1h
+      lifetime: 7d
+      description: Discovers input trays using standard Printer-MIB prtInputName.
+      item_prototypes:
+      - uuid: 8912c94723b4484dbae96e3015b84dff
+        name: 'Paper tray {#TRAYNAME}: current level'
+        type: SNMP_AGENT
+        snmp_oid: 1.3.6.1.2.1.43.8.2.1.10.{#SNMPINDEX}
+        key: printer.tray.level[{#SNMPINDEX}]
+        delay: 5m
+        history: 30d
+        trends: 365d
+        value_type: FLOAT
+        units: sheets
+      - uuid: dcf077c42f7b47168c60ebf36aef3638
+        name: 'Paper tray {#TRAYNAME}: maximum capacity'
+        type: SNMP_AGENT
+        snmp_oid: 1.3.6.1.2.1.43.8.2.1.9.{#SNMPINDEX}
+        key: printer.tray.max[{#SNMPINDEX}]
+        delay: 1h
+        history: 30d
+        trends: 365d
+        value_type: FLOAT
+        units: sheets
+      trigger_prototypes:
+      - uuid: 20885351a31241cc9576ddb3609669ab
+        expression: last(/Epson Epson LQ-690IIN by SNMP/printer.tray.level[{#SNMPINDEX}])=0
+        name: 'Epson Epson LQ-690IIN: Paper tray {#TRAYNAME} is empty'
+        priority: AVERAGE
+      - uuid: 1f79517b8a6e48e0840046e8d54ef784
+        expression: last(/Epson Epson LQ-690IIN by SNMP/printer.tray.level[{#SNMPINDEX}])>0 and last(/Epson Epson LQ-690IIN by SNMP/printer.tray.max[{#SNMPINDEX}])>0
+          and (100*last(/Epson Epson LQ-690IIN by SNMP/printer.tray.level[{#SNMPINDEX}])/last(/Epson Epson LQ-690IIN by SNMP/printer.tray.max[{#SNMPINDEX}]))<{$PRINTER.PAPER.LOW}
+        name: 'Epson Epson LQ-690IIN: Paper tray {#TRAYNAME} is low'
+        priority: WARNING
+      graph_prototypes:
+      - uuid: 605ed8573a764333b6d4023ff84a4ee8
+        name: Paper tray {#TRAYNAME}
+        graph_items:
+        - color: 199C0D
+          item:
+            host: Epson Epson LQ-690IIN by SNMP
+            key: printer.tray.level[{#SNMPINDEX}]
+        - sortorder: '1'
+          color: F63100
+          item:
+            host: Epson Epson LQ-690IIN by SNMP
+            key: printer.tray.max[{#SNMPINDEX}]
+    - uuid: 3fdf04093d37442eab99aecfa237b6e3
+      name: Marker life counter discovery
+      type: SNMP_AGENT
+      snmp_oid: discovery[{#MARKERCOUNT},1.3.6.1.2.1.43.10.2.1.4]
+      key: printer.marker.discovery
+      delay: 1h
+      lifetime: 7d
+      description: Discovers Printer-MIB prtMarkerLifeCount entries so devices with non-.1.1 marker indexes still expose usage counters.
+      item_prototypes:
+      - uuid: e7bd008291b2448aa8fb64efe9b52e6b
+        name: 'Marker {#SNMPINDEX}: lifetime count'
+        type: SNMP_AGENT
+        snmp_oid: 1.3.6.1.2.1.43.10.2.1.4.{#SNMPINDEX}
+        key: printer.marker.life[{#SNMPINDEX}]
+        delay: 5m
+        history: 90d
+        trends: 365d
+        value_type: UNSIGNED
+      graph_prototypes:
+      - uuid: fa7c1e29a3ef43128a6e4522fe30fc7e
+        name: 'Marker {#SNMPINDEX}: lifetime count'
+        graph_items:
+        - color: 2774A4
+          item:
+            host: Epson Epson LQ-690IIN by SNMP
+            key: printer.marker.life[{#SNMPINDEX}]
+    valuemaps:
+    - uuid: bab12cdf5cd14dab97d8a24734d30573
+      name: Zabbix SNMP availability
+      mappings:
+      - value: '0'
+        newvalue: Not available
+      - value: '1'
+        newvalue: Available
+      - value: '2'
+        newvalue: Unknown
+    - uuid: 67020d15a9d244feb606f2c981f06db5
+      name: HOST-RESOURCES-MIB::hrPrinterStatus
+      mappings:
+      - value: '1'
+        newvalue: Other
+      - value: '2'
+        newvalue: Unknown
+      - value: '3'
+        newvalue: Idle
+      - value: '4'
+        newvalue: Printing
+      - value: '5'
+        newvalue: Warmup
+  graphs:
+  - uuid: 67ab966257384ab9a7ead0f5c35709ab
+    name: 'Epson Epson LQ-690IIN: Lifetime page count'
+    graph_items:
+    - color: 2774A4
+      item:
+        host: Epson Epson LQ-690IIN by SNMP
+        key: printer.page.count

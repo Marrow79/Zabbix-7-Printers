@@ -1,0 +1,380 @@
+zabbix_export:
+  version: '7.0'
+  template_groups:
+  - uuid: e8f2a8480d674fb2a53bea65079ae6e3
+    name: Templates/Printers
+  templates:
+  - uuid: f8937241ab2f4879a57bbff92b426802
+    template: Canon imageCLASS MF663Cdw by SNMP
+    name: Canon imageCLASS MF663Cdw by SNMP
+    description: 'Zabbix 7.0.x SNMP template for Canon imageCLASS MF663Cdw.
+
+
+      Verified source database date: 2026-09-27.
+
+      Family/series: imageCLASS MF600.
+
+      Category: Colour MFP; Colour.
+
+      Network: Ethernet + Wi-Fi.
+
+      Verified SNMP support: SNMPv3.
+
+      Evidence level: A - model-specific.
+
+      Canada status: Canada product/catalog page.
+
+
+      Monitoring is intentionally based on standard SNMPv2-MIB, HOST-RESOURCES-MIB and Printer-MIB objects. Supply, tray and marker rows are discovered dynamically.
+      Manufacturer-specific private OIDs are not guessed.
+
+
+      Product/catalog source: https://shop.canon.ca/en_ca/p/imageclass-mf663cdw
+
+      SNMP evidence source: https://shop.canon.ca/en_ca/p/imageclass-mf663cdw
+
+      Verification notes: Canon Canada product/specification pages list SNMP V3.0 and network connectivity.
+
+      '
+    groups:
+    - name: Templates/Printers
+    tags:
+    - tag: class
+      value: printer
+    - tag: manufacturer
+      value: Canon
+    - tag: model
+      value: imageCLASS MF663Cdw
+    - tag: family
+      value: imageCLASS MF600
+    - tag: category
+      value: Colour MFP
+    - tag: snmp_support
+      value: SNMPv3
+    - tag: evidence_level
+      value: A - model-specific
+    macros:
+    - macro: '{$SNMP.TIMEOUT}'
+      value: 10m
+      description: Time without successful SNMP polling before the availability trigger fires.
+    - macro: '{$PRINTER.SUPPLY.LOW}'
+      value: '10'
+      description: Low supply threshold in percent, used only when both current and maximum capacity are positive.
+    - macro: '{$PRINTER.PAPER.LOW}'
+      value: '10'
+      description: Low paper threshold in percent, used only when both current and maximum tray capacity are positive.
+    items:
+    - uuid: dc25100d1f604ca99a230068fcfffdf2
+      name: SNMP availability
+      type: INTERNAL
+      key: zabbix[host,snmp,available]
+      delay: 1m
+      history: 7d
+      valuemap:
+        name: Zabbix SNMP availability
+      tags:
+      - tag: component
+        value: availability
+      triggers:
+      - uuid: 4a6daff88a5b4d83a09cf9773605d131
+        expression: max(/Canon imageCLASS MF663Cdw by SNMP/zabbix[host,snmp,available],{$SNMP.TIMEOUT})=0
+        name: 'Canon imageCLASS MF663Cdw: No SNMP data collection'
+        priority: HIGH
+        description: Zabbix has been unable to poll this printer over SNMP for the configured timeout period.
+    - uuid: c8a784893bf449df9b027dc71db8b2ac
+      name: System description
+      type: SNMP_AGENT
+      snmp_oid: 1.3.6.1.2.1.1.1.0
+      key: printer.sysdescr
+      delay: 1h
+      history: 7d
+      trends: '0'
+      value_type: TEXT
+      tags:
+      - tag: component
+        value: inventory
+    - uuid: a463453049e14395a2612f61c26669fe
+      name: System name
+      type: SNMP_AGENT
+      snmp_oid: 1.3.6.1.2.1.1.5.0
+      key: printer.sysname
+      delay: 10m
+      history: 7d
+      trends: '0'
+      value_type: CHAR
+      tags:
+      - tag: component
+        value: inventory
+    - uuid: 841d0ec19ef34229a9931cdc20811f4d
+      name: System object ID
+      type: SNMP_AGENT
+      snmp_oid: 1.3.6.1.2.1.1.2.0
+      key: printer.sysobjectid
+      delay: 12h
+      history: 30d
+      trends: '0'
+      value_type: CHAR
+      tags:
+      - tag: component
+        value: inventory
+    - uuid: 2812f6769173403bbf710433b3a1623e
+      name: System location
+      type: SNMP_AGENT
+      snmp_oid: 1.3.6.1.2.1.1.6.0
+      key: printer.syslocation
+      delay: 1h
+      history: 7d
+      trends: '0'
+      value_type: CHAR
+      tags:
+      - tag: component
+        value: inventory
+    - uuid: 7e0883e578c241c8ba2cfa397eba07bc
+      name: System contact
+      type: SNMP_AGENT
+      snmp_oid: 1.3.6.1.2.1.1.4.0
+      key: printer.syscontact
+      delay: 1h
+      history: 7d
+      trends: '0'
+      value_type: CHAR
+      tags:
+      - tag: component
+        value: inventory
+    - uuid: ddb66fad29674f299f335353a9334d09
+      name: System uptime
+      type: SNMP_AGENT
+      snmp_oid: 1.3.6.1.2.1.1.3.0
+      key: printer.uptime
+      delay: 5m
+      history: 30d
+      value_type: FLOAT
+      units: uptime
+      preprocessing:
+      - type: MULTIPLIER
+        parameters:
+        - '0.01'
+      tags:
+      - tag: component
+        value: system
+    - uuid: 861ab5b5e7164e76932805cb45941fac
+      name: Printer status
+      type: SNMP_AGENT
+      snmp_oid: 1.3.6.1.2.1.25.3.5.1.1.1
+      key: printer.status
+      delay: 1m
+      history: 30d
+      value_type: UNSIGNED
+      description: 'HOST-RESOURCES-MIB hrPrinterStatus: 1=other, 2=unknown, 3=idle, 4=printing, 5=warmup.'
+      valuemap:
+        name: HOST-RESOURCES-MIB::hrPrinterStatus
+      tags:
+      - tag: component
+        value: status
+      triggers:
+      - uuid: b3112e7dd0db4d65b7686f4c6361e8c7
+        expression: last(/Canon imageCLASS MF663Cdw by SNMP/printer.status)=1 or last(/Canon imageCLASS MF663Cdw by SNMP/printer.status)=2
+        name: 'Canon imageCLASS MF663Cdw: Printer status is other or unknown'
+        priority: WARNING
+        opdata: 'Printer status: {ITEM.LASTVALUE1}'
+    - uuid: 7689c925791d4071b18d5e63775daa93
+      name: Printer name
+      type: SNMP_AGENT
+      snmp_oid: 1.3.6.1.2.1.43.5.1.1.16.1
+      key: printer.name
+      delay: 1h
+      history: 7d
+      trends: '0'
+      value_type: CHAR
+      tags:
+      - tag: component
+        value: inventory
+    - uuid: 15c966e87a3443cea1663ce43ebc0334
+      name: Printer serial number
+      type: SNMP_AGENT
+      snmp_oid: 1.3.6.1.2.1.43.5.1.1.17.1
+      key: printer.serial
+      delay: 12h
+      history: 30d
+      trends: '0'
+      value_type: CHAR
+      tags:
+      - tag: component
+        value: inventory
+    - uuid: e787336b544d449daaccd393285bba8c
+      name: Lifetime page count
+      type: SNMP_AGENT
+      snmp_oid: 1.3.6.1.2.1.43.10.2.1.4.1.1
+      key: printer.page.count
+      delay: 5m
+      history: 90d
+      trends: 365d
+      value_type: UNSIGNED
+      units: pages
+      description: Standard Printer-MIB prtMarkerLifeCount for the common .1.1 marker instance. Some devices expose different marker indexes; the generic marker discovery
+        rule in this template can still discover alternate indexes.
+      tags:
+      - tag: component
+        value: usage
+    discovery_rules:
+    - uuid: d3cd800885be41edb31d75bd88f46f33
+      name: Printer supply discovery
+      type: SNMP_AGENT
+      snmp_oid: discovery[{#SUPPLYDESC},1.3.6.1.2.1.43.11.1.1.6,{#SUPPLYTYPE},1.3.6.1.2.1.43.11.1.1.5,{#SUPPLYUNIT},1.3.6.1.2.1.43.11.1.1.7]
+      key: printer.supply.discovery
+      delay: 1h
+      lifetime: 7d
+      description: Discovers supplies from the standard Printer-MIB. Dynamic indexes prevent assumptions about toner/drum/waste-container positions.
+      item_prototypes:
+      - uuid: 88b94a17bd914adaa109fc9508254f5c
+        name: 'Supply {#SUPPLYDESC}: current level'
+        type: SNMP_AGENT
+        snmp_oid: 1.3.6.1.2.1.43.11.1.1.9.{#SNMPINDEX}
+        key: printer.supply.level[{#SNMPINDEX}]
+        delay: 5m
+        history: 30d
+        trends: 365d
+        value_type: FLOAT
+        description: Raw current supply level. Printer-MIB special values can include -1=other, -2=unknown, -3=some remains but exact amount is unknown.
+      - uuid: d7156610aff74c4b91c21f3fe4e51ef3
+        name: 'Supply {#SUPPLYDESC}: maximum capacity'
+        type: SNMP_AGENT
+        snmp_oid: 1.3.6.1.2.1.43.11.1.1.8.{#SNMPINDEX}
+        key: printer.supply.max[{#SNMPINDEX}]
+        delay: 1h
+        history: 30d
+        trends: 365d
+        value_type: FLOAT
+        description: Raw maximum supply capacity. Printer-MIB can return negative special values when capacity is unknown.
+      trigger_prototypes:
+      - uuid: 9c84003c898e43f19c925d64fa8b6811
+        expression: last(/Canon imageCLASS MF663Cdw by SNMP/printer.supply.level[{#SNMPINDEX}])=0
+        name: 'Canon imageCLASS MF663Cdw: {#SUPPLYDESC} is empty'
+        priority: HIGH
+      - uuid: 07e9444ccfab4d8cbab4d3a9d95e6cdc
+        expression: last(/Canon imageCLASS MF663Cdw by SNMP/printer.supply.level[{#SNMPINDEX}])>0 and last(/Canon imageCLASS MF663Cdw by SNMP/printer.supply.max[{#SNMPINDEX}])>0
+          and (100*last(/Canon imageCLASS MF663Cdw by SNMP/printer.supply.level[{#SNMPINDEX}])/last(/Canon imageCLASS MF663Cdw by SNMP/printer.supply.max[{#SNMPINDEX}]))<{$PRINTER.SUPPLY.LOW}
+        name: 'Canon imageCLASS MF663Cdw: {#SUPPLYDESC} is low'
+        priority: WARNING
+      graph_prototypes:
+      - uuid: 471c53068fdb4cf9b22d743671625771
+        name: Supply {#SUPPLYDESC}
+        graph_items:
+        - color: 199C0D
+          item:
+            host: Canon imageCLASS MF663Cdw by SNMP
+            key: printer.supply.level[{#SNMPINDEX}]
+        - sortorder: '1'
+          color: F63100
+          item:
+            host: Canon imageCLASS MF663Cdw by SNMP
+            key: printer.supply.max[{#SNMPINDEX}]
+    - uuid: 93563ddebe5c4b58bb2728350eb47bda
+      name: Paper tray discovery
+      type: SNMP_AGENT
+      snmp_oid: discovery[{#TRAYNAME},1.3.6.1.2.1.43.8.2.1.13]
+      key: printer.tray.discovery
+      delay: 1h
+      lifetime: 7d
+      description: Discovers input trays using standard Printer-MIB prtInputName.
+      item_prototypes:
+      - uuid: 64fd05a08e6946a1a373efaa0c3074a0
+        name: 'Paper tray {#TRAYNAME}: current level'
+        type: SNMP_AGENT
+        snmp_oid: 1.3.6.1.2.1.43.8.2.1.10.{#SNMPINDEX}
+        key: printer.tray.level[{#SNMPINDEX}]
+        delay: 5m
+        history: 30d
+        trends: 365d
+        value_type: FLOAT
+        units: sheets
+      - uuid: fa43b0612744459a8d64081c370bd3da
+        name: 'Paper tray {#TRAYNAME}: maximum capacity'
+        type: SNMP_AGENT
+        snmp_oid: 1.3.6.1.2.1.43.8.2.1.9.{#SNMPINDEX}
+        key: printer.tray.max[{#SNMPINDEX}]
+        delay: 1h
+        history: 30d
+        trends: 365d
+        value_type: FLOAT
+        units: sheets
+      trigger_prototypes:
+      - uuid: 4d4cd73145334a6c837ead8eb34c7e71
+        expression: last(/Canon imageCLASS MF663Cdw by SNMP/printer.tray.level[{#SNMPINDEX}])=0
+        name: 'Canon imageCLASS MF663Cdw: Paper tray {#TRAYNAME} is empty'
+        priority: AVERAGE
+      - uuid: 609cffbb1a5f49d28f90cc7b5e3910d6
+        expression: last(/Canon imageCLASS MF663Cdw by SNMP/printer.tray.level[{#SNMPINDEX}])>0 and last(/Canon imageCLASS MF663Cdw by SNMP/printer.tray.max[{#SNMPINDEX}])>0
+          and (100*last(/Canon imageCLASS MF663Cdw by SNMP/printer.tray.level[{#SNMPINDEX}])/last(/Canon imageCLASS MF663Cdw by SNMP/printer.tray.max[{#SNMPINDEX}]))<{$PRINTER.PAPER.LOW}
+        name: 'Canon imageCLASS MF663Cdw: Paper tray {#TRAYNAME} is low'
+        priority: WARNING
+      graph_prototypes:
+      - uuid: 5ab5380bb1d3474fa1cf11693b3af850
+        name: Paper tray {#TRAYNAME}
+        graph_items:
+        - color: 199C0D
+          item:
+            host: Canon imageCLASS MF663Cdw by SNMP
+            key: printer.tray.level[{#SNMPINDEX}]
+        - sortorder: '1'
+          color: F63100
+          item:
+            host: Canon imageCLASS MF663Cdw by SNMP
+            key: printer.tray.max[{#SNMPINDEX}]
+    - uuid: 986bde5c5e954d20ac0baff2b521a293
+      name: Marker life counter discovery
+      type: SNMP_AGENT
+      snmp_oid: discovery[{#MARKERCOUNT},1.3.6.1.2.1.43.10.2.1.4]
+      key: printer.marker.discovery
+      delay: 1h
+      lifetime: 7d
+      description: Discovers Printer-MIB prtMarkerLifeCount entries so devices with non-.1.1 marker indexes still expose usage counters.
+      item_prototypes:
+      - uuid: 07ec5fdf258c4fd6852c252b13163df1
+        name: 'Marker {#SNMPINDEX}: lifetime count'
+        type: SNMP_AGENT
+        snmp_oid: 1.3.6.1.2.1.43.10.2.1.4.{#SNMPINDEX}
+        key: printer.marker.life[{#SNMPINDEX}]
+        delay: 5m
+        history: 90d
+        trends: 365d
+        value_type: UNSIGNED
+      graph_prototypes:
+      - uuid: 98294287f9bb4ec89c92c9edd8eff9a7
+        name: 'Marker {#SNMPINDEX}: lifetime count'
+        graph_items:
+        - color: 2774A4
+          item:
+            host: Canon imageCLASS MF663Cdw by SNMP
+            key: printer.marker.life[{#SNMPINDEX}]
+    valuemaps:
+    - uuid: 6663d4efdcfe4b55b67d69d180282399
+      name: Zabbix SNMP availability
+      mappings:
+      - value: '0'
+        newvalue: Not available
+      - value: '1'
+        newvalue: Available
+      - value: '2'
+        newvalue: Unknown
+    - uuid: c7d0043c53c14935ae7c65355bfd79df
+      name: HOST-RESOURCES-MIB::hrPrinterStatus
+      mappings:
+      - value: '1'
+        newvalue: Other
+      - value: '2'
+        newvalue: Unknown
+      - value: '3'
+        newvalue: Idle
+      - value: '4'
+        newvalue: Printing
+      - value: '5'
+        newvalue: Warmup
+  graphs:
+  - uuid: 73a035785e5b43f39f97e639646c226d
+    name: 'Canon imageCLASS MF663Cdw: Lifetime page count'
+    graph_items:
+    - color: 2774A4
+      item:
+        host: Canon imageCLASS MF663Cdw by SNMP
+        key: printer.page.count

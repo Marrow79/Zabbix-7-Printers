@@ -1,0 +1,381 @@
+zabbix_export:
+  version: '7.0'
+  template_groups:
+  - uuid: e8f2a8480d674fb2a53bea65079ae6e3
+    name: Templates/Printers
+  templates:
+  - uuid: 33b4e9b20e194a689dd35ef302fe756d
+    template: Epson Epson P6570DE by SNMP
+    name: Epson Epson P6570DE by SNMP
+    description: 'Zabbix 7.0.x SNMP template for Epson Epson P6570DE.
+
+
+      Verified source database date: 2026-09-27.
+
+      Family/series: SureColor Large Format.
+
+      Category: Large-format printer; Colour.
+
+      Network: IP network interface (wired and/or wireless by model).
+
+      Verified SNMP support: SNMP (remote SNMP confirmed; version varies).
+
+      Evidence level: A - model-specific SNMP advisory.
+
+      Canada status: Epson Canada support-listed; current-sale status varies.
+
+
+      Monitoring is intentionally based on standard SNMPv2-MIB, HOST-RESOURCES-MIB and Printer-MIB objects. Supply, tray and marker rows are discovered dynamically.
+      Manufacturer-specific private OIDs are not guessed.
+
+
+      Product/catalog source: https://epson.ca/support/wa00965
+
+      SNMP evidence source: https://epson.ca/support/wa00965
+
+      Verification notes: Epson Canada''s SNMP vulnerability advisory explicitly lists this model, establishing remote SNMP support. Check the product page for exact
+      interface and SNMP version before deployment.
+
+      '
+    groups:
+    - name: Templates/Printers
+    tags:
+    - tag: class
+      value: printer
+    - tag: manufacturer
+      value: Epson
+    - tag: model
+      value: Epson P6570DE
+    - tag: family
+      value: SureColor Large Format
+    - tag: category
+      value: Large-format printer
+    - tag: snmp_support
+      value: SNMP (remote SNMP confirmed; version varies)
+    - tag: evidence_level
+      value: A - model-specific SNMP advisory
+    macros:
+    - macro: '{$SNMP.TIMEOUT}'
+      value: 10m
+      description: Time without successful SNMP polling before the availability trigger fires.
+    - macro: '{$PRINTER.SUPPLY.LOW}'
+      value: '10'
+      description: Low supply threshold in percent, used only when both current and maximum capacity are positive.
+    - macro: '{$PRINTER.PAPER.LOW}'
+      value: '10'
+      description: Low paper threshold in percent, used only when both current and maximum tray capacity are positive.
+    items:
+    - uuid: a10575f3fb974ddf8a92bdcc4fe36c9d
+      name: SNMP availability
+      type: INTERNAL
+      key: zabbix[host,snmp,available]
+      delay: 1m
+      history: 7d
+      valuemap:
+        name: Zabbix SNMP availability
+      tags:
+      - tag: component
+        value: availability
+      triggers:
+      - uuid: 2be11f54bbe746a390d3f600e3304273
+        expression: max(/Epson Epson P6570DE by SNMP/zabbix[host,snmp,available],{$SNMP.TIMEOUT})=0
+        name: 'Epson Epson P6570DE: No SNMP data collection'
+        priority: HIGH
+        description: Zabbix has been unable to poll this printer over SNMP for the configured timeout period.
+    - uuid: 1070039222e74c859c50b6730af9b1e6
+      name: System description
+      type: SNMP_AGENT
+      snmp_oid: 1.3.6.1.2.1.1.1.0
+      key: printer.sysdescr
+      delay: 1h
+      history: 7d
+      trends: '0'
+      value_type: TEXT
+      tags:
+      - tag: component
+        value: inventory
+    - uuid: 4cf5384371ae473ea5ae3da4546ab514
+      name: System name
+      type: SNMP_AGENT
+      snmp_oid: 1.3.6.1.2.1.1.5.0
+      key: printer.sysname
+      delay: 10m
+      history: 7d
+      trends: '0'
+      value_type: CHAR
+      tags:
+      - tag: component
+        value: inventory
+    - uuid: 23db2e55a69d499e9a8eb4ffc40ed402
+      name: System object ID
+      type: SNMP_AGENT
+      snmp_oid: 1.3.6.1.2.1.1.2.0
+      key: printer.sysobjectid
+      delay: 12h
+      history: 30d
+      trends: '0'
+      value_type: CHAR
+      tags:
+      - tag: component
+        value: inventory
+    - uuid: 003341a17d5243c1ad6693567e03481d
+      name: System location
+      type: SNMP_AGENT
+      snmp_oid: 1.3.6.1.2.1.1.6.0
+      key: printer.syslocation
+      delay: 1h
+      history: 7d
+      trends: '0'
+      value_type: CHAR
+      tags:
+      - tag: component
+        value: inventory
+    - uuid: 758eb0406ea94a9aacf4dd71ce5d14da
+      name: System contact
+      type: SNMP_AGENT
+      snmp_oid: 1.3.6.1.2.1.1.4.0
+      key: printer.syscontact
+      delay: 1h
+      history: 7d
+      trends: '0'
+      value_type: CHAR
+      tags:
+      - tag: component
+        value: inventory
+    - uuid: cb83d3da913449239116d28afe27d3f8
+      name: System uptime
+      type: SNMP_AGENT
+      snmp_oid: 1.3.6.1.2.1.1.3.0
+      key: printer.uptime
+      delay: 5m
+      history: 30d
+      value_type: FLOAT
+      units: uptime
+      preprocessing:
+      - type: MULTIPLIER
+        parameters:
+        - '0.01'
+      tags:
+      - tag: component
+        value: system
+    - uuid: 3b2d54a3620542e4b391a35beb2a5d0d
+      name: Printer status
+      type: SNMP_AGENT
+      snmp_oid: 1.3.6.1.2.1.25.3.5.1.1.1
+      key: printer.status
+      delay: 1m
+      history: 30d
+      value_type: UNSIGNED
+      description: 'HOST-RESOURCES-MIB hrPrinterStatus: 1=other, 2=unknown, 3=idle, 4=printing, 5=warmup.'
+      valuemap:
+        name: HOST-RESOURCES-MIB::hrPrinterStatus
+      tags:
+      - tag: component
+        value: status
+      triggers:
+      - uuid: 50446c87d3ec440cadd5bdf7c1513c7f
+        expression: last(/Epson Epson P6570DE by SNMP/printer.status)=1 or last(/Epson Epson P6570DE by SNMP/printer.status)=2
+        name: 'Epson Epson P6570DE: Printer status is other or unknown'
+        priority: WARNING
+        opdata: 'Printer status: {ITEM.LASTVALUE1}'
+    - uuid: efdc9cb18c8d4a25822356946f308984
+      name: Printer name
+      type: SNMP_AGENT
+      snmp_oid: 1.3.6.1.2.1.43.5.1.1.16.1
+      key: printer.name
+      delay: 1h
+      history: 7d
+      trends: '0'
+      value_type: CHAR
+      tags:
+      - tag: component
+        value: inventory
+    - uuid: 0b8e82f2f33046789e24fe6eb898b20a
+      name: Printer serial number
+      type: SNMP_AGENT
+      snmp_oid: 1.3.6.1.2.1.43.5.1.1.17.1
+      key: printer.serial
+      delay: 12h
+      history: 30d
+      trends: '0'
+      value_type: CHAR
+      tags:
+      - tag: component
+        value: inventory
+    - uuid: 571ca08e777c46f08a420f24b7b17bd2
+      name: Lifetime page count
+      type: SNMP_AGENT
+      snmp_oid: 1.3.6.1.2.1.43.10.2.1.4.1.1
+      key: printer.page.count
+      delay: 5m
+      history: 90d
+      trends: 365d
+      value_type: UNSIGNED
+      units: pages
+      description: Standard Printer-MIB prtMarkerLifeCount for the common .1.1 marker instance. Some devices expose different marker indexes; the generic marker discovery
+        rule in this template can still discover alternate indexes.
+      tags:
+      - tag: component
+        value: usage
+    discovery_rules:
+    - uuid: b5fc9f14fb964c1d9616cab795b5f6e1
+      name: Printer supply discovery
+      type: SNMP_AGENT
+      snmp_oid: discovery[{#SUPPLYDESC},1.3.6.1.2.1.43.11.1.1.6,{#SUPPLYTYPE},1.3.6.1.2.1.43.11.1.1.5,{#SUPPLYUNIT},1.3.6.1.2.1.43.11.1.1.7]
+      key: printer.supply.discovery
+      delay: 1h
+      lifetime: 7d
+      description: Discovers supplies from the standard Printer-MIB. Dynamic indexes prevent assumptions about toner/drum/waste-container positions.
+      item_prototypes:
+      - uuid: ef60c5670ddc4d56ba7b8d79b3700b97
+        name: 'Supply {#SUPPLYDESC}: current level'
+        type: SNMP_AGENT
+        snmp_oid: 1.3.6.1.2.1.43.11.1.1.9.{#SNMPINDEX}
+        key: printer.supply.level[{#SNMPINDEX}]
+        delay: 5m
+        history: 30d
+        trends: 365d
+        value_type: FLOAT
+        description: Raw current supply level. Printer-MIB special values can include -1=other, -2=unknown, -3=some remains but exact amount is unknown.
+      - uuid: b2cbfeaf0ad04edcbbada26e9f88efdc
+        name: 'Supply {#SUPPLYDESC}: maximum capacity'
+        type: SNMP_AGENT
+        snmp_oid: 1.3.6.1.2.1.43.11.1.1.8.{#SNMPINDEX}
+        key: printer.supply.max[{#SNMPINDEX}]
+        delay: 1h
+        history: 30d
+        trends: 365d
+        value_type: FLOAT
+        description: Raw maximum supply capacity. Printer-MIB can return negative special values when capacity is unknown.
+      trigger_prototypes:
+      - uuid: 67fc79bb8cad4964a4f9626702f1c183
+        expression: last(/Epson Epson P6570DE by SNMP/printer.supply.level[{#SNMPINDEX}])=0
+        name: 'Epson Epson P6570DE: {#SUPPLYDESC} is empty'
+        priority: HIGH
+      - uuid: c97ec88ce3bc448a83baaacf7b686d19
+        expression: last(/Epson Epson P6570DE by SNMP/printer.supply.level[{#SNMPINDEX}])>0 and last(/Epson Epson P6570DE by SNMP/printer.supply.max[{#SNMPINDEX}])>0
+          and (100*last(/Epson Epson P6570DE by SNMP/printer.supply.level[{#SNMPINDEX}])/last(/Epson Epson P6570DE by SNMP/printer.supply.max[{#SNMPINDEX}]))<{$PRINTER.SUPPLY.LOW}
+        name: 'Epson Epson P6570DE: {#SUPPLYDESC} is low'
+        priority: WARNING
+      graph_prototypes:
+      - uuid: e4ad83e1750349fb88e8cd82ed967f39
+        name: Supply {#SUPPLYDESC}
+        graph_items:
+        - color: 199C0D
+          item:
+            host: Epson Epson P6570DE by SNMP
+            key: printer.supply.level[{#SNMPINDEX}]
+        - sortorder: '1'
+          color: F63100
+          item:
+            host: Epson Epson P6570DE by SNMP
+            key: printer.supply.max[{#SNMPINDEX}]
+    - uuid: 9446c917332342e3b2f1f97b5308115d
+      name: Paper tray discovery
+      type: SNMP_AGENT
+      snmp_oid: discovery[{#TRAYNAME},1.3.6.1.2.1.43.8.2.1.13]
+      key: printer.tray.discovery
+      delay: 1h
+      lifetime: 7d
+      description: Discovers input trays using standard Printer-MIB prtInputName.
+      item_prototypes:
+      - uuid: 25c4c37b2e6942a7b3e570213882f37e
+        name: 'Paper tray {#TRAYNAME}: current level'
+        type: SNMP_AGENT
+        snmp_oid: 1.3.6.1.2.1.43.8.2.1.10.{#SNMPINDEX}
+        key: printer.tray.level[{#SNMPINDEX}]
+        delay: 5m
+        history: 30d
+        trends: 365d
+        value_type: FLOAT
+        units: sheets
+      - uuid: 4ea55f9672ec42a7953a588329288aa7
+        name: 'Paper tray {#TRAYNAME}: maximum capacity'
+        type: SNMP_AGENT
+        snmp_oid: 1.3.6.1.2.1.43.8.2.1.9.{#SNMPINDEX}
+        key: printer.tray.max[{#SNMPINDEX}]
+        delay: 1h
+        history: 30d
+        trends: 365d
+        value_type: FLOAT
+        units: sheets
+      trigger_prototypes:
+      - uuid: f105499da9144633b54f2e45d07405df
+        expression: last(/Epson Epson P6570DE by SNMP/printer.tray.level[{#SNMPINDEX}])=0
+        name: 'Epson Epson P6570DE: Paper tray {#TRAYNAME} is empty'
+        priority: AVERAGE
+      - uuid: caef061e5f044df39494df7151b47947
+        expression: last(/Epson Epson P6570DE by SNMP/printer.tray.level[{#SNMPINDEX}])>0 and last(/Epson Epson P6570DE by SNMP/printer.tray.max[{#SNMPINDEX}])>0
+          and (100*last(/Epson Epson P6570DE by SNMP/printer.tray.level[{#SNMPINDEX}])/last(/Epson Epson P6570DE by SNMP/printer.tray.max[{#SNMPINDEX}]))<{$PRINTER.PAPER.LOW}
+        name: 'Epson Epson P6570DE: Paper tray {#TRAYNAME} is low'
+        priority: WARNING
+      graph_prototypes:
+      - uuid: cf4eb9bd75e945c785e63b118805d1fd
+        name: Paper tray {#TRAYNAME}
+        graph_items:
+        - color: 199C0D
+          item:
+            host: Epson Epson P6570DE by SNMP
+            key: printer.tray.level[{#SNMPINDEX}]
+        - sortorder: '1'
+          color: F63100
+          item:
+            host: Epson Epson P6570DE by SNMP
+            key: printer.tray.max[{#SNMPINDEX}]
+    - uuid: d3400b5a93284d9bb39a1d69d896da2d
+      name: Marker life counter discovery
+      type: SNMP_AGENT
+      snmp_oid: discovery[{#MARKERCOUNT},1.3.6.1.2.1.43.10.2.1.4]
+      key: printer.marker.discovery
+      delay: 1h
+      lifetime: 7d
+      description: Discovers Printer-MIB prtMarkerLifeCount entries so devices with non-.1.1 marker indexes still expose usage counters.
+      item_prototypes:
+      - uuid: 78c4e82e6909458a89da9f4800def608
+        name: 'Marker {#SNMPINDEX}: lifetime count'
+        type: SNMP_AGENT
+        snmp_oid: 1.3.6.1.2.1.43.10.2.1.4.{#SNMPINDEX}
+        key: printer.marker.life[{#SNMPINDEX}]
+        delay: 5m
+        history: 90d
+        trends: 365d
+        value_type: UNSIGNED
+      graph_prototypes:
+      - uuid: 0e16eb7bf1524f7a999d21ffde42ecc5
+        name: 'Marker {#SNMPINDEX}: lifetime count'
+        graph_items:
+        - color: 2774A4
+          item:
+            host: Epson Epson P6570DE by SNMP
+            key: printer.marker.life[{#SNMPINDEX}]
+    valuemaps:
+    - uuid: d9059da36a864cf18210ab524d669399
+      name: Zabbix SNMP availability
+      mappings:
+      - value: '0'
+        newvalue: Not available
+      - value: '1'
+        newvalue: Available
+      - value: '2'
+        newvalue: Unknown
+    - uuid: 1f2c50e1f8e74e7dbb4f4ad9d89ecbc7
+      name: HOST-RESOURCES-MIB::hrPrinterStatus
+      mappings:
+      - value: '1'
+        newvalue: Other
+      - value: '2'
+        newvalue: Unknown
+      - value: '3'
+        newvalue: Idle
+      - value: '4'
+        newvalue: Printing
+      - value: '5'
+        newvalue: Warmup
+  graphs:
+  - uuid: 0983d712cefe400a97e2a411998bc53d
+    name: 'Epson Epson P6570DE: Lifetime page count'
+    graph_items:
+    - color: 2774A4
+      item:
+        host: Epson Epson P6570DE by SNMP
+        key: printer.page.count

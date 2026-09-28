@@ -1,0 +1,381 @@
+zabbix_export:
+  version: '7.0'
+  template_groups:
+  - uuid: e8f2a8480d674fb2a53bea65079ae6e3
+    name: Templates/Printers
+  templates:
+  - uuid: b26decdd75214e7d85fecc80b538b44c
+    template: Epson Epson ET-2988 by SNMP
+    name: Epson Epson ET-2988 by SNMP
+    description: 'Zabbix 7.0.x SNMP template for Epson Epson ET-2988.
+
+
+      Verified source database date: 2026-09-27.
+
+      Family/series: EcoTank / Inkjet.
+
+      Category: Printer; Colour.
+
+      Network: IP network interface (wired and/or wireless by model).
+
+      Verified SNMP support: SNMP (remote SNMP confirmed; version varies).
+
+      Evidence level: A - model-specific SNMP advisory.
+
+      Canada status: Epson Canada support-listed; current-sale status varies.
+
+
+      Monitoring is intentionally based on standard SNMPv2-MIB, HOST-RESOURCES-MIB and Printer-MIB objects. Supply, tray and marker rows are discovered dynamically.
+      Manufacturer-specific private OIDs are not guessed.
+
+
+      Product/catalog source: https://epson.ca/support/wa00965
+
+      SNMP evidence source: https://epson.ca/support/wa00965
+
+      Verification notes: Epson Canada''s SNMP vulnerability advisory explicitly lists this model, establishing remote SNMP support. Check the product page for exact
+      interface and SNMP version before deployment.
+
+      '
+    groups:
+    - name: Templates/Printers
+    tags:
+    - tag: class
+      value: printer
+    - tag: manufacturer
+      value: Epson
+    - tag: model
+      value: Epson ET-2988
+    - tag: family
+      value: EcoTank / Inkjet
+    - tag: category
+      value: Printer
+    - tag: snmp_support
+      value: SNMP (remote SNMP confirmed; version varies)
+    - tag: evidence_level
+      value: A - model-specific SNMP advisory
+    macros:
+    - macro: '{$SNMP.TIMEOUT}'
+      value: 10m
+      description: Time without successful SNMP polling before the availability trigger fires.
+    - macro: '{$PRINTER.SUPPLY.LOW}'
+      value: '10'
+      description: Low supply threshold in percent, used only when both current and maximum capacity are positive.
+    - macro: '{$PRINTER.PAPER.LOW}'
+      value: '10'
+      description: Low paper threshold in percent, used only when both current and maximum tray capacity are positive.
+    items:
+    - uuid: 9c166aaa8c244516bd7a800f4bc44864
+      name: SNMP availability
+      type: INTERNAL
+      key: zabbix[host,snmp,available]
+      delay: 1m
+      history: 7d
+      valuemap:
+        name: Zabbix SNMP availability
+      tags:
+      - tag: component
+        value: availability
+      triggers:
+      - uuid: 08888482fd904d1096ab4a5b79bf1c00
+        expression: max(/Epson Epson ET-2988 by SNMP/zabbix[host,snmp,available],{$SNMP.TIMEOUT})=0
+        name: 'Epson Epson ET-2988: No SNMP data collection'
+        priority: HIGH
+        description: Zabbix has been unable to poll this printer over SNMP for the configured timeout period.
+    - uuid: c7bd3b543c9a4d3da997d03627df7ab4
+      name: System description
+      type: SNMP_AGENT
+      snmp_oid: 1.3.6.1.2.1.1.1.0
+      key: printer.sysdescr
+      delay: 1h
+      history: 7d
+      trends: '0'
+      value_type: TEXT
+      tags:
+      - tag: component
+        value: inventory
+    - uuid: dd961ed941024ec1bbd05c2a29e053bc
+      name: System name
+      type: SNMP_AGENT
+      snmp_oid: 1.3.6.1.2.1.1.5.0
+      key: printer.sysname
+      delay: 10m
+      history: 7d
+      trends: '0'
+      value_type: CHAR
+      tags:
+      - tag: component
+        value: inventory
+    - uuid: f2eb6250958948898d27d08ed3a8ad04
+      name: System object ID
+      type: SNMP_AGENT
+      snmp_oid: 1.3.6.1.2.1.1.2.0
+      key: printer.sysobjectid
+      delay: 12h
+      history: 30d
+      trends: '0'
+      value_type: CHAR
+      tags:
+      - tag: component
+        value: inventory
+    - uuid: 1f899f560331444cb804aab99b2897d8
+      name: System location
+      type: SNMP_AGENT
+      snmp_oid: 1.3.6.1.2.1.1.6.0
+      key: printer.syslocation
+      delay: 1h
+      history: 7d
+      trends: '0'
+      value_type: CHAR
+      tags:
+      - tag: component
+        value: inventory
+    - uuid: 80046bac26b24aacba4c0f27f7dc7424
+      name: System contact
+      type: SNMP_AGENT
+      snmp_oid: 1.3.6.1.2.1.1.4.0
+      key: printer.syscontact
+      delay: 1h
+      history: 7d
+      trends: '0'
+      value_type: CHAR
+      tags:
+      - tag: component
+        value: inventory
+    - uuid: f4b9e8624f1b40bf8b1ba50ea8dbdb68
+      name: System uptime
+      type: SNMP_AGENT
+      snmp_oid: 1.3.6.1.2.1.1.3.0
+      key: printer.uptime
+      delay: 5m
+      history: 30d
+      value_type: FLOAT
+      units: uptime
+      preprocessing:
+      - type: MULTIPLIER
+        parameters:
+        - '0.01'
+      tags:
+      - tag: component
+        value: system
+    - uuid: 125c8190aeed46e19d1aa1764970dc5c
+      name: Printer status
+      type: SNMP_AGENT
+      snmp_oid: 1.3.6.1.2.1.25.3.5.1.1.1
+      key: printer.status
+      delay: 1m
+      history: 30d
+      value_type: UNSIGNED
+      description: 'HOST-RESOURCES-MIB hrPrinterStatus: 1=other, 2=unknown, 3=idle, 4=printing, 5=warmup.'
+      valuemap:
+        name: HOST-RESOURCES-MIB::hrPrinterStatus
+      tags:
+      - tag: component
+        value: status
+      triggers:
+      - uuid: f2fa809df6fd420bbda3ad8676404f46
+        expression: last(/Epson Epson ET-2988 by SNMP/printer.status)=1 or last(/Epson Epson ET-2988 by SNMP/printer.status)=2
+        name: 'Epson Epson ET-2988: Printer status is other or unknown'
+        priority: WARNING
+        opdata: 'Printer status: {ITEM.LASTVALUE1}'
+    - uuid: 2a5d5a3d657949cdabf39216dd9b4671
+      name: Printer name
+      type: SNMP_AGENT
+      snmp_oid: 1.3.6.1.2.1.43.5.1.1.16.1
+      key: printer.name
+      delay: 1h
+      history: 7d
+      trends: '0'
+      value_type: CHAR
+      tags:
+      - tag: component
+        value: inventory
+    - uuid: a29db3a3aef14970af795083f6d1ecd4
+      name: Printer serial number
+      type: SNMP_AGENT
+      snmp_oid: 1.3.6.1.2.1.43.5.1.1.17.1
+      key: printer.serial
+      delay: 12h
+      history: 30d
+      trends: '0'
+      value_type: CHAR
+      tags:
+      - tag: component
+        value: inventory
+    - uuid: 7b06b7595d944f999ceea70f8e330f75
+      name: Lifetime page count
+      type: SNMP_AGENT
+      snmp_oid: 1.3.6.1.2.1.43.10.2.1.4.1.1
+      key: printer.page.count
+      delay: 5m
+      history: 90d
+      trends: 365d
+      value_type: UNSIGNED
+      units: pages
+      description: Standard Printer-MIB prtMarkerLifeCount for the common .1.1 marker instance. Some devices expose different marker indexes; the generic marker discovery
+        rule in this template can still discover alternate indexes.
+      tags:
+      - tag: component
+        value: usage
+    discovery_rules:
+    - uuid: 05fde66a67da48ea97b569da3a7670c0
+      name: Printer supply discovery
+      type: SNMP_AGENT
+      snmp_oid: discovery[{#SUPPLYDESC},1.3.6.1.2.1.43.11.1.1.6,{#SUPPLYTYPE},1.3.6.1.2.1.43.11.1.1.5,{#SUPPLYUNIT},1.3.6.1.2.1.43.11.1.1.7]
+      key: printer.supply.discovery
+      delay: 1h
+      lifetime: 7d
+      description: Discovers supplies from the standard Printer-MIB. Dynamic indexes prevent assumptions about toner/drum/waste-container positions.
+      item_prototypes:
+      - uuid: 9ecd88e4b8dd46ed8afc7cef07b978c0
+        name: 'Supply {#SUPPLYDESC}: current level'
+        type: SNMP_AGENT
+        snmp_oid: 1.3.6.1.2.1.43.11.1.1.9.{#SNMPINDEX}
+        key: printer.supply.level[{#SNMPINDEX}]
+        delay: 5m
+        history: 30d
+        trends: 365d
+        value_type: FLOAT
+        description: Raw current supply level. Printer-MIB special values can include -1=other, -2=unknown, -3=some remains but exact amount is unknown.
+      - uuid: 418cd1d4397048a3a1304e8443069b9d
+        name: 'Supply {#SUPPLYDESC}: maximum capacity'
+        type: SNMP_AGENT
+        snmp_oid: 1.3.6.1.2.1.43.11.1.1.8.{#SNMPINDEX}
+        key: printer.supply.max[{#SNMPINDEX}]
+        delay: 1h
+        history: 30d
+        trends: 365d
+        value_type: FLOAT
+        description: Raw maximum supply capacity. Printer-MIB can return negative special values when capacity is unknown.
+      trigger_prototypes:
+      - uuid: 8fa3e2bc3f854836a41432a59d146f34
+        expression: last(/Epson Epson ET-2988 by SNMP/printer.supply.level[{#SNMPINDEX}])=0
+        name: 'Epson Epson ET-2988: {#SUPPLYDESC} is empty'
+        priority: HIGH
+      - uuid: 4b0f23d7af7842df9d577c1fcb520052
+        expression: last(/Epson Epson ET-2988 by SNMP/printer.supply.level[{#SNMPINDEX}])>0 and last(/Epson Epson ET-2988 by SNMP/printer.supply.max[{#SNMPINDEX}])>0
+          and (100*last(/Epson Epson ET-2988 by SNMP/printer.supply.level[{#SNMPINDEX}])/last(/Epson Epson ET-2988 by SNMP/printer.supply.max[{#SNMPINDEX}]))<{$PRINTER.SUPPLY.LOW}
+        name: 'Epson Epson ET-2988: {#SUPPLYDESC} is low'
+        priority: WARNING
+      graph_prototypes:
+      - uuid: 73606e03b14c47d08188f33c6a65b0b3
+        name: Supply {#SUPPLYDESC}
+        graph_items:
+        - color: 199C0D
+          item:
+            host: Epson Epson ET-2988 by SNMP
+            key: printer.supply.level[{#SNMPINDEX}]
+        - sortorder: '1'
+          color: F63100
+          item:
+            host: Epson Epson ET-2988 by SNMP
+            key: printer.supply.max[{#SNMPINDEX}]
+    - uuid: 0b67f3ca9f9f459aae0922b718ded90c
+      name: Paper tray discovery
+      type: SNMP_AGENT
+      snmp_oid: discovery[{#TRAYNAME},1.3.6.1.2.1.43.8.2.1.13]
+      key: printer.tray.discovery
+      delay: 1h
+      lifetime: 7d
+      description: Discovers input trays using standard Printer-MIB prtInputName.
+      item_prototypes:
+      - uuid: 9f471f98fa8d41dc8439f2c32a21f4aa
+        name: 'Paper tray {#TRAYNAME}: current level'
+        type: SNMP_AGENT
+        snmp_oid: 1.3.6.1.2.1.43.8.2.1.10.{#SNMPINDEX}
+        key: printer.tray.level[{#SNMPINDEX}]
+        delay: 5m
+        history: 30d
+        trends: 365d
+        value_type: FLOAT
+        units: sheets
+      - uuid: 7865694a498043d19316f14910e2e18a
+        name: 'Paper tray {#TRAYNAME}: maximum capacity'
+        type: SNMP_AGENT
+        snmp_oid: 1.3.6.1.2.1.43.8.2.1.9.{#SNMPINDEX}
+        key: printer.tray.max[{#SNMPINDEX}]
+        delay: 1h
+        history: 30d
+        trends: 365d
+        value_type: FLOAT
+        units: sheets
+      trigger_prototypes:
+      - uuid: 58ca659663c44f75a006118591d44ee0
+        expression: last(/Epson Epson ET-2988 by SNMP/printer.tray.level[{#SNMPINDEX}])=0
+        name: 'Epson Epson ET-2988: Paper tray {#TRAYNAME} is empty'
+        priority: AVERAGE
+      - uuid: ca5a0c516e594bfdb98254aec1d62819
+        expression: last(/Epson Epson ET-2988 by SNMP/printer.tray.level[{#SNMPINDEX}])>0 and last(/Epson Epson ET-2988 by SNMP/printer.tray.max[{#SNMPINDEX}])>0
+          and (100*last(/Epson Epson ET-2988 by SNMP/printer.tray.level[{#SNMPINDEX}])/last(/Epson Epson ET-2988 by SNMP/printer.tray.max[{#SNMPINDEX}]))<{$PRINTER.PAPER.LOW}
+        name: 'Epson Epson ET-2988: Paper tray {#TRAYNAME} is low'
+        priority: WARNING
+      graph_prototypes:
+      - uuid: a324f8dc14b74054a7315017c8b2a20e
+        name: Paper tray {#TRAYNAME}
+        graph_items:
+        - color: 199C0D
+          item:
+            host: Epson Epson ET-2988 by SNMP
+            key: printer.tray.level[{#SNMPINDEX}]
+        - sortorder: '1'
+          color: F63100
+          item:
+            host: Epson Epson ET-2988 by SNMP
+            key: printer.tray.max[{#SNMPINDEX}]
+    - uuid: 6ea5198033154ebb8b3cd2f9fd54e4e0
+      name: Marker life counter discovery
+      type: SNMP_AGENT
+      snmp_oid: discovery[{#MARKERCOUNT},1.3.6.1.2.1.43.10.2.1.4]
+      key: printer.marker.discovery
+      delay: 1h
+      lifetime: 7d
+      description: Discovers Printer-MIB prtMarkerLifeCount entries so devices with non-.1.1 marker indexes still expose usage counters.
+      item_prototypes:
+      - uuid: e8505b6391a44d51ad9a84c5b90e905a
+        name: 'Marker {#SNMPINDEX}: lifetime count'
+        type: SNMP_AGENT
+        snmp_oid: 1.3.6.1.2.1.43.10.2.1.4.{#SNMPINDEX}
+        key: printer.marker.life[{#SNMPINDEX}]
+        delay: 5m
+        history: 90d
+        trends: 365d
+        value_type: UNSIGNED
+      graph_prototypes:
+      - uuid: f4079b0de17e4dba967c0997bad777de
+        name: 'Marker {#SNMPINDEX}: lifetime count'
+        graph_items:
+        - color: 2774A4
+          item:
+            host: Epson Epson ET-2988 by SNMP
+            key: printer.marker.life[{#SNMPINDEX}]
+    valuemaps:
+    - uuid: d783cbe2e58c4e0c8fe22eafbf1a2c07
+      name: Zabbix SNMP availability
+      mappings:
+      - value: '0'
+        newvalue: Not available
+      - value: '1'
+        newvalue: Available
+      - value: '2'
+        newvalue: Unknown
+    - uuid: 19d38508d0cd452a9c4f1157f7ae8cab
+      name: HOST-RESOURCES-MIB::hrPrinterStatus
+      mappings:
+      - value: '1'
+        newvalue: Other
+      - value: '2'
+        newvalue: Unknown
+      - value: '3'
+        newvalue: Idle
+      - value: '4'
+        newvalue: Printing
+      - value: '5'
+        newvalue: Warmup
+  graphs:
+  - uuid: 5ca0aa4313e5405dacd02f591ef17182
+    name: 'Epson Epson ET-2988: Lifetime page count'
+    graph_items:
+    - color: 2774A4
+      item:
+        host: Epson Epson ET-2988 by SNMP
+        key: printer.page.count

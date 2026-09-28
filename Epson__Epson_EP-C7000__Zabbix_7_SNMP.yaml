@@ -1,0 +1,381 @@
+zabbix_export:
+  version: '7.0'
+  template_groups:
+  - uuid: e8f2a8480d674fb2a53bea65079ae6e3
+    name: Templates/Printers
+  templates:
+  - uuid: c8e941f44f2f454bba365f388ad28e66
+    template: Epson Epson EP-C7000 by SNMP
+    name: Epson Epson EP-C7000 by SNMP
+    description: 'Zabbix 7.0.x SNMP template for Epson Epson EP-C7000.
+
+
+      Verified source database date: 2026-09-27.
+
+      Family/series: WorkForce Pro.
+
+      Category: Business inkjet / MFP; Colour.
+
+      Network: IP network interface (wired and/or wireless by model).
+
+      Verified SNMP support: SNMP (remote SNMP confirmed; version varies).
+
+      Evidence level: A - model-specific SNMP advisory.
+
+      Canada status: Epson Canada support-listed; current-sale status varies.
+
+
+      Monitoring is intentionally based on standard SNMPv2-MIB, HOST-RESOURCES-MIB and Printer-MIB objects. Supply, tray and marker rows are discovered dynamically.
+      Manufacturer-specific private OIDs are not guessed.
+
+
+      Product/catalog source: https://epson.ca/support/wa00965
+
+      SNMP evidence source: https://epson.ca/support/wa00965
+
+      Verification notes: Epson Canada''s SNMP vulnerability advisory explicitly lists this model, establishing remote SNMP support. Check the product page for exact
+      interface and SNMP version before deployment.
+
+      '
+    groups:
+    - name: Templates/Printers
+    tags:
+    - tag: class
+      value: printer
+    - tag: manufacturer
+      value: Epson
+    - tag: model
+      value: Epson EP-C7000
+    - tag: family
+      value: WorkForce Pro
+    - tag: category
+      value: Business inkjet / MFP
+    - tag: snmp_support
+      value: SNMP (remote SNMP confirmed; version varies)
+    - tag: evidence_level
+      value: A - model-specific SNMP advisory
+    macros:
+    - macro: '{$SNMP.TIMEOUT}'
+      value: 10m
+      description: Time without successful SNMP polling before the availability trigger fires.
+    - macro: '{$PRINTER.SUPPLY.LOW}'
+      value: '10'
+      description: Low supply threshold in percent, used only when both current and maximum capacity are positive.
+    - macro: '{$PRINTER.PAPER.LOW}'
+      value: '10'
+      description: Low paper threshold in percent, used only when both current and maximum tray capacity are positive.
+    items:
+    - uuid: 6b80f99069bd41c791e53c0c6032e93e
+      name: SNMP availability
+      type: INTERNAL
+      key: zabbix[host,snmp,available]
+      delay: 1m
+      history: 7d
+      valuemap:
+        name: Zabbix SNMP availability
+      tags:
+      - tag: component
+        value: availability
+      triggers:
+      - uuid: 132390aa82e6478d89defd1c9b78e06e
+        expression: max(/Epson Epson EP-C7000 by SNMP/zabbix[host,snmp,available],{$SNMP.TIMEOUT})=0
+        name: 'Epson Epson EP-C7000: No SNMP data collection'
+        priority: HIGH
+        description: Zabbix has been unable to poll this printer over SNMP for the configured timeout period.
+    - uuid: 18f9c3e971e24076a7b0112336305aea
+      name: System description
+      type: SNMP_AGENT
+      snmp_oid: 1.3.6.1.2.1.1.1.0
+      key: printer.sysdescr
+      delay: 1h
+      history: 7d
+      trends: '0'
+      value_type: TEXT
+      tags:
+      - tag: component
+        value: inventory
+    - uuid: 9df6943c8958489ca20b7bfc2a7900d0
+      name: System name
+      type: SNMP_AGENT
+      snmp_oid: 1.3.6.1.2.1.1.5.0
+      key: printer.sysname
+      delay: 10m
+      history: 7d
+      trends: '0'
+      value_type: CHAR
+      tags:
+      - tag: component
+        value: inventory
+    - uuid: 6acd0ad9e688487989d60ae527f59f2a
+      name: System object ID
+      type: SNMP_AGENT
+      snmp_oid: 1.3.6.1.2.1.1.2.0
+      key: printer.sysobjectid
+      delay: 12h
+      history: 30d
+      trends: '0'
+      value_type: CHAR
+      tags:
+      - tag: component
+        value: inventory
+    - uuid: 2788d6375bcd438381a872e454450a16
+      name: System location
+      type: SNMP_AGENT
+      snmp_oid: 1.3.6.1.2.1.1.6.0
+      key: printer.syslocation
+      delay: 1h
+      history: 7d
+      trends: '0'
+      value_type: CHAR
+      tags:
+      - tag: component
+        value: inventory
+    - uuid: 601e955c2d8347acbc975364053ce83c
+      name: System contact
+      type: SNMP_AGENT
+      snmp_oid: 1.3.6.1.2.1.1.4.0
+      key: printer.syscontact
+      delay: 1h
+      history: 7d
+      trends: '0'
+      value_type: CHAR
+      tags:
+      - tag: component
+        value: inventory
+    - uuid: bbbd1a335b5a4bb693c82eca2de0ff48
+      name: System uptime
+      type: SNMP_AGENT
+      snmp_oid: 1.3.6.1.2.1.1.3.0
+      key: printer.uptime
+      delay: 5m
+      history: 30d
+      value_type: FLOAT
+      units: uptime
+      preprocessing:
+      - type: MULTIPLIER
+        parameters:
+        - '0.01'
+      tags:
+      - tag: component
+        value: system
+    - uuid: 30e69bb503d14bb59e17e2feb99ad50d
+      name: Printer status
+      type: SNMP_AGENT
+      snmp_oid: 1.3.6.1.2.1.25.3.5.1.1.1
+      key: printer.status
+      delay: 1m
+      history: 30d
+      value_type: UNSIGNED
+      description: 'HOST-RESOURCES-MIB hrPrinterStatus: 1=other, 2=unknown, 3=idle, 4=printing, 5=warmup.'
+      valuemap:
+        name: HOST-RESOURCES-MIB::hrPrinterStatus
+      tags:
+      - tag: component
+        value: status
+      triggers:
+      - uuid: 3d54b9b5dbcf4e8a810c110282cbb049
+        expression: last(/Epson Epson EP-C7000 by SNMP/printer.status)=1 or last(/Epson Epson EP-C7000 by SNMP/printer.status)=2
+        name: 'Epson Epson EP-C7000: Printer status is other or unknown'
+        priority: WARNING
+        opdata: 'Printer status: {ITEM.LASTVALUE1}'
+    - uuid: 04c67a41a9484d708a41d0ce09f45178
+      name: Printer name
+      type: SNMP_AGENT
+      snmp_oid: 1.3.6.1.2.1.43.5.1.1.16.1
+      key: printer.name
+      delay: 1h
+      history: 7d
+      trends: '0'
+      value_type: CHAR
+      tags:
+      - tag: component
+        value: inventory
+    - uuid: 0667780cca504fa68c3360db9103664e
+      name: Printer serial number
+      type: SNMP_AGENT
+      snmp_oid: 1.3.6.1.2.1.43.5.1.1.17.1
+      key: printer.serial
+      delay: 12h
+      history: 30d
+      trends: '0'
+      value_type: CHAR
+      tags:
+      - tag: component
+        value: inventory
+    - uuid: b936e4e7b2574690b963e294242076bc
+      name: Lifetime page count
+      type: SNMP_AGENT
+      snmp_oid: 1.3.6.1.2.1.43.10.2.1.4.1.1
+      key: printer.page.count
+      delay: 5m
+      history: 90d
+      trends: 365d
+      value_type: UNSIGNED
+      units: pages
+      description: Standard Printer-MIB prtMarkerLifeCount for the common .1.1 marker instance. Some devices expose different marker indexes; the generic marker discovery
+        rule in this template can still discover alternate indexes.
+      tags:
+      - tag: component
+        value: usage
+    discovery_rules:
+    - uuid: 2e7e4ae0ba4a443bb2a71af2e6ae2df2
+      name: Printer supply discovery
+      type: SNMP_AGENT
+      snmp_oid: discovery[{#SUPPLYDESC},1.3.6.1.2.1.43.11.1.1.6,{#SUPPLYTYPE},1.3.6.1.2.1.43.11.1.1.5,{#SUPPLYUNIT},1.3.6.1.2.1.43.11.1.1.7]
+      key: printer.supply.discovery
+      delay: 1h
+      lifetime: 7d
+      description: Discovers supplies from the standard Printer-MIB. Dynamic indexes prevent assumptions about toner/drum/waste-container positions.
+      item_prototypes:
+      - uuid: 369b49a45b7244f39cac46f87b525a1d
+        name: 'Supply {#SUPPLYDESC}: current level'
+        type: SNMP_AGENT
+        snmp_oid: 1.3.6.1.2.1.43.11.1.1.9.{#SNMPINDEX}
+        key: printer.supply.level[{#SNMPINDEX}]
+        delay: 5m
+        history: 30d
+        trends: 365d
+        value_type: FLOAT
+        description: Raw current supply level. Printer-MIB special values can include -1=other, -2=unknown, -3=some remains but exact amount is unknown.
+      - uuid: cc99ee5e3b7d47aea92e703ad87e8175
+        name: 'Supply {#SUPPLYDESC}: maximum capacity'
+        type: SNMP_AGENT
+        snmp_oid: 1.3.6.1.2.1.43.11.1.1.8.{#SNMPINDEX}
+        key: printer.supply.max[{#SNMPINDEX}]
+        delay: 1h
+        history: 30d
+        trends: 365d
+        value_type: FLOAT
+        description: Raw maximum supply capacity. Printer-MIB can return negative special values when capacity is unknown.
+      trigger_prototypes:
+      - uuid: fba2cd0cc0084679b0dd2bfd91582df5
+        expression: last(/Epson Epson EP-C7000 by SNMP/printer.supply.level[{#SNMPINDEX}])=0
+        name: 'Epson Epson EP-C7000: {#SUPPLYDESC} is empty'
+        priority: HIGH
+      - uuid: dcd2da7f8cdf42eb961766ee16e23d83
+        expression: last(/Epson Epson EP-C7000 by SNMP/printer.supply.level[{#SNMPINDEX}])>0 and last(/Epson Epson EP-C7000 by SNMP/printer.supply.max[{#SNMPINDEX}])>0
+          and (100*last(/Epson Epson EP-C7000 by SNMP/printer.supply.level[{#SNMPINDEX}])/last(/Epson Epson EP-C7000 by SNMP/printer.supply.max[{#SNMPINDEX}]))<{$PRINTER.SUPPLY.LOW}
+        name: 'Epson Epson EP-C7000: {#SUPPLYDESC} is low'
+        priority: WARNING
+      graph_prototypes:
+      - uuid: 7752a35da2df478c841482bdfe7aa7e0
+        name: Supply {#SUPPLYDESC}
+        graph_items:
+        - color: 199C0D
+          item:
+            host: Epson Epson EP-C7000 by SNMP
+            key: printer.supply.level[{#SNMPINDEX}]
+        - sortorder: '1'
+          color: F63100
+          item:
+            host: Epson Epson EP-C7000 by SNMP
+            key: printer.supply.max[{#SNMPINDEX}]
+    - uuid: 9ed5e8515048432fbb21accca85a5d5e
+      name: Paper tray discovery
+      type: SNMP_AGENT
+      snmp_oid: discovery[{#TRAYNAME},1.3.6.1.2.1.43.8.2.1.13]
+      key: printer.tray.discovery
+      delay: 1h
+      lifetime: 7d
+      description: Discovers input trays using standard Printer-MIB prtInputName.
+      item_prototypes:
+      - uuid: e5bdc7bcb99b4de69fd2876301f50677
+        name: 'Paper tray {#TRAYNAME}: current level'
+        type: SNMP_AGENT
+        snmp_oid: 1.3.6.1.2.1.43.8.2.1.10.{#SNMPINDEX}
+        key: printer.tray.level[{#SNMPINDEX}]
+        delay: 5m
+        history: 30d
+        trends: 365d
+        value_type: FLOAT
+        units: sheets
+      - uuid: e1c002fa183a45a2938a181925e1d37e
+        name: 'Paper tray {#TRAYNAME}: maximum capacity'
+        type: SNMP_AGENT
+        snmp_oid: 1.3.6.1.2.1.43.8.2.1.9.{#SNMPINDEX}
+        key: printer.tray.max[{#SNMPINDEX}]
+        delay: 1h
+        history: 30d
+        trends: 365d
+        value_type: FLOAT
+        units: sheets
+      trigger_prototypes:
+      - uuid: 11e383ca3cfe4f26a4b09c8f6f71bd3e
+        expression: last(/Epson Epson EP-C7000 by SNMP/printer.tray.level[{#SNMPINDEX}])=0
+        name: 'Epson Epson EP-C7000: Paper tray {#TRAYNAME} is empty'
+        priority: AVERAGE
+      - uuid: 52c227f282e748e7a53b4f68b4e32a52
+        expression: last(/Epson Epson EP-C7000 by SNMP/printer.tray.level[{#SNMPINDEX}])>0 and last(/Epson Epson EP-C7000 by SNMP/printer.tray.max[{#SNMPINDEX}])>0
+          and (100*last(/Epson Epson EP-C7000 by SNMP/printer.tray.level[{#SNMPINDEX}])/last(/Epson Epson EP-C7000 by SNMP/printer.tray.max[{#SNMPINDEX}]))<{$PRINTER.PAPER.LOW}
+        name: 'Epson Epson EP-C7000: Paper tray {#TRAYNAME} is low'
+        priority: WARNING
+      graph_prototypes:
+      - uuid: e200c6ad649845a2a4087e56023115b5
+        name: Paper tray {#TRAYNAME}
+        graph_items:
+        - color: 199C0D
+          item:
+            host: Epson Epson EP-C7000 by SNMP
+            key: printer.tray.level[{#SNMPINDEX}]
+        - sortorder: '1'
+          color: F63100
+          item:
+            host: Epson Epson EP-C7000 by SNMP
+            key: printer.tray.max[{#SNMPINDEX}]
+    - uuid: f19fa80095074d53b56e06af4e44d212
+      name: Marker life counter discovery
+      type: SNMP_AGENT
+      snmp_oid: discovery[{#MARKERCOUNT},1.3.6.1.2.1.43.10.2.1.4]
+      key: printer.marker.discovery
+      delay: 1h
+      lifetime: 7d
+      description: Discovers Printer-MIB prtMarkerLifeCount entries so devices with non-.1.1 marker indexes still expose usage counters.
+      item_prototypes:
+      - uuid: f729cbe5423948c6a34b8c107fc9d177
+        name: 'Marker {#SNMPINDEX}: lifetime count'
+        type: SNMP_AGENT
+        snmp_oid: 1.3.6.1.2.1.43.10.2.1.4.{#SNMPINDEX}
+        key: printer.marker.life[{#SNMPINDEX}]
+        delay: 5m
+        history: 90d
+        trends: 365d
+        value_type: UNSIGNED
+      graph_prototypes:
+      - uuid: cef0175cbedb43f281d700017faeff5c
+        name: 'Marker {#SNMPINDEX}: lifetime count'
+        graph_items:
+        - color: 2774A4
+          item:
+            host: Epson Epson EP-C7000 by SNMP
+            key: printer.marker.life[{#SNMPINDEX}]
+    valuemaps:
+    - uuid: c03435c9d2f340819f82dcb15fdfa9b5
+      name: Zabbix SNMP availability
+      mappings:
+      - value: '0'
+        newvalue: Not available
+      - value: '1'
+        newvalue: Available
+      - value: '2'
+        newvalue: Unknown
+    - uuid: faa35dcf21d040cc8133585f954f1285
+      name: HOST-RESOURCES-MIB::hrPrinterStatus
+      mappings:
+      - value: '1'
+        newvalue: Other
+      - value: '2'
+        newvalue: Unknown
+      - value: '3'
+        newvalue: Idle
+      - value: '4'
+        newvalue: Printing
+      - value: '5'
+        newvalue: Warmup
+  graphs:
+  - uuid: 2b22386b8de64201aae02921df9abdb9
+    name: 'Epson Epson EP-C7000: Lifetime page count'
+    graph_items:
+    - color: 2774A4
+      item:
+        host: Epson Epson EP-C7000 by SNMP
+        key: printer.page.count
