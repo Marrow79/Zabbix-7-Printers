@@ -1,0 +1,381 @@
+zabbix_export:
+  version: '7.0'
+  template_groups:
+  - uuid: e8f2a8480d674fb2a53bea65079ae6e3
+    name: Templates/Printers
+  templates:
+  - uuid: 632cb867389a40119cfc00cb08972ef8
+    template: Ricoh RICOH IM 600SRF by SNMP
+    name: Ricoh RICOH IM 600SRF by SNMP
+    description: 'Zabbix 7.0.x SNMP template for Ricoh RICOH IM 600SRF.
+
+
+      Verified source database date: 2026-09-27.
+
+      Family/series: RICOH IM.
+
+      Category: A4 MFP; B&W.
+
+      Network: Ethernet; Wi-Fi on selected/configured models.
+
+      Verified SNMP support: SNMPv1/v2 + SNMPv3.
+
+      Evidence level: B - current model + platform/manual.
+
+      Canada status: Current Ricoh Canada Always Current Technology list.
+
+
+      Monitoring is intentionally based on standard SNMPv2-MIB, HOST-RESOURCES-MIB and Printer-MIB objects. Supply, tray and marker rows are discovered dynamically.
+      Manufacturer-specific private OIDs are not guessed.
+
+
+      Product/catalog source: https://www.ricoh.ca/en-CA/products/always-current-technology/always-current-technology-instructions-and-versions
+
+      SNMP evidence source: https://manuals.ricoh.com/mfp/p_manual/IM6000JPN/ja/security/int/control.htm
+
+      Verification notes: Ricoh''s current Canada list establishes active models; Ricoh IM security documentation describes SNMPv1/v2 and SNMPv3 network management.
+      Exact interface options vary.
+
+      '
+    groups:
+    - name: Templates/Printers
+    tags:
+    - tag: class
+      value: printer
+    - tag: manufacturer
+      value: Ricoh
+    - tag: model
+      value: RICOH IM 600SRF
+    - tag: family
+      value: RICOH IM
+    - tag: category
+      value: A4 MFP
+    - tag: snmp_support
+      value: SNMPv1/v2 + SNMPv3
+    - tag: evidence_level
+      value: B - current model + platform/manual
+    macros:
+    - macro: '{$SNMP.TIMEOUT}'
+      value: 10m
+      description: Time without successful SNMP polling before the availability trigger fires.
+    - macro: '{$PRINTER.SUPPLY.LOW}'
+      value: '10'
+      description: Low supply threshold in percent, used only when both current and maximum capacity are positive.
+    - macro: '{$PRINTER.PAPER.LOW}'
+      value: '10'
+      description: Low paper threshold in percent, used only when both current and maximum tray capacity are positive.
+    items:
+    - uuid: e241788364d64175807f51e9ad38b8ce
+      name: SNMP availability
+      type: INTERNAL
+      key: zabbix[host,snmp,available]
+      delay: 1m
+      history: 7d
+      valuemap:
+        name: Zabbix SNMP availability
+      tags:
+      - tag: component
+        value: availability
+      triggers:
+      - uuid: 03b7a49d830144a085a18431a79e5fbc
+        expression: max(/Ricoh RICOH IM 600SRF by SNMP/zabbix[host,snmp,available],{$SNMP.TIMEOUT})=0
+        name: 'Ricoh RICOH IM 600SRF: No SNMP data collection'
+        priority: HIGH
+        description: Zabbix has been unable to poll this printer over SNMP for the configured timeout period.
+    - uuid: 2255c40b70664da89adbda6117c739fa
+      name: System description
+      type: SNMP_AGENT
+      snmp_oid: 1.3.6.1.2.1.1.1.0
+      key: printer.sysdescr
+      delay: 1h
+      history: 7d
+      trends: '0'
+      value_type: TEXT
+      tags:
+      - tag: component
+        value: inventory
+    - uuid: 53ddb9d640d84857b9a8185f1702501e
+      name: System name
+      type: SNMP_AGENT
+      snmp_oid: 1.3.6.1.2.1.1.5.0
+      key: printer.sysname
+      delay: 10m
+      history: 7d
+      trends: '0'
+      value_type: CHAR
+      tags:
+      - tag: component
+        value: inventory
+    - uuid: ee72caa649484105a8fa9d16b901b1f5
+      name: System object ID
+      type: SNMP_AGENT
+      snmp_oid: 1.3.6.1.2.1.1.2.0
+      key: printer.sysobjectid
+      delay: 12h
+      history: 30d
+      trends: '0'
+      value_type: CHAR
+      tags:
+      - tag: component
+        value: inventory
+    - uuid: 7ae531a8bff9400a979bae6bac904349
+      name: System location
+      type: SNMP_AGENT
+      snmp_oid: 1.3.6.1.2.1.1.6.0
+      key: printer.syslocation
+      delay: 1h
+      history: 7d
+      trends: '0'
+      value_type: CHAR
+      tags:
+      - tag: component
+        value: inventory
+    - uuid: 59dba547717347cbbee422016fb15b36
+      name: System contact
+      type: SNMP_AGENT
+      snmp_oid: 1.3.6.1.2.1.1.4.0
+      key: printer.syscontact
+      delay: 1h
+      history: 7d
+      trends: '0'
+      value_type: CHAR
+      tags:
+      - tag: component
+        value: inventory
+    - uuid: 9d9fb55af15a4198acdfc35647650942
+      name: System uptime
+      type: SNMP_AGENT
+      snmp_oid: 1.3.6.1.2.1.1.3.0
+      key: printer.uptime
+      delay: 5m
+      history: 30d
+      value_type: FLOAT
+      units: uptime
+      preprocessing:
+      - type: MULTIPLIER
+        parameters:
+        - '0.01'
+      tags:
+      - tag: component
+        value: system
+    - uuid: 3ffb2695672d4cdb9fc3eb179b9b0537
+      name: Printer status
+      type: SNMP_AGENT
+      snmp_oid: 1.3.6.1.2.1.25.3.5.1.1.1
+      key: printer.status
+      delay: 1m
+      history: 30d
+      value_type: UNSIGNED
+      description: 'HOST-RESOURCES-MIB hrPrinterStatus: 1=other, 2=unknown, 3=idle, 4=printing, 5=warmup.'
+      valuemap:
+        name: HOST-RESOURCES-MIB::hrPrinterStatus
+      tags:
+      - tag: component
+        value: status
+      triggers:
+      - uuid: f5034048348c4f2ea26a41399f3f8b4b
+        expression: last(/Ricoh RICOH IM 600SRF by SNMP/printer.status)=1 or last(/Ricoh RICOH IM 600SRF by SNMP/printer.status)=2
+        name: 'Ricoh RICOH IM 600SRF: Printer status is other or unknown'
+        priority: WARNING
+        opdata: 'Printer status: {ITEM.LASTVALUE1}'
+    - uuid: d4e3e7a138054b72abeeac702006ebf3
+      name: Printer name
+      type: SNMP_AGENT
+      snmp_oid: 1.3.6.1.2.1.43.5.1.1.16.1
+      key: printer.name
+      delay: 1h
+      history: 7d
+      trends: '0'
+      value_type: CHAR
+      tags:
+      - tag: component
+        value: inventory
+    - uuid: 25cccd6e6c7041b896cc5a3802f47c9d
+      name: Printer serial number
+      type: SNMP_AGENT
+      snmp_oid: 1.3.6.1.2.1.43.5.1.1.17.1
+      key: printer.serial
+      delay: 12h
+      history: 30d
+      trends: '0'
+      value_type: CHAR
+      tags:
+      - tag: component
+        value: inventory
+    - uuid: ba3c0cd4f1244445b5bbf9e13e62de97
+      name: Lifetime page count
+      type: SNMP_AGENT
+      snmp_oid: 1.3.6.1.2.1.43.10.2.1.4.1.1
+      key: printer.page.count
+      delay: 5m
+      history: 90d
+      trends: 365d
+      value_type: UNSIGNED
+      units: pages
+      description: Standard Printer-MIB prtMarkerLifeCount for the common .1.1 marker instance. Some devices expose different marker indexes; the generic marker discovery
+        rule in this template can still discover alternate indexes.
+      tags:
+      - tag: component
+        value: usage
+    discovery_rules:
+    - uuid: 6ab06d95373748a4aa9d83170d39aff9
+      name: Printer supply discovery
+      type: SNMP_AGENT
+      snmp_oid: discovery[{#SUPPLYDESC},1.3.6.1.2.1.43.11.1.1.6,{#SUPPLYTYPE},1.3.6.1.2.1.43.11.1.1.5,{#SUPPLYUNIT},1.3.6.1.2.1.43.11.1.1.7]
+      key: printer.supply.discovery
+      delay: 1h
+      lifetime: 7d
+      description: Discovers supplies from the standard Printer-MIB. Dynamic indexes prevent assumptions about toner/drum/waste-container positions.
+      item_prototypes:
+      - uuid: b9cdf6058a794260a1e3f963288108c4
+        name: 'Supply {#SUPPLYDESC}: current level'
+        type: SNMP_AGENT
+        snmp_oid: 1.3.6.1.2.1.43.11.1.1.9.{#SNMPINDEX}
+        key: printer.supply.level[{#SNMPINDEX}]
+        delay: 5m
+        history: 30d
+        trends: 365d
+        value_type: FLOAT
+        description: Raw current supply level. Printer-MIB special values can include -1=other, -2=unknown, -3=some remains but exact amount is unknown.
+      - uuid: 7fb29d104d2745b680181ae5d88feb7f
+        name: 'Supply {#SUPPLYDESC}: maximum capacity'
+        type: SNMP_AGENT
+        snmp_oid: 1.3.6.1.2.1.43.11.1.1.8.{#SNMPINDEX}
+        key: printer.supply.max[{#SNMPINDEX}]
+        delay: 1h
+        history: 30d
+        trends: 365d
+        value_type: FLOAT
+        description: Raw maximum supply capacity. Printer-MIB can return negative special values when capacity is unknown.
+      trigger_prototypes:
+      - uuid: 2a015eab472d4e41bcc2aca3beb2b014
+        expression: last(/Ricoh RICOH IM 600SRF by SNMP/printer.supply.level[{#SNMPINDEX}])=0
+        name: 'Ricoh RICOH IM 600SRF: {#SUPPLYDESC} is empty'
+        priority: HIGH
+      - uuid: 8aeb01600c634e94bcd1ba1ac9665c1e
+        expression: last(/Ricoh RICOH IM 600SRF by SNMP/printer.supply.level[{#SNMPINDEX}])>0 and last(/Ricoh RICOH IM 600SRF by SNMP/printer.supply.max[{#SNMPINDEX}])>0
+          and (100*last(/Ricoh RICOH IM 600SRF by SNMP/printer.supply.level[{#SNMPINDEX}])/last(/Ricoh RICOH IM 600SRF by SNMP/printer.supply.max[{#SNMPINDEX}]))<{$PRINTER.SUPPLY.LOW}
+        name: 'Ricoh RICOH IM 600SRF: {#SUPPLYDESC} is low'
+        priority: WARNING
+      graph_prototypes:
+      - uuid: 205f876f774d47e4aa3da110f8cee5ca
+        name: Supply {#SUPPLYDESC}
+        graph_items:
+        - color: 199C0D
+          item:
+            host: Ricoh RICOH IM 600SRF by SNMP
+            key: printer.supply.level[{#SNMPINDEX}]
+        - sortorder: '1'
+          color: F63100
+          item:
+            host: Ricoh RICOH IM 600SRF by SNMP
+            key: printer.supply.max[{#SNMPINDEX}]
+    - uuid: f689e8ac424548008e89542eb1b36a9f
+      name: Paper tray discovery
+      type: SNMP_AGENT
+      snmp_oid: discovery[{#TRAYNAME},1.3.6.1.2.1.43.8.2.1.13]
+      key: printer.tray.discovery
+      delay: 1h
+      lifetime: 7d
+      description: Discovers input trays using standard Printer-MIB prtInputName.
+      item_prototypes:
+      - uuid: 68a81f2f253a40918be2cbb44637dc26
+        name: 'Paper tray {#TRAYNAME}: current level'
+        type: SNMP_AGENT
+        snmp_oid: 1.3.6.1.2.1.43.8.2.1.10.{#SNMPINDEX}
+        key: printer.tray.level[{#SNMPINDEX}]
+        delay: 5m
+        history: 30d
+        trends: 365d
+        value_type: FLOAT
+        units: sheets
+      - uuid: ba54b172a646444f9eb62e45608f00c8
+        name: 'Paper tray {#TRAYNAME}: maximum capacity'
+        type: SNMP_AGENT
+        snmp_oid: 1.3.6.1.2.1.43.8.2.1.9.{#SNMPINDEX}
+        key: printer.tray.max[{#SNMPINDEX}]
+        delay: 1h
+        history: 30d
+        trends: 365d
+        value_type: FLOAT
+        units: sheets
+      trigger_prototypes:
+      - uuid: 458d5b99d5d9408aa6bcd7871d74f6f5
+        expression: last(/Ricoh RICOH IM 600SRF by SNMP/printer.tray.level[{#SNMPINDEX}])=0
+        name: 'Ricoh RICOH IM 600SRF: Paper tray {#TRAYNAME} is empty'
+        priority: AVERAGE
+      - uuid: 49866d543ea841dd955aec206330e5f5
+        expression: last(/Ricoh RICOH IM 600SRF by SNMP/printer.tray.level[{#SNMPINDEX}])>0 and last(/Ricoh RICOH IM 600SRF by SNMP/printer.tray.max[{#SNMPINDEX}])>0
+          and (100*last(/Ricoh RICOH IM 600SRF by SNMP/printer.tray.level[{#SNMPINDEX}])/last(/Ricoh RICOH IM 600SRF by SNMP/printer.tray.max[{#SNMPINDEX}]))<{$PRINTER.PAPER.LOW}
+        name: 'Ricoh RICOH IM 600SRF: Paper tray {#TRAYNAME} is low'
+        priority: WARNING
+      graph_prototypes:
+      - uuid: 5ab30ca417c24340b0e61980a86ca37d
+        name: Paper tray {#TRAYNAME}
+        graph_items:
+        - color: 199C0D
+          item:
+            host: Ricoh RICOH IM 600SRF by SNMP
+            key: printer.tray.level[{#SNMPINDEX}]
+        - sortorder: '1'
+          color: F63100
+          item:
+            host: Ricoh RICOH IM 600SRF by SNMP
+            key: printer.tray.max[{#SNMPINDEX}]
+    - uuid: d603e02a93ac4a578f025f990d127a91
+      name: Marker life counter discovery
+      type: SNMP_AGENT
+      snmp_oid: discovery[{#MARKERCOUNT},1.3.6.1.2.1.43.10.2.1.4]
+      key: printer.marker.discovery
+      delay: 1h
+      lifetime: 7d
+      description: Discovers Printer-MIB prtMarkerLifeCount entries so devices with non-.1.1 marker indexes still expose usage counters.
+      item_prototypes:
+      - uuid: 06107a32f0004a6aaf58f8cba7dd6d95
+        name: 'Marker {#SNMPINDEX}: lifetime count'
+        type: SNMP_AGENT
+        snmp_oid: 1.3.6.1.2.1.43.10.2.1.4.{#SNMPINDEX}
+        key: printer.marker.life[{#SNMPINDEX}]
+        delay: 5m
+        history: 90d
+        trends: 365d
+        value_type: UNSIGNED
+      graph_prototypes:
+      - uuid: d0b471a4ddb84d439c486975862e28db
+        name: 'Marker {#SNMPINDEX}: lifetime count'
+        graph_items:
+        - color: 2774A4
+          item:
+            host: Ricoh RICOH IM 600SRF by SNMP
+            key: printer.marker.life[{#SNMPINDEX}]
+    valuemaps:
+    - uuid: 823a06f232394097bab150910c42fc10
+      name: Zabbix SNMP availability
+      mappings:
+      - value: '0'
+        newvalue: Not available
+      - value: '1'
+        newvalue: Available
+      - value: '2'
+        newvalue: Unknown
+    - uuid: 7857eda06e694c0794a93537fc5869f8
+      name: HOST-RESOURCES-MIB::hrPrinterStatus
+      mappings:
+      - value: '1'
+        newvalue: Other
+      - value: '2'
+        newvalue: Unknown
+      - value: '3'
+        newvalue: Idle
+      - value: '4'
+        newvalue: Printing
+      - value: '5'
+        newvalue: Warmup
+  graphs:
+  - uuid: 3b916a371788406d98932f7c3d5ff3f8
+    name: 'Ricoh RICOH IM 600SRF: Lifetime page count'
+    graph_items:
+    - color: 2774A4
+      item:
+        host: Ricoh RICOH IM 600SRF by SNMP
+        key: printer.page.count

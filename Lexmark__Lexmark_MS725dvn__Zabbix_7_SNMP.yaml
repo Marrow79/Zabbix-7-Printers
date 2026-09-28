@@ -1,0 +1,380 @@
+zabbix_export:
+  version: '7.0'
+  template_groups:
+  - uuid: e8f2a8480d674fb2a53bea65079ae6e3
+    name: Templates/Printers
+  templates:
+  - uuid: 35dd38f756f44617b3c1ad76070dde18
+    template: Lexmark Lexmark MS725dvn by SNMP
+    name: Lexmark Lexmark MS725dvn by SNMP
+    description: 'Zabbix 7.0.x SNMP template for Lexmark Lexmark MS725dvn.
+
+
+      Verified source database date: 2026-09-27.
+
+      Family/series: MS Series.
+
+      Category: Printer; B&W.
+
+      Network: Ethernet (Wi-Fi optional on some).
+
+      Verified SNMP support: SNMPv1/v2c/v3.
+
+      Evidence level: A - model-specific.
+
+      Canada status: Lexmark Canada product/support page.
+
+
+      Monitoring is intentionally based on standard SNMPv2-MIB, HOST-RESOURCES-MIB and Printer-MIB objects. Supply, tray and marker rows are discovered dynamically.
+      Manufacturer-specific private OIDs are not guessed.
+
+
+      Product/catalog source: https://www.lexmark.com/en_ca/printers/printer/12437/Lexmark-MS725dvn
+
+      SNMP evidence source: https://www.lexmark.com/en_ca/printers/printer/12437/Lexmark-MS725dvn
+
+      Verification notes: Lexmark Canada connectivity section lists Ethernet and SNMPv1/v2c/v3.
+
+      '
+    groups:
+    - name: Templates/Printers
+    tags:
+    - tag: class
+      value: printer
+    - tag: manufacturer
+      value: Lexmark
+    - tag: model
+      value: Lexmark MS725dvn
+    - tag: family
+      value: MS Series
+    - tag: category
+      value: Printer
+    - tag: snmp_support
+      value: SNMPv1/v2c/v3
+    - tag: evidence_level
+      value: A - model-specific
+    macros:
+    - macro: '{$SNMP.TIMEOUT}'
+      value: 10m
+      description: Time without successful SNMP polling before the availability trigger fires.
+    - macro: '{$PRINTER.SUPPLY.LOW}'
+      value: '10'
+      description: Low supply threshold in percent, used only when both current and maximum capacity are positive.
+    - macro: '{$PRINTER.PAPER.LOW}'
+      value: '10'
+      description: Low paper threshold in percent, used only when both current and maximum tray capacity are positive.
+    items:
+    - uuid: ae0eef40fdc04e458c84536ac52a19e9
+      name: SNMP availability
+      type: INTERNAL
+      key: zabbix[host,snmp,available]
+      delay: 1m
+      history: 7d
+      valuemap:
+        name: Zabbix SNMP availability
+      tags:
+      - tag: component
+        value: availability
+      triggers:
+      - uuid: 073616dcb994428fae4f9a3ed09ceb47
+        expression: max(/Lexmark Lexmark MS725dvn by SNMP/zabbix[host,snmp,available],{$SNMP.TIMEOUT})=0
+        name: 'Lexmark Lexmark MS725dvn: No SNMP data collection'
+        priority: HIGH
+        description: Zabbix has been unable to poll this printer over SNMP for the configured timeout period.
+    - uuid: b8b5bbca52f347b696a3afac98bdceb0
+      name: System description
+      type: SNMP_AGENT
+      snmp_oid: 1.3.6.1.2.1.1.1.0
+      key: printer.sysdescr
+      delay: 1h
+      history: 7d
+      trends: '0'
+      value_type: TEXT
+      tags:
+      - tag: component
+        value: inventory
+    - uuid: f9292a15c5da4befb5940f678cad9782
+      name: System name
+      type: SNMP_AGENT
+      snmp_oid: 1.3.6.1.2.1.1.5.0
+      key: printer.sysname
+      delay: 10m
+      history: 7d
+      trends: '0'
+      value_type: CHAR
+      tags:
+      - tag: component
+        value: inventory
+    - uuid: e37048fded73427e8f9b4dec8c4b944c
+      name: System object ID
+      type: SNMP_AGENT
+      snmp_oid: 1.3.6.1.2.1.1.2.0
+      key: printer.sysobjectid
+      delay: 12h
+      history: 30d
+      trends: '0'
+      value_type: CHAR
+      tags:
+      - tag: component
+        value: inventory
+    - uuid: c21ff3a53cf0496e950e5c9c4b65cde9
+      name: System location
+      type: SNMP_AGENT
+      snmp_oid: 1.3.6.1.2.1.1.6.0
+      key: printer.syslocation
+      delay: 1h
+      history: 7d
+      trends: '0'
+      value_type: CHAR
+      tags:
+      - tag: component
+        value: inventory
+    - uuid: 9a4e15ddc4334a41b7fee31414d1f306
+      name: System contact
+      type: SNMP_AGENT
+      snmp_oid: 1.3.6.1.2.1.1.4.0
+      key: printer.syscontact
+      delay: 1h
+      history: 7d
+      trends: '0'
+      value_type: CHAR
+      tags:
+      - tag: component
+        value: inventory
+    - uuid: a9bb166b54614b38805c71c9cd736ad4
+      name: System uptime
+      type: SNMP_AGENT
+      snmp_oid: 1.3.6.1.2.1.1.3.0
+      key: printer.uptime
+      delay: 5m
+      history: 30d
+      value_type: FLOAT
+      units: uptime
+      preprocessing:
+      - type: MULTIPLIER
+        parameters:
+        - '0.01'
+      tags:
+      - tag: component
+        value: system
+    - uuid: a2b7e5f4a7e74ab3a3c9effb3e8df233
+      name: Printer status
+      type: SNMP_AGENT
+      snmp_oid: 1.3.6.1.2.1.25.3.5.1.1.1
+      key: printer.status
+      delay: 1m
+      history: 30d
+      value_type: UNSIGNED
+      description: 'HOST-RESOURCES-MIB hrPrinterStatus: 1=other, 2=unknown, 3=idle, 4=printing, 5=warmup.'
+      valuemap:
+        name: HOST-RESOURCES-MIB::hrPrinterStatus
+      tags:
+      - tag: component
+        value: status
+      triggers:
+      - uuid: ff179b0f04934d6986a40f77a57bb671
+        expression: last(/Lexmark Lexmark MS725dvn by SNMP/printer.status)=1 or last(/Lexmark Lexmark MS725dvn by SNMP/printer.status)=2
+        name: 'Lexmark Lexmark MS725dvn: Printer status is other or unknown'
+        priority: WARNING
+        opdata: 'Printer status: {ITEM.LASTVALUE1}'
+    - uuid: db70ee8b440e498a9e57ecad786e9be0
+      name: Printer name
+      type: SNMP_AGENT
+      snmp_oid: 1.3.6.1.2.1.43.5.1.1.16.1
+      key: printer.name
+      delay: 1h
+      history: 7d
+      trends: '0'
+      value_type: CHAR
+      tags:
+      - tag: component
+        value: inventory
+    - uuid: 0f5c733c087f4e8d96a65bc91f75d16a
+      name: Printer serial number
+      type: SNMP_AGENT
+      snmp_oid: 1.3.6.1.2.1.43.5.1.1.17.1
+      key: printer.serial
+      delay: 12h
+      history: 30d
+      trends: '0'
+      value_type: CHAR
+      tags:
+      - tag: component
+        value: inventory
+    - uuid: 9f33587f43c840b6bfac1a0e2d7481c8
+      name: Lifetime page count
+      type: SNMP_AGENT
+      snmp_oid: 1.3.6.1.2.1.43.10.2.1.4.1.1
+      key: printer.page.count
+      delay: 5m
+      history: 90d
+      trends: 365d
+      value_type: UNSIGNED
+      units: pages
+      description: Standard Printer-MIB prtMarkerLifeCount for the common .1.1 marker instance. Some devices expose different marker indexes; the generic marker discovery
+        rule in this template can still discover alternate indexes.
+      tags:
+      - tag: component
+        value: usage
+    discovery_rules:
+    - uuid: 87ecc27821a7478cbb1e456c3ab756a1
+      name: Printer supply discovery
+      type: SNMP_AGENT
+      snmp_oid: discovery[{#SUPPLYDESC},1.3.6.1.2.1.43.11.1.1.6,{#SUPPLYTYPE},1.3.6.1.2.1.43.11.1.1.5,{#SUPPLYUNIT},1.3.6.1.2.1.43.11.1.1.7]
+      key: printer.supply.discovery
+      delay: 1h
+      lifetime: 7d
+      description: Discovers supplies from the standard Printer-MIB. Dynamic indexes prevent assumptions about toner/drum/waste-container positions.
+      item_prototypes:
+      - uuid: d716d1d6e81143c9b2f4660f32ea1094
+        name: 'Supply {#SUPPLYDESC}: current level'
+        type: SNMP_AGENT
+        snmp_oid: 1.3.6.1.2.1.43.11.1.1.9.{#SNMPINDEX}
+        key: printer.supply.level[{#SNMPINDEX}]
+        delay: 5m
+        history: 30d
+        trends: 365d
+        value_type: FLOAT
+        description: Raw current supply level. Printer-MIB special values can include -1=other, -2=unknown, -3=some remains but exact amount is unknown.
+      - uuid: 82753fce21134d3eb800ac69cc0bac81
+        name: 'Supply {#SUPPLYDESC}: maximum capacity'
+        type: SNMP_AGENT
+        snmp_oid: 1.3.6.1.2.1.43.11.1.1.8.{#SNMPINDEX}
+        key: printer.supply.max[{#SNMPINDEX}]
+        delay: 1h
+        history: 30d
+        trends: 365d
+        value_type: FLOAT
+        description: Raw maximum supply capacity. Printer-MIB can return negative special values when capacity is unknown.
+      trigger_prototypes:
+      - uuid: 567cd14849814c25837fc545123712fd
+        expression: last(/Lexmark Lexmark MS725dvn by SNMP/printer.supply.level[{#SNMPINDEX}])=0
+        name: 'Lexmark Lexmark MS725dvn: {#SUPPLYDESC} is empty'
+        priority: HIGH
+      - uuid: bda91c5007d043a59949bee1861d68a5
+        expression: last(/Lexmark Lexmark MS725dvn by SNMP/printer.supply.level[{#SNMPINDEX}])>0 and last(/Lexmark Lexmark MS725dvn by SNMP/printer.supply.max[{#SNMPINDEX}])>0
+          and (100*last(/Lexmark Lexmark MS725dvn by SNMP/printer.supply.level[{#SNMPINDEX}])/last(/Lexmark Lexmark MS725dvn by SNMP/printer.supply.max[{#SNMPINDEX}]))<{$PRINTER.SUPPLY.LOW}
+        name: 'Lexmark Lexmark MS725dvn: {#SUPPLYDESC} is low'
+        priority: WARNING
+      graph_prototypes:
+      - uuid: 56ec72577cdb49468356173d091d0b8d
+        name: Supply {#SUPPLYDESC}
+        graph_items:
+        - color: 199C0D
+          item:
+            host: Lexmark Lexmark MS725dvn by SNMP
+            key: printer.supply.level[{#SNMPINDEX}]
+        - sortorder: '1'
+          color: F63100
+          item:
+            host: Lexmark Lexmark MS725dvn by SNMP
+            key: printer.supply.max[{#SNMPINDEX}]
+    - uuid: baabf5bfab59405cbf2678403d75fbe4
+      name: Paper tray discovery
+      type: SNMP_AGENT
+      snmp_oid: discovery[{#TRAYNAME},1.3.6.1.2.1.43.8.2.1.13]
+      key: printer.tray.discovery
+      delay: 1h
+      lifetime: 7d
+      description: Discovers input trays using standard Printer-MIB prtInputName.
+      item_prototypes:
+      - uuid: a6209851e9254525b9be5f61978174c3
+        name: 'Paper tray {#TRAYNAME}: current level'
+        type: SNMP_AGENT
+        snmp_oid: 1.3.6.1.2.1.43.8.2.1.10.{#SNMPINDEX}
+        key: printer.tray.level[{#SNMPINDEX}]
+        delay: 5m
+        history: 30d
+        trends: 365d
+        value_type: FLOAT
+        units: sheets
+      - uuid: 640a4cb1d96f40bb8021b6fe4a6af5cd
+        name: 'Paper tray {#TRAYNAME}: maximum capacity'
+        type: SNMP_AGENT
+        snmp_oid: 1.3.6.1.2.1.43.8.2.1.9.{#SNMPINDEX}
+        key: printer.tray.max[{#SNMPINDEX}]
+        delay: 1h
+        history: 30d
+        trends: 365d
+        value_type: FLOAT
+        units: sheets
+      trigger_prototypes:
+      - uuid: 6a8d90c49299485cb912e4c1e42931ce
+        expression: last(/Lexmark Lexmark MS725dvn by SNMP/printer.tray.level[{#SNMPINDEX}])=0
+        name: 'Lexmark Lexmark MS725dvn: Paper tray {#TRAYNAME} is empty'
+        priority: AVERAGE
+      - uuid: 033a9f56e3174ac8ae59ec7eb062aa96
+        expression: last(/Lexmark Lexmark MS725dvn by SNMP/printer.tray.level[{#SNMPINDEX}])>0 and last(/Lexmark Lexmark MS725dvn by SNMP/printer.tray.max[{#SNMPINDEX}])>0
+          and (100*last(/Lexmark Lexmark MS725dvn by SNMP/printer.tray.level[{#SNMPINDEX}])/last(/Lexmark Lexmark MS725dvn by SNMP/printer.tray.max[{#SNMPINDEX}]))<{$PRINTER.PAPER.LOW}
+        name: 'Lexmark Lexmark MS725dvn: Paper tray {#TRAYNAME} is low'
+        priority: WARNING
+      graph_prototypes:
+      - uuid: 5ca631e0380e47a5b4f180757dc7938d
+        name: Paper tray {#TRAYNAME}
+        graph_items:
+        - color: 199C0D
+          item:
+            host: Lexmark Lexmark MS725dvn by SNMP
+            key: printer.tray.level[{#SNMPINDEX}]
+        - sortorder: '1'
+          color: F63100
+          item:
+            host: Lexmark Lexmark MS725dvn by SNMP
+            key: printer.tray.max[{#SNMPINDEX}]
+    - uuid: 050a4bf512b14c5890906748b22cfef5
+      name: Marker life counter discovery
+      type: SNMP_AGENT
+      snmp_oid: discovery[{#MARKERCOUNT},1.3.6.1.2.1.43.10.2.1.4]
+      key: printer.marker.discovery
+      delay: 1h
+      lifetime: 7d
+      description: Discovers Printer-MIB prtMarkerLifeCount entries so devices with non-.1.1 marker indexes still expose usage counters.
+      item_prototypes:
+      - uuid: 4605f187518e48b49d9edcd87cccd59f
+        name: 'Marker {#SNMPINDEX}: lifetime count'
+        type: SNMP_AGENT
+        snmp_oid: 1.3.6.1.2.1.43.10.2.1.4.{#SNMPINDEX}
+        key: printer.marker.life[{#SNMPINDEX}]
+        delay: 5m
+        history: 90d
+        trends: 365d
+        value_type: UNSIGNED
+      graph_prototypes:
+      - uuid: b8aaf2f6e5bb41888a2b8410214c494a
+        name: 'Marker {#SNMPINDEX}: lifetime count'
+        graph_items:
+        - color: 2774A4
+          item:
+            host: Lexmark Lexmark MS725dvn by SNMP
+            key: printer.marker.life[{#SNMPINDEX}]
+    valuemaps:
+    - uuid: d4edbdf86e6d4d889cd09ea742b12699
+      name: Zabbix SNMP availability
+      mappings:
+      - value: '0'
+        newvalue: Not available
+      - value: '1'
+        newvalue: Available
+      - value: '2'
+        newvalue: Unknown
+    - uuid: 0fcca78943ff4636a32b69841d82f256
+      name: HOST-RESOURCES-MIB::hrPrinterStatus
+      mappings:
+      - value: '1'
+        newvalue: Other
+      - value: '2'
+        newvalue: Unknown
+      - value: '3'
+        newvalue: Idle
+      - value: '4'
+        newvalue: Printing
+      - value: '5'
+        newvalue: Warmup
+  graphs:
+  - uuid: a852e4b1dff742f7b669fece22500530
+    name: 'Lexmark Lexmark MS725dvn: Lifetime page count'
+    graph_items:
+    - color: 2774A4
+      item:
+        host: Lexmark Lexmark MS725dvn by SNMP
+        key: printer.page.count

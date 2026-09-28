@@ -1,0 +1,381 @@
+zabbix_export:
+  version: '7.0'
+  template_groups:
+  - uuid: e8f2a8480d674fb2a53bea65079ae6e3
+    name: Templates/Printers
+  templates:
+  - uuid: aead4696bb1d43d1bb4a102c90e8aacb
+    template: Ricoh RICOH IM 2510 by SNMP
+    name: Ricoh RICOH IM 2510 by SNMP
+    description: 'Zabbix 7.0.x SNMP template for Ricoh RICOH IM 2510.
+
+
+      Verified source database date: 2026-09-27.
+
+      Family/series: RICOH IM.
+
+      Category: A3 MFP; B&W.
+
+      Network: Ethernet; Wi-Fi on selected/configured models.
+
+      Verified SNMP support: SNMPv1/v2 + SNMPv3.
+
+      Evidence level: B - current model + platform/manual.
+
+      Canada status: Current Ricoh Canada Always Current Technology list.
+
+
+      Monitoring is intentionally based on standard SNMPv2-MIB, HOST-RESOURCES-MIB and Printer-MIB objects. Supply, tray and marker rows are discovered dynamically.
+      Manufacturer-specific private OIDs are not guessed.
+
+
+      Product/catalog source: https://www.ricoh.ca/en-CA/products/always-current-technology/always-current-technology-instructions-and-versions
+
+      SNMP evidence source: https://manuals.ricoh.com/mfp/p_manual/IM6000JPN/ja/security/int/control.htm
+
+      Verification notes: Ricoh''s current Canada list establishes active models; Ricoh IM security documentation describes SNMPv1/v2 and SNMPv3 network management.
+      Exact interface options vary.
+
+      '
+    groups:
+    - name: Templates/Printers
+    tags:
+    - tag: class
+      value: printer
+    - tag: manufacturer
+      value: Ricoh
+    - tag: model
+      value: RICOH IM 2510
+    - tag: family
+      value: RICOH IM
+    - tag: category
+      value: A3 MFP
+    - tag: snmp_support
+      value: SNMPv1/v2 + SNMPv3
+    - tag: evidence_level
+      value: B - current model + platform/manual
+    macros:
+    - macro: '{$SNMP.TIMEOUT}'
+      value: 10m
+      description: Time without successful SNMP polling before the availability trigger fires.
+    - macro: '{$PRINTER.SUPPLY.LOW}'
+      value: '10'
+      description: Low supply threshold in percent, used only when both current and maximum capacity are positive.
+    - macro: '{$PRINTER.PAPER.LOW}'
+      value: '10'
+      description: Low paper threshold in percent, used only when both current and maximum tray capacity are positive.
+    items:
+    - uuid: a8b8d3264b59482193511ec01a4bfb6e
+      name: SNMP availability
+      type: INTERNAL
+      key: zabbix[host,snmp,available]
+      delay: 1m
+      history: 7d
+      valuemap:
+        name: Zabbix SNMP availability
+      tags:
+      - tag: component
+        value: availability
+      triggers:
+      - uuid: 1c50a66374e64053972d904a2654ca80
+        expression: max(/Ricoh RICOH IM 2510 by SNMP/zabbix[host,snmp,available],{$SNMP.TIMEOUT})=0
+        name: 'Ricoh RICOH IM 2510: No SNMP data collection'
+        priority: HIGH
+        description: Zabbix has been unable to poll this printer over SNMP for the configured timeout period.
+    - uuid: c83e52b3627444d680b3ac538d093ac7
+      name: System description
+      type: SNMP_AGENT
+      snmp_oid: 1.3.6.1.2.1.1.1.0
+      key: printer.sysdescr
+      delay: 1h
+      history: 7d
+      trends: '0'
+      value_type: TEXT
+      tags:
+      - tag: component
+        value: inventory
+    - uuid: 0504d15d87ef4de98a192c3239e4b36e
+      name: System name
+      type: SNMP_AGENT
+      snmp_oid: 1.3.6.1.2.1.1.5.0
+      key: printer.sysname
+      delay: 10m
+      history: 7d
+      trends: '0'
+      value_type: CHAR
+      tags:
+      - tag: component
+        value: inventory
+    - uuid: ccfec3ea90514eeb98feb59ed3c9c34f
+      name: System object ID
+      type: SNMP_AGENT
+      snmp_oid: 1.3.6.1.2.1.1.2.0
+      key: printer.sysobjectid
+      delay: 12h
+      history: 30d
+      trends: '0'
+      value_type: CHAR
+      tags:
+      - tag: component
+        value: inventory
+    - uuid: da0027ae669446e0982e2348e51fb53a
+      name: System location
+      type: SNMP_AGENT
+      snmp_oid: 1.3.6.1.2.1.1.6.0
+      key: printer.syslocation
+      delay: 1h
+      history: 7d
+      trends: '0'
+      value_type: CHAR
+      tags:
+      - tag: component
+        value: inventory
+    - uuid: ccdb4d60988540cc939e25d5c74bdef9
+      name: System contact
+      type: SNMP_AGENT
+      snmp_oid: 1.3.6.1.2.1.1.4.0
+      key: printer.syscontact
+      delay: 1h
+      history: 7d
+      trends: '0'
+      value_type: CHAR
+      tags:
+      - tag: component
+        value: inventory
+    - uuid: 490268b4d9ef42308297249f982f63ee
+      name: System uptime
+      type: SNMP_AGENT
+      snmp_oid: 1.3.6.1.2.1.1.3.0
+      key: printer.uptime
+      delay: 5m
+      history: 30d
+      value_type: FLOAT
+      units: uptime
+      preprocessing:
+      - type: MULTIPLIER
+        parameters:
+        - '0.01'
+      tags:
+      - tag: component
+        value: system
+    - uuid: 055f43f4cfbb4e2084abbd2bc5480596
+      name: Printer status
+      type: SNMP_AGENT
+      snmp_oid: 1.3.6.1.2.1.25.3.5.1.1.1
+      key: printer.status
+      delay: 1m
+      history: 30d
+      value_type: UNSIGNED
+      description: 'HOST-RESOURCES-MIB hrPrinterStatus: 1=other, 2=unknown, 3=idle, 4=printing, 5=warmup.'
+      valuemap:
+        name: HOST-RESOURCES-MIB::hrPrinterStatus
+      tags:
+      - tag: component
+        value: status
+      triggers:
+      - uuid: a8797920ff0a471dab1cabfbaf9f6501
+        expression: last(/Ricoh RICOH IM 2510 by SNMP/printer.status)=1 or last(/Ricoh RICOH IM 2510 by SNMP/printer.status)=2
+        name: 'Ricoh RICOH IM 2510: Printer status is other or unknown'
+        priority: WARNING
+        opdata: 'Printer status: {ITEM.LASTVALUE1}'
+    - uuid: 7c2af3a36778473f964f301aa3e4aa1c
+      name: Printer name
+      type: SNMP_AGENT
+      snmp_oid: 1.3.6.1.2.1.43.5.1.1.16.1
+      key: printer.name
+      delay: 1h
+      history: 7d
+      trends: '0'
+      value_type: CHAR
+      tags:
+      - tag: component
+        value: inventory
+    - uuid: 62e6dcfc2491440bb8e2d94235aa90c0
+      name: Printer serial number
+      type: SNMP_AGENT
+      snmp_oid: 1.3.6.1.2.1.43.5.1.1.17.1
+      key: printer.serial
+      delay: 12h
+      history: 30d
+      trends: '0'
+      value_type: CHAR
+      tags:
+      - tag: component
+        value: inventory
+    - uuid: 15722eb1d265455cb9ea25b000ec9161
+      name: Lifetime page count
+      type: SNMP_AGENT
+      snmp_oid: 1.3.6.1.2.1.43.10.2.1.4.1.1
+      key: printer.page.count
+      delay: 5m
+      history: 90d
+      trends: 365d
+      value_type: UNSIGNED
+      units: pages
+      description: Standard Printer-MIB prtMarkerLifeCount for the common .1.1 marker instance. Some devices expose different marker indexes; the generic marker discovery
+        rule in this template can still discover alternate indexes.
+      tags:
+      - tag: component
+        value: usage
+    discovery_rules:
+    - uuid: ee2e8337531547e28bf0f90e7d054471
+      name: Printer supply discovery
+      type: SNMP_AGENT
+      snmp_oid: discovery[{#SUPPLYDESC},1.3.6.1.2.1.43.11.1.1.6,{#SUPPLYTYPE},1.3.6.1.2.1.43.11.1.1.5,{#SUPPLYUNIT},1.3.6.1.2.1.43.11.1.1.7]
+      key: printer.supply.discovery
+      delay: 1h
+      lifetime: 7d
+      description: Discovers supplies from the standard Printer-MIB. Dynamic indexes prevent assumptions about toner/drum/waste-container positions.
+      item_prototypes:
+      - uuid: d59c6c0f885842bcbd496b63b4f6bf47
+        name: 'Supply {#SUPPLYDESC}: current level'
+        type: SNMP_AGENT
+        snmp_oid: 1.3.6.1.2.1.43.11.1.1.9.{#SNMPINDEX}
+        key: printer.supply.level[{#SNMPINDEX}]
+        delay: 5m
+        history: 30d
+        trends: 365d
+        value_type: FLOAT
+        description: Raw current supply level. Printer-MIB special values can include -1=other, -2=unknown, -3=some remains but exact amount is unknown.
+      - uuid: dee511d580ee4ef8b9b5a3cea0040580
+        name: 'Supply {#SUPPLYDESC}: maximum capacity'
+        type: SNMP_AGENT
+        snmp_oid: 1.3.6.1.2.1.43.11.1.1.8.{#SNMPINDEX}
+        key: printer.supply.max[{#SNMPINDEX}]
+        delay: 1h
+        history: 30d
+        trends: 365d
+        value_type: FLOAT
+        description: Raw maximum supply capacity. Printer-MIB can return negative special values when capacity is unknown.
+      trigger_prototypes:
+      - uuid: feb52ec9746d46cd857c39b71e96c657
+        expression: last(/Ricoh RICOH IM 2510 by SNMP/printer.supply.level[{#SNMPINDEX}])=0
+        name: 'Ricoh RICOH IM 2510: {#SUPPLYDESC} is empty'
+        priority: HIGH
+      - uuid: 4e390e43867c46e6a19585239bd00b71
+        expression: last(/Ricoh RICOH IM 2510 by SNMP/printer.supply.level[{#SNMPINDEX}])>0 and last(/Ricoh RICOH IM 2510 by SNMP/printer.supply.max[{#SNMPINDEX}])>0
+          and (100*last(/Ricoh RICOH IM 2510 by SNMP/printer.supply.level[{#SNMPINDEX}])/last(/Ricoh RICOH IM 2510 by SNMP/printer.supply.max[{#SNMPINDEX}]))<{$PRINTER.SUPPLY.LOW}
+        name: 'Ricoh RICOH IM 2510: {#SUPPLYDESC} is low'
+        priority: WARNING
+      graph_prototypes:
+      - uuid: ca94b0f9768741959238cb83333a5e1b
+        name: Supply {#SUPPLYDESC}
+        graph_items:
+        - color: 199C0D
+          item:
+            host: Ricoh RICOH IM 2510 by SNMP
+            key: printer.supply.level[{#SNMPINDEX}]
+        - sortorder: '1'
+          color: F63100
+          item:
+            host: Ricoh RICOH IM 2510 by SNMP
+            key: printer.supply.max[{#SNMPINDEX}]
+    - uuid: ddf8f9055c1c4c21aca1b2b07ea10196
+      name: Paper tray discovery
+      type: SNMP_AGENT
+      snmp_oid: discovery[{#TRAYNAME},1.3.6.1.2.1.43.8.2.1.13]
+      key: printer.tray.discovery
+      delay: 1h
+      lifetime: 7d
+      description: Discovers input trays using standard Printer-MIB prtInputName.
+      item_prototypes:
+      - uuid: b9b70c73d605454e969679033a5b3f55
+        name: 'Paper tray {#TRAYNAME}: current level'
+        type: SNMP_AGENT
+        snmp_oid: 1.3.6.1.2.1.43.8.2.1.10.{#SNMPINDEX}
+        key: printer.tray.level[{#SNMPINDEX}]
+        delay: 5m
+        history: 30d
+        trends: 365d
+        value_type: FLOAT
+        units: sheets
+      - uuid: 147fd72bcec34862a8547b79ba46e88c
+        name: 'Paper tray {#TRAYNAME}: maximum capacity'
+        type: SNMP_AGENT
+        snmp_oid: 1.3.6.1.2.1.43.8.2.1.9.{#SNMPINDEX}
+        key: printer.tray.max[{#SNMPINDEX}]
+        delay: 1h
+        history: 30d
+        trends: 365d
+        value_type: FLOAT
+        units: sheets
+      trigger_prototypes:
+      - uuid: aae733081c9e4d25a911e25b105adca4
+        expression: last(/Ricoh RICOH IM 2510 by SNMP/printer.tray.level[{#SNMPINDEX}])=0
+        name: 'Ricoh RICOH IM 2510: Paper tray {#TRAYNAME} is empty'
+        priority: AVERAGE
+      - uuid: 311494050dac4fd9b9ccd63cedfc2511
+        expression: last(/Ricoh RICOH IM 2510 by SNMP/printer.tray.level[{#SNMPINDEX}])>0 and last(/Ricoh RICOH IM 2510 by SNMP/printer.tray.max[{#SNMPINDEX}])>0
+          and (100*last(/Ricoh RICOH IM 2510 by SNMP/printer.tray.level[{#SNMPINDEX}])/last(/Ricoh RICOH IM 2510 by SNMP/printer.tray.max[{#SNMPINDEX}]))<{$PRINTER.PAPER.LOW}
+        name: 'Ricoh RICOH IM 2510: Paper tray {#TRAYNAME} is low'
+        priority: WARNING
+      graph_prototypes:
+      - uuid: 49e2e74e72eb4cddb734047b249b627f
+        name: Paper tray {#TRAYNAME}
+        graph_items:
+        - color: 199C0D
+          item:
+            host: Ricoh RICOH IM 2510 by SNMP
+            key: printer.tray.level[{#SNMPINDEX}]
+        - sortorder: '1'
+          color: F63100
+          item:
+            host: Ricoh RICOH IM 2510 by SNMP
+            key: printer.tray.max[{#SNMPINDEX}]
+    - uuid: a25af0acceb5466ab7fd5575ecf85db4
+      name: Marker life counter discovery
+      type: SNMP_AGENT
+      snmp_oid: discovery[{#MARKERCOUNT},1.3.6.1.2.1.43.10.2.1.4]
+      key: printer.marker.discovery
+      delay: 1h
+      lifetime: 7d
+      description: Discovers Printer-MIB prtMarkerLifeCount entries so devices with non-.1.1 marker indexes still expose usage counters.
+      item_prototypes:
+      - uuid: 123e6f3fcb6641178607af066a204204
+        name: 'Marker {#SNMPINDEX}: lifetime count'
+        type: SNMP_AGENT
+        snmp_oid: 1.3.6.1.2.1.43.10.2.1.4.{#SNMPINDEX}
+        key: printer.marker.life[{#SNMPINDEX}]
+        delay: 5m
+        history: 90d
+        trends: 365d
+        value_type: UNSIGNED
+      graph_prototypes:
+      - uuid: 4e00f96272c5454c858393d6874da235
+        name: 'Marker {#SNMPINDEX}: lifetime count'
+        graph_items:
+        - color: 2774A4
+          item:
+            host: Ricoh RICOH IM 2510 by SNMP
+            key: printer.marker.life[{#SNMPINDEX}]
+    valuemaps:
+    - uuid: ed5aae52d731441d81d427b286856d68
+      name: Zabbix SNMP availability
+      mappings:
+      - value: '0'
+        newvalue: Not available
+      - value: '1'
+        newvalue: Available
+      - value: '2'
+        newvalue: Unknown
+    - uuid: 40bb23cecbdd489fa3346b231d658cc9
+      name: HOST-RESOURCES-MIB::hrPrinterStatus
+      mappings:
+      - value: '1'
+        newvalue: Other
+      - value: '2'
+        newvalue: Unknown
+      - value: '3'
+        newvalue: Idle
+      - value: '4'
+        newvalue: Printing
+      - value: '5'
+        newvalue: Warmup
+  graphs:
+  - uuid: 3b060d0c6b56488db4358f258f15e6fd
+    name: 'Ricoh RICOH IM 2510: Lifetime page count'
+    graph_items:
+    - color: 2774A4
+      item:
+        host: Ricoh RICOH IM 2510 by SNMP
+        key: printer.page.count
